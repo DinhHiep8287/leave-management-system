@@ -1,0 +1,21 @@
+# Đảm bảo line endings đồng nhất giữa Windows host và Linux container
+* text=auto eol=lf
+
+# Binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.jar binary
+
+# Windows scripts giữ CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Shell scripts luôn LF
+*.sh text eol=lf
+gradlew text eol=lf
