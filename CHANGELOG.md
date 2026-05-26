@@ -7,6 +7,14 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added — Week 2 Part 3: User CRUD
+- `user/web/`: `UserCreateRequest`, `UserUpdateRequest`, `UpdateMeRequest`, `ChangePasswordRequest`, `ResetPasswordRequest`, `UserResponse` (không bao giờ trả `passwordHash`).
+- `UserService`: `create` (ADMIN — hash password BCrypt), `update` (ADMIN full update), `updateSelf` (chỉ `fullName`), `changePassword` (self, verify old), `resetPassword` (ADMIN), `setActive` (ADMIN), `findById`, `list` (HR/ADMIN, filter by `q`/department/role/active).
+- `UserController` `/api/users`: `POST` (ADMIN), `GET /{id}` (ADMIN/HR or self qua SpEL), `PUT /{id}` (ADMIN), `POST /{id}/reset-password` (ADMIN), `POST /{id}/activate|deactivate` (ADMIN), `GET` (ADMIN/HR list), `GET /me`, `PATCH /me`, `POST /me/password`.
+- Khi đổi/reset password hoặc deactivate user → revoke toàn bộ refresh token của user đó (force re-login mọi device).
+- `UserRepository.search` với JPQL filter theo `q`/department/role/active.
+- Tests: `UserRepositoryTest` (5), `UserControllerTest` `@WebMvcTest` (8), `UserE2ETest` (4 scenarios — admin tạo→user login→deactivate→401, duplicate email→409, admin update role, change password revoke refresh). 17 mới, tổng 47.
+
 ### Added — Week 2 Part 2: Department CRUD
 - `department/` package: `DepartmentEntity`, `DepartmentRepository` (unique code, case-insensitive search by code/name), `DepartmentService` (create/update/softDelete/findById/list), `DepartmentController` `/api/departments` với RBAC (`@PreAuthorize` ADMIN cho write).
 - Code normalization uppercase + duplicate check → 409 CONFLICT.
