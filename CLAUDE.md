@@ -86,7 +86,12 @@ docker compose exec postgres psql -U leave_admin -d leave_management
 
 ## Lộ trình 4 tuần
 
-- **Tuần 1**: Foundation — Docker Compose + Auth + User CRUD + DB schema.
-- **Tuần 2**: Core domain — LeaveType, LeaveBalance, Holiday + dashboard nền.
-- **Tuần 3**: Nghiệp vụ chính — LeaveRequest + Approval workflow + tính ngày.
-- **Tuần 4**: Lịch tổng hợp + báo cáo + polish + deploy guide.
+- **Tuần 1**: Foundation — Docker Compose + skeleton backend/frontend + DB schema baseline. ✅ **Done**.
+- **Tuần 2**: Auth (JWT) + User CRUD + Department + LeaveType/LeaveBalance CRUD + tests.
+- **Tuần 3**: LeaveRequest + tính ngày (weekend + holiday) + approval workflow + audit.
+- **Tuần 4**: Lịch tổng hợp + dashboard + báo cáo CSV + polish + production Dockerfile + deploy guide.
+
+## Lưu ý vận hành (gotchas đã gặp)
+
+- **Dev container backend chạy as root** (mặc định image `gradle:8.10-jdk21-alpine`). Lý do: named volume mount cho gradle cache được Docker init với owner `root` → user `gradle` không exec được JDK. **Đừng thêm `USER gradle`** trừ khi đồng thời fix init volume (entrypoint chown + gosu, hoặc bind mount, hoặc bỏ cache volume — hiện đang dùng cách bỏ cache).
+- **Pull Docker Hub từ ISP Việt Nam** có thể đứt giữa stream khi tải blob lớn (`httpReadSeeker: EOF` từ Cloudfront). Workaround: dùng mirror `mirror.gcr.io` — xem `docs/DEVELOPMENT.md §12`.

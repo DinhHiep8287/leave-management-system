@@ -2,18 +2,11 @@ FROM gradle:8.10-jdk21-alpine
 
 WORKDIR /app
 
-# Copy build files first to cache dependencies layer
-COPY --chown=gradle:gradle build.gradle.kts settings.gradle.kts gradle.properties ./
-
-# Pre-download dependencies
+# Pre-download dependencies in a cacheable layer
+COPY build.gradle.kts settings.gradle.kts gradle.properties ./
 RUN gradle --no-daemon dependencies --refresh-dependencies || true
 
-EXPOSE 8080 5005
+EXPOSE 8080
 
-# ENV JAVA_TOOL_OPTIONS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
-ENV GRADLE_USER_HOME=/home/gradle/.gradle
-
-# USER gradle
-
-# Source mounted via docker-compose volume at /app
+# Container runs as root (image default). Source mounted at /app via docker-compose.
 CMD ["gradle", "--no-daemon", "bootRun"]

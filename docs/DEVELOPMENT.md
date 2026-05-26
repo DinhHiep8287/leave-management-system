@@ -130,11 +130,17 @@ docker compose exec frontend npm run format
 
 ## 8. Debug
 
-### Backend (IntelliJ)
-1. Backend đã expose port `5005` cho remote debug.
-2. IntelliJ → Run → Edit Configurations → `+` → Remote JVM Debug.
-3. Host: `localhost`, Port: `5005`.
-4. Đặt breakpoint, bấm Debug.
+### Backend
+Remote debug đang **tắt** ở MVP (giữ container chạy đơn giản). Khi cần bật, thêm vào service `backend` trong `docker-compose.yml`:
+
+```yaml
+environment:
+  JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+ports:
+  - "5005:5005"
+```
+
+Sau đó IntelliJ → Run → Edit Configurations → Remote JVM Debug → Host `localhost`, Port `5005`.
 
 ### Frontend
 React DevTools + browser DevTools.
@@ -176,8 +182,9 @@ Body (tùy chọn) giải thích **why**, không lặp lại **what**.
 | Hot-reload không chạy | `docker compose restart backend` hoặc `frontend` |
 | Flyway checksum mismatch | Bạn đã sửa migration cũ. Reset DB: `docker compose down -v` |
 | `node_modules` permission error trên Windows | Container dùng named volume cho `node_modules`, không mount từ host |
-| Backend start chậm | Lần đầu Gradle download deps. Có cache volume `gradle-cache` |
+| Backend start chậm | Lần đầu Gradle download deps (~vài phút). |
 | OOM khi build | Tăng RAM Docker Desktop ≥ 4GB |
+| `docker pull` fail với `httpReadSeeker: EOF` từ Cloudfront | ISP Việt Nam đôi khi drop connection khi tải blob lớn từ Docker Hub CDN. Workaround: pull qua mirror Google `docker pull mirror.gcr.io/library/<image>:<tag>` rồi `docker tag` lại tên gốc. Hoặc thêm `"registry-mirrors": ["https://mirror.gcr.io"]` vào `~/.docker/daemon.json` rồi restart Docker Desktop. |
 
 ## 13. Cấu trúc port (tham khảo)
 
@@ -185,5 +192,4 @@ Body (tùy chọn) giải thích **why**, không lặp lại **what**.
 |---|---|---|
 | Frontend (Vite) | 5173 | 5173 |
 | Backend (Spring Boot) | 8080 | 8080 |
-| Backend debug (JDWP) | 5005 | 5005 |
 | Postgres | 5432 | 5432 |
