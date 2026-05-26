@@ -44,7 +44,6 @@ services:
       - "${BACKEND_DEBUG_PORT:-5005}:5005"
     volumes:
       - ./backend:/app
-      - gradle-cache:/home/gradle/.gradle
     networks:
       - leave-net
 
@@ -75,5 +74,4 @@ networks:
 
 volumes:
   postgres-data:
-  gradle-cache:
   frontend-node-modules:
