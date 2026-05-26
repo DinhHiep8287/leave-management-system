@@ -1,10 +1,25 @@
 spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/leave_management_test
+    username: ${POSTGRES_USER:leave_admin}
+    password: ${POSTGRES_PASSWORD:changeme_in_local}
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: validate
   flyway:
     enabled: true
+    clean-disabled: false
 
 app:
   jwt:
     secret: test_secret_for_local_unit_tests_only_at_least_32_chars
+    access-expiration-ms: 900000
+    refresh-expiration-ms: 604800000
+  cors:
+    allowed-origins: http://localhost:5173
+
+logging:
+  level:
+    org.springframework.security: INFO
+    com.peih68.leave: INFO

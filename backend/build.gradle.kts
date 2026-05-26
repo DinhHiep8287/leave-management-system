@@ -61,9 +61,11 @@ dependencies {
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
-    testImplementation("org.springframework.boot:spring-boot-testcontainers")
-    testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.testcontainers:postgresql")
+    // Apache HttpClient5 — enables TestRestTemplate to handle 401 responses with
+    // a request body (default JDK HttpURLConnection throws "cannot retry due to
+    // server authentication" for streaming POSTs).
+    testImplementation("org.apache.httpcomponents.client5:httpclient5")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.withType<JavaCompile> {
@@ -73,6 +75,18 @@ tasks.withType<JavaCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    maxHeapSize = "1g"
+    jvmArgs("-XX:MaxMetaspaceSize=512m")
+    // Override datasource so tests target a dedicated DB instead of the dev one.
+    // Java system properties win over the SPRING_DATASOURCE_* env vars set by
+    // docker-compose, which otherwise leak into tests.
+    systemProperty("spring.datasource.url",
+            System.getenv("SPRING_DATASOURCE_URL_TEST")
+                ?: "jdbc:postgresql://postgres:5432/leave_management_test")
+    systemProperty("spring.datasource.username",
+            System.getenv("POSTGRES_USER") ?: "leave_admin")
+    systemProperty("spring.datasource.password",
+            System.getenv("POSTGRES_PASSWORD") ?: "changeme_in_local")
 }
 
 springBoot {
