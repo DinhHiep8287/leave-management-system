@@ -7,6 +7,13 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added — Week 2 Part 2: Department CRUD
+- `department/` package: `DepartmentEntity`, `DepartmentRepository` (unique code, case-insensitive search by code/name), `DepartmentService` (create/update/softDelete/findById/list), `DepartmentController` `/api/departments` với RBAC (`@PreAuthorize` ADMIN cho write).
+- Code normalization uppercase + duplicate check → 409 CONFLICT.
+- Validation: code regex `[A-Za-z0-9_-]+`, name 1..200.
+- Pagination support qua `Pageable` + meta `{page,size,totalElements,totalPages}`.
+- Tests: `DepartmentRepositoryTest` (3), `DepartmentControllerTest` `@WebMvcTest` (6) — dùng `MethodSecurityTestConfig` để bật `@EnableMethodSecurity` trong slice, `DepartmentE2ETest` (4) — full lifecycle + RBAC. 13 tests xanh, tổng 30.
+
 ### Added — Week 2 Part 1: JWT Auth foundation
 - `auth/` package: `JwtService` (HS256, access 15m + refresh 7d, SHA-256 store hash), `AuthService` (login/refresh/logout với rotation), `JpaUserDetailsService`, `JwtAuthenticationFilter`, `UserPrincipal`, `RefreshTokenEntity`/repo, `AuthController` (`/auth/login`, `/refresh`, `/logout`, `/me`).
 - `user/` package: `UserEntity` (đầy đủ field theo schema), `Role` enum, `UserRepository`.
