@@ -7,6 +7,12 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added — Week 2 Part 4: LeaveType CRUD
+- `leavetype/` package: `LeaveTypeEntity` (`default_quota_days` NUMERIC(5,1)), `LeaveTypeRepository` (unique code, active/requiresBalance filters), `LeaveTypeService`, `LeaveTypeController` `/api/leave-types`.
+- Endpoints: `POST`/`PUT /{id}`/`DELETE /{id}` (ADMIN), `GET /{id}` + `GET` (mọi user authenticated). `DELETE` mặc định soft-delete; `?hard=true` xoá cứng nhưng 409 nếu còn `leave_balances`/`leave_requests` reference.
+- Validation: code regex + uppercase normalize + duplicate 409, `defaultQuotaDays` ∈ [0,366] với `@Digits(3,1)` và phải là bội số của 0.5.
+- Tests: `LeaveTypeRepositoryTest` (3), `LeaveTypeControllerTest` `@WebMvcTest` (6), `LeaveTypeE2ETest` (4). 13 mới, tổng 60.
+
 ### Added — Week 2 Part 3: User CRUD
 - `user/web/`: `UserCreateRequest`, `UserUpdateRequest`, `UpdateMeRequest`, `ChangePasswordRequest`, `ResetPasswordRequest`, `UserResponse` (không bao giờ trả `passwordHash`).
 - `UserService`: `create` (ADMIN — hash password BCrypt), `update` (ADMIN full update), `updateSelf` (chỉ `fullName`), `changePassword` (self, verify old), `resetPassword` (ADMIN), `setActive` (ADMIN), `findById`, `list` (HR/ADMIN, filter by `q`/department/role/active).
