@@ -87,7 +87,7 @@ docker compose exec postgres psql -U leave_admin -d leave_management
 ## Lộ trình 4 tuần
 
 - **Tuần 1**: Foundation — Docker Compose + skeleton backend/frontend + DB schema baseline. ✅ **Done**.
-- **Tuần 2**: Auth (JWT) + User CRUD + Department + LeaveType/LeaveBalance CRUD + tests.
+- **Tuần 2**: Auth (JWT) + User CRUD + Department + LeaveType/LeaveBalance CRUD + tests. ✅ **Done** (78 backend tests).
 - **Tuần 3**: LeaveRequest + tính ngày (weekend + holiday) + approval workflow + audit.
 - **Tuần 4**: Lịch tổng hợp + dashboard + báo cáo CSV + polish + production Dockerfile + deploy guide.
 
@@ -101,3 +101,6 @@ docker compose exec postgres psql -U leave_admin -d leave_management
 - **Spring Data Auditing với `OffsetDateTime`** cần `DateTimeProvider` bean tường minh — default chỉ trả `LocalDateTime`/`Instant`. Xem `JpaAuditingConfig#auditingDateTimeProvider`.
 - **Gradle 9.x** yêu cầu `testRuntimeOnly("org.junit.platform:junit-platform-launcher")` tường minh, khác Gradle 8.
 - **TestRestTemplate + JDK HttpURLConnection** ném `HttpRetryException: cannot retry due to server authentication, in streaming mode` khi nhận 401 với body POST. Đã thêm `org.apache.httpcomponents.client5:httpclient5` vào `testImplementation` để Spring Boot auto-detect và dùng HttpClient5.
+- **Docker Desktop tự khởi động lại dev backend** (`restart: unless-stopped`) sau khi daemon restart → container `leave-backend` chạy `bootRun` giữ lock `/app/.gradle`. Trước khi chạy `docker compose run ... gradlew test` phải `docker compose stop backend`. Nếu gặp "Timeout waiting to lock Build Output Cleanup Cache" hoặc "Cannot create directory .gradle": `docker rm -f` các container `*backend-run*` còn sót và stop dev backend.
+- **@WebMvcTest với `@PreAuthorize` SpEL `#id == principal.id`**: request-post-processor auth (`SecurityMockMvcRequestPostProcessors.authentication`) KHÔNG nạp được vào `SecurityContext` khi `addFilters=false` (cần filter chain). Dùng annotation `@WithMockPrincipal` (kiểu `@WithSecurityContext`, xem `src/test/.../config/`) để inject `UserPrincipal` có id cụ thể qua TestExecutionListener. `@WithMockUser` thường chỉ cho role, không cho principal id.
+- **Test `@Transactional` + raw JdbcTemplate UPDATE rồi service đọc lại qua JPA**: Hibernate chưa flush INSERT khi JDBC chạy (UPDATE 0 row) và first-level cache giữ entity cũ. Phải `em.flush()` trước JDBC update và `em.clear()` sau để service re-read thấy state mới.
