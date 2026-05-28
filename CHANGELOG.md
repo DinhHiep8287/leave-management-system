@@ -7,6 +7,13 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added — Week 2 Part 5: LeaveBalance CRUD
+- `leavebalance/` package: `LeaveBalanceEntity` (unique `(user_id, leave_type_id, year)`, `remaining() = total + adjusted - used`), `LeaveBalanceRepository`, `LeaveBalanceService`, `LeaveBalanceController`.
+- Endpoints: `GET /api/users/{id}/leave-balances?year=` (self | HR | ADMIN qua SpEL), `POST /api/leave-balances` (ADMIN upsert quota — giữ nguyên used/adjusted), `POST /api/leave-balances/initialize?year=` (ADMIN bulk init, idempotent), `PATCH /api/leave-balances/{id}/adjust` (HR | ADMIN).
+- `bulkInitializeYear`: tạo row cho mỗi active user × active leave type có `requiresBalance=true`, dùng `default_quota_days` làm `total_days`; bỏ qua row đã tồn tại.
+- `adjust`: cộng/trừ `adjusted_days`, chặn nếu remaining < 0, ghi `audit_log` (action `LEAVE_BALANCE_ADJUST`, old/new JSONB) qua `AuditLogWriter` (JdbcTemplate + `CAST(? AS jsonb)`).
+- Tests: `LeaveBalanceRepositoryTest` (4), `LeaveBalanceServiceTest` (3 — bulk idempotent, adjust+audit, upsert giữ used/adjusted), `LeaveBalanceControllerTest` `@WebMvcTest` (7 — RBAC self vs HR/ADMIN), `LeaveBalanceE2ETest` (4 — bulk init→adjust→remaining + audit, RBAC, negative guard). 18 mới, tổng 78.
+
 ### Added — Week 2 Part 4: LeaveType CRUD
 - `leavetype/` package: `LeaveTypeEntity` (`default_quota_days` NUMERIC(5,1)), `LeaveTypeRepository` (unique code, active/requiresBalance filters), `LeaveTypeService`, `LeaveTypeController` `/api/leave-types`.
 - Endpoints: `POST`/`PUT /{id}`/`DELETE /{id}` (ADMIN), `GET /{id}` + `GET` (mọi user authenticated). `DELETE` mặc định soft-delete; `?hard=true` xoá cứng nhưng 409 nếu còn `leave_balances`/`leave_requests` reference.
