@@ -5,8 +5,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 public class CorsConfig {
@@ -14,8 +14,14 @@ public class CorsConfig {
     @Value("${app.cors.allowed-origins:http://localhost:5173}")
     private List<String> allowedOrigins;
 
+    /**
+     * Exposed as a CorsConfigurationSource (not a standalone CorsFilter) so that
+     * Spring Security's http.cors() wires it into the security filter chain. A
+     * standalone CorsFilter runs AFTER the security chain, so CORS preflight
+     * OPTIONS requests would be rejected with 401 before CORS handling.
+     */
     @Bean
-    public CorsFilter corsFilter() {
+    public CorsConfigurationSource corsConfigurationSource() {
         var config = new CorsConfiguration();
         config.setAllowCredentials(true);
         config.setAllowedOrigins(allowedOrigins);
@@ -25,6 +31,6 @@ public class CorsConfig {
 
         var source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
-        return new CorsFilter(source);
+        return source;
     }
 }

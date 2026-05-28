@@ -7,6 +7,9 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Fixed
+- CORS preflight (`OPTIONS`) bị Spring Security trả 401 → trình duyệt block các request có header `Authorization` (vd `GET /auth/me`), khiến FE login báo "Đăng nhập thất bại" dù backend OK. Đổi `CorsConfig` expose `CorsConfigurationSource` bean (thay vì standalone `CorsFilter` chạy sau security chain) + bật `http.cors()` trong `SecurityConfig`. `MockMvc`/`TestRestTemplate` không mô phỏng preflight nên 78 test vẫn xanh — chỉ lộ khi chạy trên browser.
+
 ### Added — Week 2 Part 5: LeaveBalance CRUD
 - `leavebalance/` package: `LeaveBalanceEntity` (unique `(user_id, leave_type_id, year)`, `remaining() = total + adjusted - used`), `LeaveBalanceRepository`, `LeaveBalanceService`, `LeaveBalanceController`.
 - Endpoints: `GET /api/users/{id}/leave-balances?year=` (self | HR | ADMIN qua SpEL), `POST /api/leave-balances` (ADMIN upsert quota — giữ nguyên used/adjusted), `POST /api/leave-balances/initialize?year=` (ADMIN bulk init, idempotent), `PATCH /api/leave-balances/{id}/adjust` (HR | ADMIN).
