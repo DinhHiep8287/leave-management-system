@@ -1,15 +1,35 @@
+import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { AppLayout } from "@/components/layout/app-layout";
 import { AuthProvider } from "@/features/auth/auth-context";
 import { LoginPage } from "@/features/auth/login-page";
-import { ApprovalInboxPage } from "@/features/approvals/inbox-page";
-import { CalendarPage } from "@/features/calendar/calendar-page";
-import { DashboardPage } from "@/features/dashboard/dashboard-page";
-import { MyRequestsPage } from "@/features/leave-requests/my-requests-page";
-import { SubmitLeaveRequestPage } from "@/features/leave-requests/submit-page";
-import { ReportsPage } from "@/features/reports/reports-page";
 import { ProtectedRoute } from "@/routes/protected-route";
+
+// Code-split protected pages so the login bundle stays small (recharts, date-fns,
+// and feature code load only when their route is visited).
+const DashboardPage = lazy(() =>
+  import("@/features/dashboard/dashboard-page").then((m) => ({ default: m.DashboardPage })),
+);
+const MyRequestsPage = lazy(() =>
+  import("@/features/leave-requests/my-requests-page").then((m) => ({ default: m.MyRequestsPage })),
+);
+const SubmitLeaveRequestPage = lazy(() =>
+  import("@/features/leave-requests/submit-page").then((m) => ({ default: m.SubmitLeaveRequestPage })),
+);
+const ApprovalInboxPage = lazy(() =>
+  import("@/features/approvals/inbox-page").then((m) => ({ default: m.ApprovalInboxPage })),
+);
+const CalendarPage = lazy(() =>
+  import("@/features/calendar/calendar-page").then((m) => ({ default: m.CalendarPage })),
+);
+const ReportsPage = lazy(() =>
+  import("@/features/reports/reports-page").then((m) => ({ default: m.ReportsPage })),
+);
+
+function PageFallback() {
+  return <div className="p-6 text-sm text-muted-foreground">Đang tải…</div>;
+}
 
 export default function App() {
   return (
@@ -23,12 +43,54 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route path="/" element={<DashboardPage />} />
-          <Route path="/leave-requests" element={<MyRequestsPage />} />
-          <Route path="/leave-requests/new" element={<SubmitLeaveRequestPage />} />
-          <Route path="/approvals" element={<ApprovalInboxPage />} />
-          <Route path="/calendar" element={<CalendarPage />} />
-          <Route path="/reports" element={<ReportsPage />} />
+          <Route
+            path="/"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <DashboardPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/leave-requests"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <MyRequestsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/leave-requests/new"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <SubmitLeaveRequestPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/approvals"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <ApprovalInboxPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/calendar"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <CalendarPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/reports"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <ReportsPage />
+              </Suspense>
+            }
+          />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

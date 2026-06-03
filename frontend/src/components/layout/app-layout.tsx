@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
 
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/auth-context";
 import { cn } from "@/lib/utils";
@@ -57,7 +58,8 @@ export function AppLayout() {
           <div className="text-sm text-muted-foreground md:hidden">
             <span className="font-semibold text-foreground">Quản lý nghỉ phép</span>
           </div>
-          <div className="ml-auto flex items-center gap-4">
+          <div className="ml-auto flex items-center gap-3">
+            <ThemeToggle />
             <div className="text-right">
               <p className="text-sm font-medium leading-tight">{user?.fullName}</p>
               <p className="text-xs text-muted-foreground">{roleLabel(role)}</p>
