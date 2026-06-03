@@ -8,6 +8,7 @@ import { CalendarPage } from "@/features/calendar/calendar-page";
 import { DashboardPage } from "@/features/dashboard/dashboard-page";
 import { MyRequestsPage } from "@/features/leave-requests/my-requests-page";
 import { SubmitLeaveRequestPage } from "@/features/leave-requests/submit-page";
+import { ReportsPage } from "@/features/reports/reports-page";
 import { ProtectedRoute } from "@/routes/protected-route";
 
 export default function App() {
@@ -27,6 +28,7 @@ export default function App() {
           <Route path="/leave-requests/new" element={<SubmitLeaveRequestPage />} />
           <Route path="/approvals" element={<ApprovalInboxPage />} />
           <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

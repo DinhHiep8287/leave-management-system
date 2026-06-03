@@ -8,15 +8,16 @@ type NavItem = { to: string; label: string; show: (role: string) => boolean };
 
 const ALL = () => true;
 const APPROVER = (role: string) => role === "MANAGER" || role === "HR" || role === "ADMIN";
+const HR_ADMIN = (role: string) => role === "HR" || role === "ADMIN";
 
 // Text-led navigation per docs/UI-GUIDELINES.md (no decorative icons).
-// Reports (Part 6) is added with its route.
 const NAV: NavItem[] = [
   { to: "/", label: "Tổng quan", show: ALL },
   { to: "/leave-requests/new", label: "Nộp đơn", show: ALL },
   { to: "/leave-requests", label: "Đơn của tôi", show: ALL },
   { to: "/approvals", label: "Cần duyệt", show: APPROVER },
   { to: "/calendar", label: "Lịch nghỉ phép", show: ALL },
+  { to: "/reports", label: "Báo cáo", show: HR_ADMIN },
 ];
 
 export function AppLayout() {
