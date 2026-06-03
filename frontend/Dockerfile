@@ -7,6 +7,10 @@ COPY package.json pnpm-lock.yaml* ./
 RUN pnpm install --frozen-lockfile
 
 COPY . .
+# Vite bakes env at build time. Default to a same-origin "/api" path that the
+# runtime nginx proxies to the backend; override for split-host deploys.
+ARG VITE_API_BASE_URL=/api
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 RUN pnpm build
 
 # ===== Runtime stage =====

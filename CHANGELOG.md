@@ -7,6 +7,33 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added — Week 4 Part 7: Production config + deploy guide
+- `application-prod.yml`: Hikari pool lớn hơn, graceful shutdown, tắt Swagger UI, expose actuator `health,info` (probes), `server.error.include-message: never`, log INFO.
+- `docker-compose.prod.yml`: stack prod dùng image build sẵn (jar + nginx), backend không publish cổng (qua nginx `/api`), secret bắt buộc (`JWT_SECRET`/`POSTGRES_PASSWORD` fail-fast). `frontend/Dockerfile` nhận build-arg `VITE_API_BASE_URL` (mặc định `/api`); `nginx.conf` proxy `/api` → backend (cùng origin). `.env.prod.example`.
+- `docs/DEPLOYMENT.md`: hướng dẫn build/run prod compose, sinh `JWT_SECRET`, tạo admin đầu tiên (prod không seed), health check, vận hành, gợi ý deploy tách dịch vụ (Neon/Railway/Fly.io/Vercel) — chỉ hướng dẫn.
+- Polish: sửa script `pnpm typecheck` (`tsc -p tsconfig.json --noEmit`, hết lỗi TS6310 do `-b --noEmit`).
+
+### Added — Week 4 Part 6: Dashboard (charts) + CSV downloads (frontend)
+- `features/dashboard`: trang tổng quan thật — stat cards (chờ duyệt / đang nghỉ hôm nay / đơn chờ của tôi), biểu đồ cột recharts (quỹ phép đã dùng/còn lại theo loại), danh sách đang nghỉ hôm nay. `GET /dashboard/summary`.
+- `features/reports` (HR/ADMIN): tải CSV đơn nghỉ + quỹ phép qua blob + object URL (kèm Authorization), route `/reports` gated theo role.
+
+### Added — Week 4 Part 5: Team leave calendar (frontend)
+- `features/calendar`: lưới tháng tự dựng bằng date-fns, hiển thị đơn đã duyệt/chờ duyệt trong phạm vi, tô cuối tuần/ngày lễ, điều hướng tháng, lọc phòng ban cho HR/ADMIN; click mở dialog chi tiết. Thêm `date-fns`, `recharts`.
+
+### Added — Week 4 Part 3-4: Frontend leave-request + approval UI
+- Nền tảng FE: app shell nav role-aware text-led, font Be Vietnam Pro, theme teal (light+dark), UI primitives kiểu shadcn (input/label/textarea/select/card/badge/table/dialog) + sonner toast. Theo `docs/UI-GUIDELINES.md`.
+- `features/leave-requests`: form nộp đơn (RHF+Zod), "Đơn của tôi" (lọc năm/trạng thái, hủy đơn PENDING), dialog chi tiết + timeline lịch sử (dùng chung).
+- `features/approvals`: inbox phân trang theo scope, dialog duyệt (ghi chú tùy chọn) / từ chối (bắt buộc lý do).
+
+### Added — Week 4 Part 2: CSV report exports (backend)
+- `report/`: `CsvWriter` (RFC-4180, BOM UTF-8 cho Excel tiếng Việt), `ReportService` (đơn nghỉ overlap kỳ + quỹ phép theo năm), `ReportController` `GET /api/reports/leave-requests.csv`, `/leave-balances.csv` (HR/ADMIN, `text/csv` + attachment). `LeaveBalanceRepository.findByYearOrderByUserIdAscLeaveTypeIdAsc`.
+- Tests: `CsvWriterTest` (6), `ReportServiceTest` (3), `ReportControllerTest` (4). 13 mới, tổng 155.
+
+### Added — Week 4 Part 1: Team calendar + dashboard endpoints (backend)
+- `leaverequest`: `LeaveCalendarService` + `GET /api/calendar?from=&to=&departmentId=` (scope theo role: employee=mình, manager=reports+mình, HR/ADMIN=tất cả hoặc 1 phòng ban; giới hạn ≤92 ngày). Repo: `findOverlappingForUsers`/`findOverlapping` (JPQL param non-null) + count queries. `UserRepository.findByDepartmentIdAndIsActiveTrue`/`findByManagerIdAndIsActiveTrue`.
+- `dashboard`: `DashboardService` + `GET /api/dashboard/summary` (pendingApprovalCount theo role, onLeaveToday, myPendingCount, myBalances).
+- Tests: `LeaveCalendarServiceTest` (6), `DashboardServiceTest` (3), `LeaveCalendarControllerTest` (1), `DashboardControllerTest` (1). 11 mới, tổng 142.
+
 ### Added — Week 3 Part 4: End-to-end leave-request flow + docs
 - `LeaveRequestE2ETest` (`@SpringBootTest(RANDOM_PORT)` + `TestRestTemplate`, JWT thật cho admin/manager1/manager2/employee): golden path (submit ANNUAL 5 ngày → inbox manager → approve → `used_days`/`remaining` đúng → history CREATED+APPROVED), reject không trừ balance, cancel-approved hoàn balance, manager khác team → 403, employee tự duyệt → 403, approve khi balance bị HR rút bớt → 409 `INSUFFICIENT_BALANCE`. 6 mới, tổng 131.
 - `CLAUDE.md`: lộ trình Tuần 3 ✅; thêm gotchas — JPQL `:date IS NULL` (Postgres không suy được kiểu), `@WebMvcTest` cần `@MockBean(name=...)` cho SpEL bean reference (sai tên → 500), E2E commit thật cần `@AfterEach` dọn `leave_requests`/`approval_actions` để không vỡ FK `DELETE FROM users` của suite khác.

@@ -1,0 +1,40 @@
+# Production overrides (active when SPRING_PROFILES_ACTIVE=prod).
+# Only differences from application.yml are listed here.
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+server:
+  shutdown: graceful
+  error:
+    # Do not leak exception messages on unhandled paths; the API error envelope
+    # (GlobalExceptionHandler) still returns intended messages for handled errors.
+    include-message: never
+
+# Disable the API docs / Swagger UI in production.
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+# Expose only health + info for readiness/liveness probes.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+
+logging:
+  level:
+    root: INFO
+    com.peih68.leave: INFO

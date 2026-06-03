@@ -1,0 +1,69 @@
+# Production stack: prod images (built jar + nginx-served SPA), no source mounts,
+# no dev tooling. Run with: docker compose -f docker-compose.prod.yml up -d --build
+# Reads variables from .env (see .env.prod.example). Required secrets fail fast.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: leave-postgres-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-leave_management}
+      POSTGRES_USER: ${POSTGRES_USER:-leave_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      TZ: ${TZ:-Asia/Ho_Chi_Minh}
+    volumes:
+      - postgres-data-prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-leave_admin} -d ${POSTGRES_DB:-leave_management}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - leave-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: leave-backend-prod
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-leave_management}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-leave_admin}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required (>=32 chars)}
+      JWT_ACCESS_EXPIRATION_MS: ${JWT_ACCESS_EXPIRATION_MS:-900000}
+      JWT_REFRESH_EXPIRATION_MS: ${JWT_REFRESH_EXPIRATION_MS:-604800000}
+      APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS:-http://localhost}
+      TZ: ${TZ:-Asia/Ho_Chi_Minh}
+    # Not published: reached only through the frontend nginx /api proxy.
+    expose:
+      - "8080"
+    networks:
+      - leave-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
+    container_name: leave-frontend-prod
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    networks:
+      - leave-net
+
+networks:
+  leave-net:
+    driver: bridge
+
+volumes:
+  postgres-data-prod:

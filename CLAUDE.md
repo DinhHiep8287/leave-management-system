@@ -90,7 +90,7 @@ docker compose exec postgres psql -U leave_admin -d leave_management
 - **Tuần 1**: Foundation — Docker Compose + skeleton backend/frontend + DB schema baseline. ✅ **Done**.
 - **Tuần 2**: Auth (JWT) + User CRUD + Department + LeaveType/LeaveBalance CRUD + tests. ✅ **Done** (78 backend tests).
 - **Tuần 3**: LeaveRequest + tính ngày (weekend + holiday) + approval workflow + audit. ✅ **Done** (131 backend tests).
-- **Tuần 4**: Lịch tổng hợp + dashboard + báo cáo CSV + polish + production Dockerfile + deploy guide.
+- **Tuần 4**: Lịch tổng hợp + dashboard + báo cáo CSV + frontend đầy đủ + production config + deploy guide. ✅ **Done** (155 backend tests; FE: build/lint xanh).
 
 ## Lưu ý vận hành (gotchas đã gặp)
 

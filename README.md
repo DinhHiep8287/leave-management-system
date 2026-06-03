@@ -48,16 +48,37 @@ docker compose up
 
 Chi tiết xem [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md).
 
+Đăng nhập demo (profile `dev`): `admin@demo.local / Admin@12345` (ADMIN), `eng.manager@demo.local / User@12345` (quản lý), `eng.emp1@demo.local / User@12345` (nhân viên).
+
+## Màn hình frontend
+
+- **Tổng quan** — stat cards + biểu đồ quỹ phép + đang nghỉ hôm nay.
+- **Nộp đơn** / **Đơn của tôi** — tạo, theo dõi, hủy đơn; xem lịch sử xử lý.
+- **Cần duyệt** (quản lý/HR/ADMIN) — inbox duyệt/từ chối.
+- **Lịch nghỉ phép** — lưới tháng theo phạm vi, lọc phòng ban.
+- **Báo cáo** (HR/ADMIN) — xuất CSV đơn nghỉ + quỹ phép.
+
+## Triển khai production
+
+```bash
+cp .env.prod.example .env   # điền JWT_SECRET, POSTGRES_PASSWORD, ...
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+Chi tiết xem [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+
 ## Tài liệu
 
 - [Yêu cầu nghiệp vụ](docs/REQUIREMENTS.md)
 - [Kiến trúc hệ thống](docs/ARCHITECTURE.md)
 - [Thiết kế database](docs/DATABASE.md)
 - [Hướng dẫn phát triển](docs/DEVELOPMENT.md)
+- [Hướng dẫn triển khai](docs/DEPLOYMENT.md)
+- [Quy ước thiết kế UI](docs/UI-GUIDELINES.md)
 
 ## Trạng thái
 
-🚧 Đang phát triển — MVP dự kiến hoàn thành trong 4 tuần.
+✅ MVP hoàn thành (4 tuần): auth, CRUD, đơn nghỉ + duyệt, lịch, dashboard, báo cáo CSV, cấu hình production.
 
 ## Giấy phép
 
