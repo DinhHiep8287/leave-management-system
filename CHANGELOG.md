@@ -7,6 +7,10 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added — Week 3 Part 4: End-to-end leave-request flow + docs
+- `LeaveRequestE2ETest` (`@SpringBootTest(RANDOM_PORT)` + `TestRestTemplate`, JWT thật cho admin/manager1/manager2/employee): golden path (submit ANNUAL 5 ngày → inbox manager → approve → `used_days`/`remaining` đúng → history CREATED+APPROVED), reject không trừ balance, cancel-approved hoàn balance, manager khác team → 403, employee tự duyệt → 403, approve khi balance bị HR rút bớt → 409 `INSUFFICIENT_BALANCE`. 6 mới, tổng 131.
+- `CLAUDE.md`: lộ trình Tuần 3 ✅; thêm gotchas — JPQL `:date IS NULL` (Postgres không suy được kiểu), `@WebMvcTest` cần `@MockBean(name=...)` cho SpEL bean reference (sai tên → 500), E2E commit thật cần `@AfterEach` dọn `leave_requests`/`approval_actions` để không vỡ FK `DELETE FROM users` của suite khác.
+
 ### Added — Week 3 Part 3: Approval workflow (approve / reject / cancel)
 - `LeaveRequestService`: `approve` (PENDING→APPROVED, hard-check + trừ `used_days`), `reject` (PENDING→REJECTED, comment bắt buộc, không đụng balance), `cancel` (requester hủy đơn PENDING; manager/HR/ADMIN hủy đơn APPROVED → hoàn `used_days`; đơn terminal → `CONFLICT`), `history`. State machine `transition()` ghi `approval_actions` + `audit_log` (action `LEAVE_REQUEST_APPROVED/REJECTED/CANCELLED`, old/new status JSON) qua `AuditLogWriter`.
 - `LeaveBalanceService.applyUsedDelta(userId, leaveTypeId, year, delta)`: cộng/trừ `used_days` với guard không âm và remaining ≥ 0 (`INSUFFICIENT_BALANCE`); tái dùng cho approve (+) và cancel-approved (−).
