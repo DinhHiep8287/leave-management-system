@@ -1,11 +1,13 @@
 package com.peih68.leave.leaverequest.service;
 
 import com.peih68.leave.auth.domain.UserPrincipal;
+import com.peih68.leave.common.audit.AuditLogWriter;
 import com.peih68.leave.common.exception.ApiException;
 import com.peih68.leave.common.exception.ErrorCode;
 import com.peih68.leave.holiday.service.HolidayService;
 import com.peih68.leave.leavebalance.domain.LeaveBalanceEntity;
 import com.peih68.leave.leavebalance.repository.LeaveBalanceRepository;
+import com.peih68.leave.leavebalance.service.LeaveBalanceService;
 import com.peih68.leave.leaverequest.domain.ApprovalAction;
 import com.peih68.leave.leaverequest.domain.ApprovalActionEntity;
 import com.peih68.leave.leaverequest.domain.LeaveDayCalculator;
@@ -13,10 +15,13 @@ import com.peih68.leave.leaverequest.domain.LeaveRequestEntity;
 import com.peih68.leave.leaverequest.domain.LeaveStatus;
 import com.peih68.leave.leaverequest.repository.ApprovalActionRepository;
 import com.peih68.leave.leaverequest.repository.LeaveRequestRepository;
+import com.peih68.leave.leaverequest.web.dto.ApprovalActionResponse;
+import com.peih68.leave.leaverequest.web.dto.ApprovalDecisionRequest;
 import com.peih68.leave.leaverequest.web.dto.LeaveRequestCreateRequest;
 import com.peih68.leave.leaverequest.web.dto.LeaveRequestResponse;
 import com.peih68.leave.leavetype.domain.LeaveTypeEntity;
 import com.peih68.leave.leavetype.repository.LeaveTypeRepository;
+import com.peih68.leave.user.domain.Role;
 import com.peih68.leave.user.domain.UserEntity;
 import com.peih68.leave.user.repository.UserRepository;
 import java.math.BigDecimal;
@@ -42,8 +47,10 @@ public class LeaveRequestService {
     private final LeaveTypeRepository leaveTypeRepository;
     private final UserRepository userRepository;
     private final LeaveBalanceRepository balanceRepository;
+    private final LeaveBalanceService leaveBalanceService;
     private final HolidayService holidayService;
     private final LeaveDayCalculator dayCalculator;
+    private final AuditLogWriter auditLogWriter;
 
     /** An employee submits a leave request for themselves. */
     @Transactional
@@ -144,7 +151,97 @@ public class LeaveRequestService {
         return page.map(this::toResponse);
     }
 
+    /** Approve a pending request: hard-check + consume balance, then mark APPROVED. */
+    @Transactional
+    public LeaveRequestResponse approve(Long id, ApprovalDecisionRequest req, UserPrincipal actor) {
+        LeaveRequestEntity r = requireRequest(id);
+        requireStatus(r, LeaveStatus.PENDING);
+        consumeBalanceIfNeeded(r, r.getTotalDays());
+        return transition(r, ApprovalAction.APPROVED, LeaveStatus.APPROVED, actor, comment(req));
+    }
+
+    /** Reject a pending request. A comment is required. No balance change. */
+    @Transactional
+    public LeaveRequestResponse reject(Long id, ApprovalDecisionRequest req, UserPrincipal actor) {
+        LeaveRequestEntity r = requireRequest(id);
+        requireStatus(r, LeaveStatus.PENDING);
+        String comment = comment(req);
+        if (comment == null || comment.isBlank()) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "a comment is required when rejecting");
+        }
+        return transition(r, ApprovalAction.REJECTED, LeaveStatus.REJECTED, actor, comment);
+    }
+
+    /**
+     * Cancel a request. The requester may cancel their own PENDING request; an APPROVED
+     * request can only be cancelled by the manager/HR/ADMIN and restores the consumed balance.
+     */
+    @Transactional
+    public LeaveRequestResponse cancel(Long id, ApprovalDecisionRequest req, UserPrincipal actor) {
+        LeaveRequestEntity r = requireRequest(id);
+        boolean privileged = actor.getRole() == Role.ADMIN || actor.getRole() == Role.HR
+                || actor.getId().equals(r.getManagerId());
+
+        switch (r.getStatus()) {
+            case PENDING -> { /* requester or privileged (already checked at the controller) */ }
+            case APPROVED -> {
+                if (!privileged) {
+                    throw new ApiException(ErrorCode.FORBIDDEN,
+                            "only the manager or HR/ADMIN can cancel an approved request");
+                }
+                consumeBalanceIfNeeded(r, r.getTotalDays().negate());
+            }
+            default -> throw new ApiException(ErrorCode.CONFLICT,
+                    "request is %s and can no longer be cancelled".formatted(r.getStatus()));
+        }
+        return transition(r, ApprovalAction.CANCELLED, LeaveStatus.CANCELLED, actor, comment(req));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ApprovalActionResponse> history(Long requestId) {
+        requireRequest(requestId);
+        return approvalActionRepository.findByLeaveRequestIdOrderByCreatedAtAsc(requestId).stream()
+                .map(this::toActionResponse)
+                .toList();
+    }
+
     // --- helpers (shared with the approval workflow added in Part 3) ---
+
+    private void consumeBalanceIfNeeded(LeaveRequestEntity r, BigDecimal delta) {
+        LeaveTypeEntity type = leaveTypeRepository.findById(r.getLeaveTypeId()).orElse(null);
+        if (type != null && Boolean.TRUE.equals(type.getRequiresBalance())) {
+            leaveBalanceService.applyUsedDelta(r.getUserId(), r.getLeaveTypeId(), r.getStartDate().getYear(), delta);
+        }
+    }
+
+    private LeaveRequestResponse transition(LeaveRequestEntity r, ApprovalAction action,
+            LeaveStatus next, UserPrincipal actor, String comment) {
+        LeaveStatus previous = r.getStatus();
+        r.setStatus(next);
+        recordAction(r.getId(), actor.getId(), action, previous, next, comment);
+        auditLogWriter.record(actor.getId(), "LEAVE_REQUEST_" + action.name(), "leave_request", r.getId(),
+                "{\"status\":\"" + previous + "\"}", "{\"status\":\"" + next + "\"}");
+        log.info("request {} {} by user {} ({} -> {})", r.getId(), action, actor.getId(), previous, next);
+        return toResponse(r);
+    }
+
+    private void requireStatus(LeaveRequestEntity r, LeaveStatus expected) {
+        if (r.getStatus() != expected) {
+            throw new ApiException(ErrorCode.CONFLICT,
+                    "request is %s, expected %s".formatted(r.getStatus(), expected));
+        }
+    }
+
+    private static String comment(ApprovalDecisionRequest req) {
+        return req == null ? null : req.comment();
+    }
+
+    private ApprovalActionResponse toActionResponse(ApprovalActionEntity a) {
+        String actorName = userRepository.findById(a.getActorId()).map(UserEntity::getFullName).orElse(null);
+        return new ApprovalActionResponse(
+                a.getId(), a.getAction(), a.getActorId(), actorName,
+                a.getPreviousStatus(), a.getNewStatus(), a.getComment(), a.getCreatedAt());
+    }
 
     void recordAction(Long requestId, Long actorId, ApprovalAction action,
             LeaveStatus previous, LeaveStatus next, String comment) {

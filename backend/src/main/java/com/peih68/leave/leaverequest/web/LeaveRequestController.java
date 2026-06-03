@@ -4,6 +4,8 @@ import com.peih68.leave.auth.domain.UserPrincipal;
 import com.peih68.leave.common.web.ApiResponse;
 import com.peih68.leave.leaverequest.domain.LeaveStatus;
 import com.peih68.leave.leaverequest.service.LeaveRequestService;
+import com.peih68.leave.leaverequest.web.dto.ApprovalActionResponse;
+import com.peih68.leave.leaverequest.web.dto.ApprovalDecisionRequest;
 import com.peih68.leave.leaverequest.web.dto.LeaveRequestCreateRequest;
 import com.peih68.leave.leaverequest.web.dto.LeaveRequestResponse;
 import jakarta.validation.Valid;
@@ -69,5 +71,43 @@ public class LeaveRequestController {
                 "size", page.getSize(),
                 "totalElements", page.getTotalElements(),
                 "totalPages", page.getTotalPages()));
+    }
+
+    /** Approve a pending request — the assigned manager or HR/ADMIN. */
+    @PostMapping("/leave-requests/{id}/approve")
+    @PreAuthorize("hasAnyRole('ADMIN','HR') or @leaveRequestSecurity.isManagerOf(#id, principal.id)")
+    public ApiResponse<LeaveRequestResponse> approve(
+            @PathVariable Long id,
+            @Valid @RequestBody(required = false) ApprovalDecisionRequest req,
+            @AuthenticationPrincipal UserPrincipal actor) {
+        return ApiResponse.ok(leaveRequestService.approve(id, req, actor));
+    }
+
+    /** Reject a pending request — the assigned manager or HR/ADMIN. */
+    @PostMapping("/leave-requests/{id}/reject")
+    @PreAuthorize("hasAnyRole('ADMIN','HR') or @leaveRequestSecurity.isManagerOf(#id, principal.id)")
+    public ApiResponse<LeaveRequestResponse> reject(
+            @PathVariable Long id,
+            @Valid @RequestBody(required = false) ApprovalDecisionRequest req,
+            @AuthenticationPrincipal UserPrincipal actor) {
+        return ApiResponse.ok(leaveRequestService.reject(id, req, actor));
+    }
+
+    /** Cancel a request — requester (PENDING only) or manager/HR/ADMIN. */
+    @PostMapping("/leave-requests/{id}/cancel")
+    @PreAuthorize("hasAnyRole('ADMIN','HR') or @leaveRequestSecurity.isManagerOf(#id, principal.id)"
+            + " or @leaveRequestSecurity.isRequester(#id, principal.id)")
+    public ApiResponse<LeaveRequestResponse> cancel(
+            @PathVariable Long id,
+            @Valid @RequestBody(required = false) ApprovalDecisionRequest req,
+            @AuthenticationPrincipal UserPrincipal actor) {
+        return ApiResponse.ok(leaveRequestService.cancel(id, req, actor));
+    }
+
+    /** Workflow history — requester, the assigned manager, or HR/ADMIN. */
+    @GetMapping("/leave-requests/{id}/history")
+    @PreAuthorize("hasAnyRole('ADMIN','HR') or @leaveRequestSecurity.isParticipant(#id, principal.id)")
+    public ApiResponse<List<ApprovalActionResponse>> history(@PathVariable Long id) {
+        return ApiResponse.ok(leaveRequestService.history(id));
     }
 }

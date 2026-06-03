@@ -7,6 +7,12 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added — Week 3 Part 3: Approval workflow (approve / reject / cancel)
+- `LeaveRequestService`: `approve` (PENDING→APPROVED, hard-check + trừ `used_days`), `reject` (PENDING→REJECTED, comment bắt buộc, không đụng balance), `cancel` (requester hủy đơn PENDING; manager/HR/ADMIN hủy đơn APPROVED → hoàn `used_days`; đơn terminal → `CONFLICT`), `history`. State machine `transition()` ghi `approval_actions` + `audit_log` (action `LEAVE_REQUEST_APPROVED/REJECTED/CANCELLED`, old/new status JSON) qua `AuditLogWriter`.
+- `LeaveBalanceService.applyUsedDelta(userId, leaveTypeId, year, delta)`: cộng/trừ `used_days` với guard không âm và remaining ≥ 0 (`INSUFFICIENT_BALANCE`); tái dùng cho approve (+) và cancel-approved (−).
+- `LeaveRequestController`: `POST /api/leave-requests/{id}/approve|reject` (manager team mình | HR/ADMIN), `POST /{id}/cancel` (requester | manager | HR/ADMIN), `GET /{id}/history` (participant | HR/ADMIN). DTOs `ApprovalDecisionRequest`, `ApprovalActionResponse`.
+- Tests: `LeaveRequestApprovalServiceTest` (8 — approve trừ balance + audit + 2 action, reject không đụng balance, reject thiếu comment, cancel-approved hoàn balance, requester không hủy được approved, requester hủy pending, transition sai → CONFLICT, hard-check thiếu balance → INSUFFICIENT_BALANCE), `LeaveRequestApprovalControllerTest` `@WebMvcTest` (8 — RBAC approve/reject/cancel/history). 16 mới, tổng 125.
+
 ### Added — Week 3 Part 2: LeaveRequest submit + list + detail
 - `leaverequest/` package: `LeaveRequestEntity` (map `leave_requests`), `LeaveRequestRepository` (overlap query `existsOverlap`, inbox queries theo manager/status, list theo user + khoảng start_date), DTOs `LeaveRequestCreateRequest`/`LeaveRequestResponse`.
 - `ApprovalActionEntity` + `ApprovalAction` enum + `ApprovalActionRepository` — bảng `approval_actions` chỉ có `created_at` nên KHÔNG extend `BaseEntity` (dùng `@CreatedDate` + `AuditingEntityListener`). Tạo sớm ở Part 2 vì `submit` ghi action `CREATED`; Part 3 sẽ thêm APPROVED/REJECTED/CANCELLED.

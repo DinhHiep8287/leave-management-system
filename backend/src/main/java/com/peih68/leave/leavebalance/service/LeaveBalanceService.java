@@ -110,6 +110,28 @@ public class LeaveBalanceService {
         return toResponse(entity, user, type);
     }
 
+    /**
+     * Apply a delta to {@code used_days} for one user-type-year (positive = consume on
+     * approval, negative = restore on cancellation). Guards against negative used days and
+     * against remaining dropping below zero. Used by the leave-request approval workflow.
+     */
+    @Transactional
+    public void applyUsedDelta(Long userId, Long leaveTypeId, int year, BigDecimal delta) {
+        LeaveBalanceEntity entity = balanceRepository
+                .findByUserIdAndLeaveTypeIdAndYear(userId, leaveTypeId, year)
+                .orElseThrow(() -> new ApiException(ErrorCode.INSUFFICIENT_BALANCE,
+                        "no leave balance for user %d type %d year %d".formatted(userId, leaveTypeId, year)));
+        BigDecimal newUsed = entity.getUsedDays().add(delta);
+        if (newUsed.signum() < 0) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "used days cannot drop below zero");
+        }
+        if (entity.getTotalDays().add(entity.getAdjustedDays()).subtract(newUsed).signum() < 0) {
+            throw new ApiException(ErrorCode.INSUFFICIENT_BALANCE,
+                    "insufficient balance to consume %s days".formatted(delta));
+        }
+        entity.setUsedDays(newUsed);
+    }
+
     @Transactional(readOnly = true)
     public List<LeaveBalanceResponse> findByUser(Long userId, int year) {
         UserEntity user = requireUser(userId);
