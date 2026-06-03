@@ -7,6 +7,12 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added — Week 3 Part 1: Holiday lookup + working-day calculator
+- `holiday/` package: `HolidayEntity` (map `holidays`), `HolidayRepository.findByHolidayDateBetweenOrderByHolidayDateAsc`, `HolidayService` (`listByYear`, `holidayDatesBetween` — dùng lại cho tính ngày nghỉ), `HolidayController` `GET /api/holidays?year=` (mọi user authenticated; mặc định năm hiện tại).
+- `leaverequest/domain/`: enum `LeaveHalf` (FULL_DAY/MORNING/AFTERNOON), `LeaveStatus` (PENDING/APPROVED/REJECTED/CANCELLED) khớp CHECK constraint của `leave_requests`.
+- `LeaveDayCalculator` (component thuần, không phụ thuộc Spring/DB): `calculate(start, end, startHalf, endHalf, Set<holidayDates>)` → số ngày tính phí, loại Thứ 7/CN + ngày lễ, hỗ trợ nửa ngày ở biên; trả về bội số 0.5, `0.0` nếu khoảng rơi hết vào cuối tuần/lễ.
+- Tests: `LeaveDayCalculatorTest` (12, JUnit thuần — tuần đủ, bắc cầu cuối tuần, trùng lễ, nửa ngày đầu/cuối, một ngày nửa buổi, toàn cuối tuần, biên rơi cuối tuần, end<start), `HolidayRepositoryTest` (2, `@SpringBootTest` — đọc 10 ngày lễ seed 2026). 14 mới, tổng 92.
+
 ### Fixed
 - CORS preflight (`OPTIONS`) bị Spring Security trả 401 → trình duyệt block các request có header `Authorization` (vd `GET /auth/me`), khiến FE login báo "Đăng nhập thất bại" dù backend OK. Đổi `CorsConfig` expose `CorsConfigurationSource` bean (thay vì standalone `CorsFilter` chạy sau security chain) + bật `http.cors()` trong `SecurityConfig`. `MockMvc`/`TestRestTemplate` không mô phỏng preflight nên 78 test vẫn xanh — chỉ lộ khi chạy trên browser.
 
