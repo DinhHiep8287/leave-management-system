@@ -45,6 +45,7 @@ Tài liệu hướng dẫn cho Claude Code khi làm việc trong repo này.
 - Component: PascalCase. Hook: `useXxx`. File: kebab-case hoặc PascalCase theo loại.
 - Mọi API call đi qua TanStack Query, không gọi axios trực tiếp trong component.
 - Form bắt buộc validate qua Zod schema.
+- **Thiết kế UI theo `docs/UI-GUIDELINES.md`**: font Be Vietnam Pro, accent teal, text-led (icon tối thiểu), không "AI tells" (không Inter/tím-AI/em-dash/emoji). Áp dụng khi build mọi màn hình FE.
 
 ### Commit
 - **Conventional Commits**: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`, `ci:`.
