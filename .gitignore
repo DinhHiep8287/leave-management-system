@@ -36,6 +36,9 @@ dist-ssr/
 .cache/
 coverage/
 *.tsbuildinfo
+# tsc -b emits these from vite.config.ts (composite project) — build artifacts, not source
+frontend/vite.config.js
+frontend/vite.config.d.ts
 
 # ===== IDE =====
 # IntelliJ
