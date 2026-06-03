@@ -41,4 +41,39 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequestEntity
     Page<LeaveRequestEntity> findByStatusOrderByStartDateAsc(LeaveStatus status, Pageable pageable);
 
     Page<LeaveRequestEntity> findAllByOrderByStartDateAsc(Pageable pageable);
+
+    /** Calendar: requests for the given users whose date range overlaps [from, to]. */
+    @Query("""
+            SELECT r FROM LeaveRequestEntity r
+            WHERE r.userId IN :userIds
+              AND r.status IN :statuses
+              AND r.startDate <= :to
+              AND r.endDate >= :from
+            ORDER BY r.startDate ASC
+            """)
+    List<LeaveRequestEntity> findOverlappingForUsers(
+            @Param("userIds") Collection<Long> userIds,
+            @Param("statuses") Collection<LeaveStatus> statuses,
+            @Param("from") LocalDate from,
+            @Param("to") LocalDate to);
+
+    /** Calendar (privileged, all users): requests whose date range overlaps [from, to]. */
+    @Query("""
+            SELECT r FROM LeaveRequestEntity r
+            WHERE r.status IN :statuses
+              AND r.startDate <= :to
+              AND r.endDate >= :from
+            ORDER BY r.startDate ASC
+            """)
+    List<LeaveRequestEntity> findOverlapping(
+            @Param("statuses") Collection<LeaveStatus> statuses,
+            @Param("from") LocalDate from,
+            @Param("to") LocalDate to);
+
+    // Dashboard counters.
+    long countByStatus(LeaveStatus status);
+
+    long countByManagerIdAndStatus(Long managerId, LeaveStatus status);
+
+    long countByUserIdAndStatus(Long userId, LeaveStatus status);
 }

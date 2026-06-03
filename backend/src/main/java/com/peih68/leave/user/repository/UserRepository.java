@@ -2,6 +2,7 @@ package com.peih68.leave.user.repository;
 
 import com.peih68.leave.user.domain.Role;
 import com.peih68.leave.user.domain.UserEntity;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,4 +34,10 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             @Param("role") Role role,
             @Param("activeOnly") boolean activeOnly,
             Pageable pageable);
+
+    /** Active members of a department (calendar/report scoping). */
+    List<UserEntity> findByDepartmentIdAndIsActiveTrue(Long departmentId);
+
+    /** A manager's active direct reports (approver-scope calendar). */
+    List<UserEntity> findByManagerIdAndIsActiveTrue(Long managerId);
 }
