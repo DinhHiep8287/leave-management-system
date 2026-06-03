@@ -7,6 +7,14 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added — Week 3 Part 2: LeaveRequest submit + list + detail
+- `leaverequest/` package: `LeaveRequestEntity` (map `leave_requests`), `LeaveRequestRepository` (overlap query `existsOverlap`, inbox queries theo manager/status, list theo user + khoảng start_date), DTOs `LeaveRequestCreateRequest`/`LeaveRequestResponse`.
+- `ApprovalActionEntity` + `ApprovalAction` enum + `ApprovalActionRepository` — bảng `approval_actions` chỉ có `created_at` nên KHÔNG extend `BaseEntity` (dùng `@CreatedDate` + `AuditingEntityListener`). Tạo sớm ở Part 2 vì `submit` ghi action `CREATED`; Part 3 sẽ thêm APPROVED/REJECTED/CANCELLED.
+- `LeaveRequestService.submit`: tính `total_days` qua `LeaveDayCalculator` + holidays trong khoảng; chặn end<start, đơn một-ngày nửa-buổi lệch half, khoảng toàn cuối tuần/lễ (→ `VALIDATION_ERROR`), thiếu manager (→ `VALIDATION_ERROR`), chồng lấn đơn PENDING/APPROVED (→ `CONFLICT`), soft-check số dư nếu `requiresBalance` (→ `INSUFFICIENT_BALANCE`); lưu `status=PENDING` + ghi `approval_actions` CREATED. Thêm `findById`, `listByUser`, `listForApprover` (MANAGER thấy team mình; HR/ADMIN thấy tất cả).
+- `LeaveRequestController`: `POST /api/leave-requests` (tự nộp), `GET /api/leave-requests/{id}` (requester|manager|HR/ADMIN qua `@leaveRequestSecurity.isParticipant`), `GET /api/users/{id}/leave-requests?year=&status=` (self|HR/ADMIN), `GET /api/leave-requests?status=` (inbox, paged). `LeaveRequestSecurity` bean cho SpEL (`isRequester`/`isManagerOf`/`isParticipant`).
+- `common/exception/ErrorCode`: thêm `INSUFFICIENT_BALANCE` (409).
+- Tests: `LeaveRequestRepositoryTest` (4 — overlap detect/ignore-terminal, date window, manager+status), `LeaveRequestControllerTest` `@WebMvcTest` (8 — RBAC submit/detail/list/inbox; `@MockBean(name="leaveRequestSecurity")` để SpEL bean resolve), `LeaveRequestServiceTest` (5 — tính ngày+managerId+CREATED, thiếu manager, chồng lấn, thiếu số dư, toàn cuối tuần). 17 mới, tổng 109.
+
 ### Added — Week 3 Part 1: Holiday lookup + working-day calculator
 - `holiday/` package: `HolidayEntity` (map `holidays`), `HolidayRepository.findByHolidayDateBetweenOrderByHolidayDateAsc`, `HolidayService` (`listByYear`, `holidayDatesBetween` — dùng lại cho tính ngày nghỉ), `HolidayController` `GET /api/holidays?year=` (mọi user authenticated; mặc định năm hiện tại).
 - `leaverequest/domain/`: enum `LeaveHalf` (FULL_DAY/MORNING/AFTERNOON), `LeaveStatus` (PENDING/APPROVED/REJECTED/CANCELLED) khớp CHECK constraint của `leave_requests`.
