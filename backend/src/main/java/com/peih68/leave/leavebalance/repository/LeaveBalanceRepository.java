@@ -12,4 +12,7 @@ public interface LeaveBalanceRepository extends JpaRepository<LeaveBalanceEntity
     boolean existsByUserIdAndLeaveTypeIdAndYear(Long userId, Long leaveTypeId, Integer year);
 
     List<LeaveBalanceEntity> findByUserIdAndYearOrderByLeaveTypeId(Long userId, Integer year);
+
+    /** All balances for a year, for the CSV report. */
+    List<LeaveBalanceEntity> findByYearOrderByUserIdAscLeaveTypeIdAsc(Integer year);
 }
