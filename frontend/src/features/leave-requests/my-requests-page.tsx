@@ -23,6 +23,11 @@ const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = [CURRENT_YEAR, CURRENT_YEAR - 1];
 const STATUSES: LeaveStatus[] = ["PENDING", "APPROVED", "REJECTED", "CANCELLED"];
 
+// The requester may cancel a PENDING request, or an APPROVED one before it starts (§5.5).
+function canRequesterCancel(status: LeaveStatus, startDate: string, todayIso: string): boolean {
+  return status === "PENDING" || (status === "APPROVED" && startDate > todayIso);
+}
+
 export function MyRequestsPage() {
   const { user } = useAuth();
   const [year, setYear] = useState<number | undefined>(CURRENT_YEAR);
@@ -32,6 +37,7 @@ export function MyRequestsPage() {
 
   const { data: requests, isLoading } = useMyRequests(user?.id, year, status);
   const cancel = useCancelRequest();
+  const todayIso = new Date().toISOString().slice(0, 10);
 
   return (
     <div className="space-y-6">
@@ -115,7 +121,7 @@ export function MyRequestsPage() {
                     <Button variant="ghost" size="sm" onClick={() => setDetailId(r.id)}>
                       Xem
                     </Button>
-                    {r.status === "PENDING" && (
+                    {canRequesterCancel(r.status, r.startDate, todayIso) && (
                       <Button variant="outline" size="sm" onClick={() => setCancelId(r.id)}>
                         Hủy
                       </Button>
@@ -136,7 +142,8 @@ export function MyRequestsPage() {
             <DialogTitle>Hủy đơn nghỉ phép?</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            Đơn đang chờ duyệt sẽ bị hủy. Hành động này không thể hoàn tác.
+            Đơn sẽ bị hủy. Nếu đơn đã được duyệt, số ngày phép sẽ được hoàn lại. Hành động này
+            không thể hoàn tác.
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCancelId(null)}>

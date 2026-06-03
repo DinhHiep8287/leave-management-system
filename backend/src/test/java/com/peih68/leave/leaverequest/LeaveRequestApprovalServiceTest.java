@@ -9,8 +9,10 @@ import com.peih68.leave.common.exception.ErrorCode;
 import com.peih68.leave.leavebalance.domain.LeaveBalanceEntity;
 import com.peih68.leave.leavebalance.repository.LeaveBalanceRepository;
 import com.peih68.leave.leaverequest.domain.LeaveHalf;
+import com.peih68.leave.leaverequest.domain.LeaveRequestEntity;
 import com.peih68.leave.leaverequest.domain.LeaveStatus;
 import com.peih68.leave.leaverequest.repository.ApprovalActionRepository;
+import com.peih68.leave.leaverequest.repository.LeaveRequestRepository;
 import com.peih68.leave.leaverequest.service.LeaveRequestService;
 import com.peih68.leave.leaverequest.web.dto.ApprovalDecisionRequest;
 import com.peih68.leave.leaverequest.web.dto.LeaveRequestCreateRequest;
@@ -43,6 +45,7 @@ class LeaveRequestApprovalServiceTest {
     @Autowired LeaveTypeRepository leaveTypeRepository;
     @Autowired LeaveBalanceRepository balanceRepository;
     @Autowired ApprovalActionRepository approvalActionRepository;
+    @Autowired LeaveRequestRepository requestRepository;
     @Autowired JdbcTemplate jdbc;
 
     private UserEntity employee;
@@ -129,11 +132,28 @@ class LeaveRequestApprovalServiceTest {
     }
 
     @Test
-    void requesterCannotCancelApproved() {
+    void requesterCanCancelApprovedBeforeStart() {
+        // MON (2026-07-06) is in the future, so the requester may cancel and gets balance back.
         Long id = submit();
         service.approve(id, new ApprovalDecisionRequest("ok"), managerPrincipal);
+        assertThat(usedDays()).isEqualByComparingTo("5.0");
 
-        assertThatThrownBy(() -> service.cancel(id, null, UserPrincipal.from(employee)))
+        LeaveRequestResponse resp = service.cancel(id, null, UserPrincipal.from(employee));
+        assertThat(resp.status()).isEqualTo(LeaveStatus.CANCELLED);
+        assertThat(usedDays()).isEqualByComparingTo("0.0");
+    }
+
+    @Test
+    void requesterCannotCancelApprovedAfterStart() {
+        // An approved leave whose start date is already in the past: only manager/HR/ADMIN may cancel.
+        LeaveRequestEntity past = requestRepository.save(LeaveRequestEntity.builder()
+                .userId(employee.getId()).leaveTypeId(typeId)
+                .startDate(LocalDate.of(2026, 1, 5)).endDate(LocalDate.of(2026, 1, 9))
+                .startHalf(LeaveHalf.FULL_DAY).endHalf(LeaveHalf.FULL_DAY)
+                .totalDays(new BigDecimal("5.0")).reason("past").status(LeaveStatus.APPROVED)
+                .managerId(employee.getManagerId()).build());
+
+        assertThatThrownBy(() -> service.cancel(past.getId(), null, UserPrincipal.from(employee)))
                 .isInstanceOf(ApiException.class)
                 .satisfies(e -> assertThat(((ApiException) e).getCode()).isEqualTo(ErrorCode.FORBIDDEN));
     }

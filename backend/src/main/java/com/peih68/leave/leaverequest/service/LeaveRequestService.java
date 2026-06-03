@@ -181,13 +181,23 @@ public class LeaveRequestService {
         LeaveRequestEntity r = requireRequest(id);
         boolean privileged = actor.getRole() == Role.ADMIN || actor.getRole() == Role.HR
                 || actor.getId().equals(r.getManagerId());
+        boolean requester = actor.getId().equals(r.getUserId());
 
         switch (r.getStatus()) {
             case PENDING -> { /* requester or privileged (already checked at the controller) */ }
             case APPROVED -> {
+                // Requirements §5.5: the requester may cancel an approved request only before
+                // it starts; the manager/HR/ADMIN may always cancel (override). Cancelling
+                // restores the consumed balance.
                 if (!privileged) {
-                    throw new ApiException(ErrorCode.FORBIDDEN,
-                            "only the manager or HR/ADMIN can cancel an approved request");
+                    if (!requester) {
+                        throw new ApiException(ErrorCode.FORBIDDEN, "you cannot cancel this request");
+                    }
+                    if (!LocalDate.now().isBefore(r.getStartDate())) {
+                        throw new ApiException(ErrorCode.FORBIDDEN,
+                                "an approved leave can only be cancelled by you before it starts;"
+                                        + " ask your manager or HR");
+                    }
                 }
                 consumeBalanceIfNeeded(r, r.getTotalDays().negate());
             }
