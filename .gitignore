@@ -105,3 +105,8 @@ playwright-report/
 *.swo
 *~
 .history/
+
+# ===== Claude Code skills (Windows junctions to .agents/skills) =====
+# Auto-load convenience only; the real skills live in .agents/skills/.
+# Junctions don't track cleanly in git on Windows — recreate locally if needed.
+.claude/skills/
