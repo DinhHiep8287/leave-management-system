@@ -10,12 +10,13 @@ const ALL = () => true;
 const APPROVER = (role: string) => role === "MANAGER" || role === "HR" || role === "ADMIN";
 
 // Text-led navigation per docs/UI-GUIDELINES.md (no decorative icons).
-// Calendar (Part 5) and Reports (Part 6) are added with their routes.
+// Reports (Part 6) is added with its route.
 const NAV: NavItem[] = [
   { to: "/", label: "Tổng quan", show: ALL },
   { to: "/leave-requests/new", label: "Nộp đơn", show: ALL },
   { to: "/leave-requests", label: "Đơn của tôi", show: ALL },
   { to: "/approvals", label: "Cần duyệt", show: APPROVER },
+  { to: "/calendar", label: "Lịch nghỉ phép", show: ALL },
 ];
 
 export function AppLayout() {
