@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface HolidayRepository extends JpaRepository<HolidayEntity, Long> {
 
     List<HolidayEntity> findByHolidayDateBetweenOrderByHolidayDateAsc(LocalDate from, LocalDate to);
+
+    boolean existsByHolidayDate(LocalDate holidayDate);
 }
