@@ -17,7 +17,9 @@ replay_pid*
 # Gradle
 .gradle/
 build/
-!gradle/wrapper/gradle-wrapper.jar
+# Keep the Gradle wrapper jar at any depth (needed for ./gradlew on fresh clones / CI).
+# A root-anchored "!gradle/wrapper/..." does NOT match backend/gradle/wrapper/...
+!**/gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
 
