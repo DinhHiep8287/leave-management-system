@@ -27,6 +27,22 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequestEntity
             @Param("start") LocalDate start,
             @Param("end") LocalDate end);
 
+    /** Like {@link #existsOverlap} but ignores one request (used when editing it). */
+    @Query("""
+            SELECT COUNT(r) > 0 FROM LeaveRequestEntity r
+            WHERE r.userId = :userId
+              AND r.status IN :statuses
+              AND r.startDate <= :end
+              AND r.endDate >= :start
+              AND r.id <> :excludeId
+            """)
+    boolean existsOverlapExcluding(
+            @Param("userId") Long userId,
+            @Param("statuses") Collection<LeaveStatus> statuses,
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end,
+            @Param("excludeId") Long excludeId);
+
     /** A single user's requests whose start date falls within [from, to], newest first.
      * Status filtering is applied in the service (the list per user is small). */
     List<LeaveRequestEntity> findByUserIdAndStartDateBetweenOrderByStartDateDesc(

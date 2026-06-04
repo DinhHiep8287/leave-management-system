@@ -10,6 +10,7 @@ import {
   getMyRequests,
   listLeaveTypes,
   submitLeaveRequest,
+  updateRequest,
 } from "./api";
 import type { LeaveRequestCreateRequest, LeaveStatus } from "./types";
 
@@ -55,6 +56,21 @@ export function useSubmitLeaveRequest() {
       toast.success("Đã nộp đơn nghỉ phép");
     },
     onError: (e) => toast.error(apiErrorMessage(e, "Nộp đơn thất bại")),
+  });
+}
+
+export function useUpdateRequest() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, body }: { id: number; body: LeaveRequestCreateRequest }) =>
+      updateRequest(id, body),
+    onSuccess: (updated) => {
+      void qc.invalidateQueries({ queryKey: ["my-requests"] });
+      void qc.invalidateQueries({ queryKey: ["leave-request", updated.id] });
+      void qc.invalidateQueries({ queryKey: ["dashboard"] });
+      toast.success("Đã cập nhật đơn");
+    },
+    onError: (e) => toast.error(apiErrorMessage(e, "Cập nhật đơn thất bại")),
   });
 }
 

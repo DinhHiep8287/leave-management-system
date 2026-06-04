@@ -6,6 +6,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.peih68.leave.auth.service.JwtService;
@@ -47,6 +48,23 @@ class LeaveRequestControllerTest {
         mvc.perform(post("/leave-requests").with(csrf())
                         .contentType("application/json").content(VALID_BODY))
                 .andExpect(status().isCreated());
+    }
+
+    @Test
+    @WithMockPrincipal(id = 7L, role = Role.EMPLOYEE)
+    void requester_canEditOwnRequest() throws Exception {
+        given(leaveRequestSecurity.isRequester(eq(5L), eq(7L))).willReturn(true);
+        given(leaveRequestService.update(eq(5L), any(), any())).willReturn(null);
+        mvc.perform(put("/leave-requests/5").with(csrf()).contentType("application/json").content(VALID_BODY))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockPrincipal(id = 7L, role = Role.EMPLOYEE)
+    void nonRequester_cannotEditRequest() throws Exception {
+        // leaveRequestSecurity.isRequester defaults to false → 403
+        mvc.perform(put("/leave-requests/5").with(csrf()).contentType("application/json").content(VALID_BODY))
+                .andExpect(status().isForbidden());
     }
 
     @Test

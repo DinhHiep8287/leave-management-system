@@ -115,6 +115,63 @@ public class LeaveRequestService {
         return toResponse(entity);
     }
 
+    /** The requester edits their own PENDING request. Days are recomputed and re-validated. */
+    @Transactional
+    public LeaveRequestResponse update(Long id, LeaveRequestCreateRequest req, UserPrincipal principal) {
+        LeaveRequestEntity r = requireRequest(id);
+        if (!r.getUserId().equals(principal.getId())) {
+            throw new ApiException(ErrorCode.FORBIDDEN, "you can only edit your own request");
+        }
+        requireStatus(r, LeaveStatus.PENDING);
+        LeaveTypeEntity type = requireActiveLeaveType(req.leaveTypeId());
+
+        if (req.endDate().isBefore(req.startDate())) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "endDate must not be before startDate");
+        }
+        if (req.startDate().equals(req.endDate()) && req.startHalf() != req.endHalf()) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR,
+                    "single-day request must use the same start and end half");
+        }
+
+        Set<LocalDate> holidays = holidayService.holidayDatesBetween(req.startDate(), req.endDate());
+        BigDecimal totalDays =
+                dayCalculator.calculate(req.startDate(), req.endDate(), req.startHalf(), req.endHalf(), holidays);
+        if (totalDays.signum() <= 0) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR,
+                    "leave range contains no working days (all weekend/holiday)");
+        }
+
+        if (requestRepository.existsOverlapExcluding(
+                r.getUserId(), ACTIVE_STATUSES, req.startDate(), req.endDate(), r.getId())) {
+            throw new ApiException(ErrorCode.CONFLICT,
+                    "you already have a pending or approved request overlapping these dates");
+        }
+
+        if (Boolean.TRUE.equals(type.getRequiresBalance())) {
+            BigDecimal remaining = balanceRepository
+                    .findByUserIdAndLeaveTypeIdAndYear(r.getUserId(), type.getId(), req.startDate().getYear())
+                    .map(LeaveBalanceEntity::remaining)
+                    .orElse(BigDecimal.ZERO);
+            if (remaining.compareTo(totalDays) < 0) {
+                throw new ApiException(ErrorCode.INSUFFICIENT_BALANCE,
+                        "remaining balance %s is less than requested %s".formatted(remaining, totalDays));
+            }
+        }
+
+        r.setLeaveTypeId(type.getId());
+        r.setStartDate(req.startDate());
+        r.setEndDate(req.endDate());
+        r.setStartHalf(req.startHalf());
+        r.setEndHalf(req.endHalf());
+        r.setTotalDays(totalDays);
+        r.setReason(req.reason());
+
+        recordAction(r.getId(), principal.getId(), ApprovalAction.UPDATED,
+                LeaveStatus.PENDING, LeaveStatus.PENDING, null);
+        log.info("user {} edited leave request {} ({} days)", principal.getId(), r.getId(), totalDays);
+        return toResponse(r);
+    }
+
     @Transactional(readOnly = true)
     public LeaveRequestResponse findById(Long id) {
         return toResponse(requireRequest(id));

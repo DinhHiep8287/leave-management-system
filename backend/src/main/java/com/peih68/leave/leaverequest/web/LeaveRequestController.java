@@ -21,6 +21,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -39,6 +40,16 @@ public class LeaveRequestController {
             @Valid @RequestBody LeaveRequestCreateRequest req,
             @AuthenticationPrincipal UserPrincipal principal) {
         return ApiResponse.ok(leaveRequestService.submit(req, principal));
+    }
+
+    /** Edit a PENDING request — requester only. Days are recomputed server-side. */
+    @PutMapping("/leave-requests/{id}")
+    @PreAuthorize("@leaveRequestSecurity.isRequester(#id, principal.id)")
+    public ApiResponse<LeaveRequestResponse> update(
+            @PathVariable Long id,
+            @Valid @RequestBody LeaveRequestCreateRequest req,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        return ApiResponse.ok(leaveRequestService.update(id, req, principal));
     }
 
     /** Detail — requester, the assigned manager, or HR/ADMIN. */

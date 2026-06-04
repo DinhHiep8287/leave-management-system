@@ -8,6 +8,7 @@ import com.peih68.leave.common.exception.ApiException;
 import com.peih68.leave.common.exception.ErrorCode;
 import com.peih68.leave.leavebalance.domain.LeaveBalanceEntity;
 import com.peih68.leave.leavebalance.repository.LeaveBalanceRepository;
+import com.peih68.leave.leaverequest.domain.ApprovalAction;
 import com.peih68.leave.leaverequest.domain.LeaveHalf;
 import com.peih68.leave.leaverequest.domain.LeaveRequestEntity;
 import com.peih68.leave.leaverequest.domain.LeaveStatus;
@@ -171,6 +172,34 @@ class LeaveRequestApprovalServiceTest {
         Long id = submit();
         service.reject(id, new ApprovalDecisionRequest("no"), managerPrincipal);
         assertThatThrownBy(() -> service.approve(id, new ApprovalDecisionRequest("ok"), managerPrincipal))
+                .isInstanceOf(ApiException.class)
+                .satisfies(e -> assertThat(((ApiException) e).getCode()).isEqualTo(ErrorCode.CONFLICT));
+    }
+
+    @Test
+    void editRecomputesDaysOnPending() {
+        Long id = submit(); // MON..FRI = 5 days
+        LeaveRequestResponse r = service.update(
+                id,
+                new LeaveRequestCreateRequest(
+                        typeId, MON, LocalDate.of(2026, 7, 8), LeaveHalf.FULL_DAY, LeaveHalf.FULL_DAY, "edited"),
+                UserPrincipal.from(employee));
+        assertThat(r.totalDays()).isEqualByComparingTo("3.0"); // MON..WED
+        assertThat(r.reason()).isEqualTo("edited");
+        assertThat(approvalActionRepository.findByLeaveRequestIdOrderByCreatedAtAsc(id))
+                .extracting(a -> a.getAction())
+                .contains(ApprovalAction.UPDATED);
+    }
+
+    @Test
+    void editNonPendingIsConflict() {
+        Long id = submit();
+        service.approve(id, new ApprovalDecisionRequest("ok"), managerPrincipal);
+        assertThatThrownBy(() -> service.update(
+                        id,
+                        new LeaveRequestCreateRequest(
+                                typeId, MON, FRI, LeaveHalf.FULL_DAY, LeaveHalf.FULL_DAY, "x"),
+                        UserPrincipal.from(employee)))
                 .isInstanceOf(ApiException.class)
                 .satisfies(e -> assertThat(((ApiException) e).getCode()).isEqualTo(ErrorCode.CONFLICT));
     }

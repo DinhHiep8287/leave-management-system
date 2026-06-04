@@ -15,9 +15,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useAuth } from "@/features/auth/auth-context";
 import { formatDate } from "@/lib/format";
 
+import { EditRequestDialog } from "./edit-dialog";
 import { useCancelRequest, useMyRequests } from "./hooks";
 import { RequestDetailDialog } from "./request-detail-dialog";
-import { STATUS_LABELS, type LeaveStatus } from "./types";
+import { STATUS_LABELS, type LeaveRequestResponse, type LeaveStatus } from "./types";
 
 const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = [CURRENT_YEAR, CURRENT_YEAR - 1];
@@ -34,6 +35,7 @@ export function MyRequestsPage() {
   const [status, setStatus] = useState<LeaveStatus | undefined>(undefined);
   const [detailId, setDetailId] = useState<number | null>(null);
   const [cancelId, setCancelId] = useState<number | null>(null);
+  const [editRequest, setEditRequest] = useState<LeaveRequestResponse | null>(null);
 
   const { data: requests, isLoading } = useMyRequests(user?.id, year, status);
   const cancel = useCancelRequest();
@@ -121,6 +123,11 @@ export function MyRequestsPage() {
                     <Button variant="ghost" size="sm" onClick={() => setDetailId(r.id)}>
                       Xem
                     </Button>
+                    {r.status === "PENDING" && (
+                      <Button variant="ghost" size="sm" onClick={() => setEditRequest(r)}>
+                        Sửa
+                      </Button>
+                    )}
                     {canRequesterCancel(r.status, r.startDate, todayIso) && (
                       <Button variant="outline" size="sm" onClick={() => setCancelId(r.id)}>
                         Hủy
@@ -135,6 +142,7 @@ export function MyRequestsPage() {
       </div>
 
       <RequestDetailDialog requestId={detailId} onClose={() => setDetailId(null)} />
+      <EditRequestDialog request={editRequest} onClose={() => setEditRequest(null)} />
 
       <Dialog open={cancelId != null} onOpenChange={(o) => !o && setCancelId(null)}>
         <DialogContent className="max-w-sm">

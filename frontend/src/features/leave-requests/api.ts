@@ -22,6 +22,14 @@ export async function submitLeaveRequest(
   return res.data.data;
 }
 
+export async function updateRequest(
+  id: number,
+  body: LeaveRequestCreateRequest,
+): Promise<LeaveRequestResponse> {
+  const res = await api.put<Envelope<LeaveRequestResponse>>(`/leave-requests/${id}`, body);
+  return res.data.data;
+}
+
 export async function getMyRequests(
   userId: number,
   year?: number,
