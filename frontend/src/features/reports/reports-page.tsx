@@ -8,9 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { STATUS_LABELS, type LeaveStatus } from "@/features/leave-requests/types";
+import { useDepartmentOptions } from "@/features/users/hooks";
 import { saveBlob } from "@/lib/download";
 
-import { downloadLeaveBalancesCsv, downloadLeaveRequestsCsv } from "./api";
+import { downloadLeaveBalancesCsv, downloadLeaveRequestsCsv, downloadLeaveSummaryCsv } from "./api";
 
 const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = [CURRENT_YEAR, CURRENT_YEAR - 1];
@@ -20,10 +21,15 @@ export function ReportsPage() {
   const [from, setFrom] = useState(`${CURRENT_YEAR}-01-01`);
   const [to, setTo] = useState(`${CURRENT_YEAR}-12-31`);
   const [status, setStatus] = useState<LeaveStatus | undefined>(undefined);
+  const [departmentId, setDepartmentId] = useState<number | undefined>(undefined);
   const [year, setYear] = useState(CURRENT_YEAR);
+  const [summaryYear, setSummaryYear] = useState(CURRENT_YEAR);
+  const [groupBy, setGroupBy] = useState<"month" | "quarter">("month");
+
+  const { data: depts } = useDepartmentOptions();
 
   const requestsCsv = useMutation({
-    mutationFn: () => downloadLeaveRequestsCsv(from, to, status),
+    mutationFn: () => downloadLeaveRequestsCsv(from, to, status, departmentId),
     onSuccess: (blob) => saveBlob(blob, `leave-requests_${from}_${to}.csv`),
     onError: () => toast.error("Tải báo cáo thất bại"),
   });
@@ -31,6 +37,12 @@ export function ReportsPage() {
   const balancesCsv = useMutation({
     mutationFn: () => downloadLeaveBalancesCsv(year),
     onSuccess: (blob) => saveBlob(blob, `leave-balances_${year}.csv`),
+    onError: () => toast.error("Tải báo cáo thất bại"),
+  });
+
+  const summaryCsv = useMutation({
+    mutationFn: () => downloadLeaveSummaryCsv(summaryYear, groupBy),
+    onSuccess: (blob) => saveBlob(blob, `leave-summary_${summaryYear}_${groupBy}.csv`),
     onError: () => toast.error("Tải báo cáo thất bại"),
   });
 
@@ -73,6 +85,21 @@ export function ReportsPage() {
                 ))}
               </Select>
             </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="dept">Phòng ban</Label>
+              <Select
+                id="dept"
+                value={departmentId ?? ""}
+                onChange={(e) => setDepartmentId(e.target.value ? Number(e.target.value) : undefined)}
+              >
+                <option value="">Mọi phòng ban</option>
+                {depts?.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </Select>
+            </div>
             <Button disabled={requestsCsv.isPending} onClick={() => requestsCsv.mutate()}>
               {requestsCsv.isPending ? "Đang tạo…" : "Tải CSV đơn nghỉ"}
             </Button>
@@ -97,6 +124,45 @@ export function ReportsPage() {
             </div>
             <Button disabled={balancesCsv.isPending} onClick={() => balancesCsv.mutate()}>
               {balancesCsv.isPending ? "Đang tạo…" : "Tải CSV quỹ phép"}
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Tổng hợp theo loại</CardTitle>
+            <CardDescription>Tổng số ngày đã duyệt theo loại nghỉ, theo tháng hoặc quý.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="summary-year">Năm</Label>
+                <Select
+                  id="summary-year"
+                  value={summaryYear}
+                  onChange={(e) => setSummaryYear(Number(e.target.value))}
+                >
+                  {YEARS.map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="groupBy">Nhóm theo</Label>
+                <Select
+                  id="groupBy"
+                  value={groupBy}
+                  onChange={(e) => setGroupBy(e.target.value as "month" | "quarter")}
+                >
+                  <option value="month">Tháng</option>
+                  <option value="quarter">Quý</option>
+                </Select>
+              </div>
+            </div>
+            <Button disabled={summaryCsv.isPending} onClick={() => summaryCsv.mutate()}>
+              {summaryCsv.isPending ? "Đang tạo…" : "Tải CSV tổng hợp"}
             </Button>
           </CardContent>
         </Card>

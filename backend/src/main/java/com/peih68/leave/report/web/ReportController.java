@@ -31,10 +31,22 @@ public class ReportController {
     public ResponseEntity<String> leaveRequests(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
-            @RequestParam(required = false) LeaveStatus status) {
-        String csv = reportService.leaveRequestsCsv(from, to, status);
+            @RequestParam(required = false) LeaveStatus status,
+            @RequestParam(required = false) Long departmentId) {
+        String csv = reportService.leaveRequestsCsv(from, to, status, departmentId);
         String filename = "leave-requests_%s_%s.csv".formatted(from, to);
         return csvResponse(csv, filename);
+    }
+
+    /** Total approved days per month/quarter and leave type for a year (REQUIREMENTS §11). */
+    @GetMapping(value = "/leave-summary.csv", produces = "text/csv")
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
+    public ResponseEntity<String> leaveSummary(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(name = "groupBy", defaultValue = "month") String groupBy) {
+        int target = year != null ? year : Year.now().getValue();
+        String csv = reportService.leaveSummaryCsv(target, groupBy);
+        return csvResponse(csv, "leave-summary_%d_%s.csv".formatted(target, groupBy));
     }
 
     @GetMapping(value = "/leave-balances.csv", produces = "text/csv")

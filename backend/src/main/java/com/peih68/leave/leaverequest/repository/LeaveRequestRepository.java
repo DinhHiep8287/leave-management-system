@@ -102,6 +102,10 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequestEntity
             @Param("from") LocalDate from,
             @Param("to") LocalDate to);
 
+    /** Report: requests of a status whose start date falls within [from, to]. */
+    List<LeaveRequestEntity> findByStatusAndStartDateBetween(
+            LeaveStatus status, LocalDate from, LocalDate to);
+
     // Dashboard counters.
     long countByStatus(LeaveStatus status);
 

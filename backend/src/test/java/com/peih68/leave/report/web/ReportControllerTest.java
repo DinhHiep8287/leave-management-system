@@ -50,7 +50,7 @@ class ReportControllerTest {
     @Test
     @WithMockPrincipal(id = 1L, role = Role.HR)
     void hrCanDownloadRequestsAsCsvAttachment() throws Exception {
-        given(reportService.leaveRequestsCsv(any(), any(), any())).willReturn("\uFEFFid\r\n1\r\n");
+        given(reportService.leaveRequestsCsv(any(), any(), any(), any())).willReturn("\uFEFFid\r\n1\r\n");
         mvc.perform(get("/reports/leave-requests.csv?from=2026-01-01&to=2026-12-31"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/csv"))
@@ -64,5 +64,20 @@ class ReportControllerTest {
         mvc.perform(get("/reports/leave-balances.csv?year=2026"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/csv"));
+    }
+
+    @Test
+    @WithMockPrincipal(id = 1L, role = Role.HR)
+    void hrCanDownloadSummary() throws Exception {
+        given(reportService.leaveSummaryCsv(anyInt(), any())).willReturn("\uFEFFmonth\r\n");
+        mvc.perform(get("/reports/leave-summary.csv?year=2026&groupBy=month"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("text/csv"));
+    }
+
+    @Test
+    @WithMockPrincipal(id = 7L, role = Role.EMPLOYEE)
+    void employeeCannotDownloadSummary() throws Exception {
+        mvc.perform(get("/reports/leave-summary.csv?year=2026")).andExpect(status().isForbidden());
     }
 }

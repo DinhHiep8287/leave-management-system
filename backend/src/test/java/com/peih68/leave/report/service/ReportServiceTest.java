@@ -8,6 +8,8 @@ import com.peih68.leave.leaverequest.domain.LeaveHalf;
 import com.peih68.leave.leaverequest.domain.LeaveRequestEntity;
 import com.peih68.leave.leaverequest.domain.LeaveStatus;
 import com.peih68.leave.leaverequest.repository.LeaveRequestRepository;
+import com.peih68.leave.leavetype.domain.LeaveTypeEntity;
+import com.peih68.leave.leavetype.repository.LeaveTypeRepository;
 import com.peih68.leave.user.domain.Role;
 import com.peih68.leave.user.domain.UserEntity;
 import com.peih68.leave.user.repository.UserRepository;
@@ -33,6 +35,7 @@ class ReportServiceTest {
     @Autowired UserRepository userRepository;
     @Autowired LeaveRequestRepository requestRepository;
     @Autowired LeaveBalanceRepository balanceRepository;
+    @Autowired LeaveTypeRepository leaveTypeRepository;
     @Autowired JdbcTemplate jdbc;
 
     private Long typeId;
@@ -62,7 +65,7 @@ class ReportServiceTest {
                 .totalDays(new BigDecimal("3.0")).reason("trip").status(LeaveStatus.APPROVED)
                 .managerId(manager.getId()).build());
 
-        String csv = service.leaveRequestsCsv(FROM, TO, null);
+        String csv = service.leaveRequestsCsv(FROM, TO, null, null);
         String[] lines = csv.split("\r\n");
         assertThat(lines[0]).contains("employeeCode", "userFullName", "leaveTypeCode", "status");
         assertThat(csv).contains("RPT-E", "Rpt Emp", "UNPAID", "APPROVED", "Rpt Mgr");
@@ -79,8 +82,33 @@ class ReportServiceTest {
                 .totalDays(new BigDecimal("1.0")).reason("pending one").status(LeaveStatus.PENDING)
                 .managerId(manager.getId()).build());
 
-        String approvedOnly = service.leaveRequestsCsv(FROM, TO, LeaveStatus.APPROVED);
+        String approvedOnly = service.leaveRequestsCsv(FROM, TO, LeaveStatus.APPROVED, null);
         assertThat(approvedOnly).doesNotContain("pending one");
+    }
+
+    @Test
+    void leaveSummaryCsvAggregatesApprovedDaysByMonth() {
+        // Dedicated type so leftover data in the shared test DB can't skew the sum.
+        Long sumType = leaveTypeRepository.save(LeaveTypeEntity.builder()
+                .code("RPT-SUM").name("Sum").defaultQuotaDays(new BigDecimal("0.0"))
+                .requiresBalance(false).isActive(true).build()).getId();
+        requestRepository.save(LeaveRequestEntity.builder()
+                .userId(employee.getId()).leaveTypeId(sumType)
+                .startDate(LocalDate.of(2026, 9, 7)).endDate(LocalDate.of(2026, 9, 9))
+                .startHalf(LeaveHalf.FULL_DAY).endHalf(LeaveHalf.FULL_DAY)
+                .totalDays(new BigDecimal("3.0")).reason("a").status(LeaveStatus.APPROVED)
+                .managerId(manager.getId()).build());
+        requestRepository.save(LeaveRequestEntity.builder()
+                .userId(employee.getId()).leaveTypeId(sumType)
+                .startDate(LocalDate.of(2026, 9, 21)).endDate(LocalDate.of(2026, 9, 22))
+                .startHalf(LeaveHalf.FULL_DAY).endHalf(LeaveHalf.FULL_DAY)
+                .totalDays(new BigDecimal("2.0")).reason("b").status(LeaveStatus.APPROVED)
+                .managerId(manager.getId()).build());
+
+        String csv = service.leaveSummaryCsv(2026, "month");
+        assertThat(csv.split("\r\n")[0]).contains("month", "leaveTypeCode", "totalDays");
+        // September (09) RPT-SUM total = 3 + 2 = 5.0 on one row.
+        assertThat(csv).contains("09,RPT-SUM,5.0");
     }
 
     @Test
