@@ -35,6 +35,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             @Param("activeOnly") boolean activeOnly,
             Pageable pageable);
 
+    long countByIsActiveTrue();
+
     /** Active members of a department (calendar/report scoping). */
     List<UserEntity> findByDepartmentIdAndIsActiveTrue(Long departmentId);
 

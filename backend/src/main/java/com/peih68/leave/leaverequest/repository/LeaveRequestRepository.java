@@ -86,6 +86,22 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequestEntity
             @Param("from") LocalDate from,
             @Param("to") LocalDate to);
 
+    /** Dashboard: number of requests per department, for requests overlapping [from, to]
+     * with the given status. Returns rows of [departmentId, count], busiest first. */
+    @Query("""
+            SELECT u.departmentId, COUNT(r) FROM LeaveRequestEntity r, UserEntity u
+            WHERE u.id = r.userId
+              AND r.status = :status
+              AND r.startDate <= :to
+              AND r.endDate >= :from
+            GROUP BY u.departmentId
+            ORDER BY COUNT(r) DESC
+            """)
+    List<Object[]> countByDepartmentForStatusInRange(
+            @Param("status") LeaveStatus status,
+            @Param("from") LocalDate from,
+            @Param("to") LocalDate to);
+
     // Dashboard counters.
     long countByStatus(LeaveStatus status);
 

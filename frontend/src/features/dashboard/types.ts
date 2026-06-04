@@ -13,6 +13,21 @@ export type LeaveBalance = {
   remainingDays: number;
 };
 
+export type DepartmentLeaveCount = {
+  departmentId: number;
+  departmentName: string | null;
+  requestCount: number;
+};
+
+export type AdminSummary = {
+  totalActiveEmployees: number;
+  pendingCount: number;
+  approvedCount: number;
+  rejectedCount: number;
+  cancelledCount: number;
+  topDepartmentsThisMonth: DepartmentLeaveCount[];
+};
+
 export type DashboardSummary = {
   pendingApprovalCount: number;
   onLeaveTodayCount: number;

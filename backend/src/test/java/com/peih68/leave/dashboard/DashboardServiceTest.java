@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.peih68.leave.auth.domain.UserPrincipal;
 import com.peih68.leave.dashboard.service.DashboardService;
+import com.peih68.leave.dashboard.web.dto.AdminSummaryResponse;
 import com.peih68.leave.dashboard.web.dto.DashboardSummaryResponse;
 import com.peih68.leave.leaverequest.domain.LeaveHalf;
 import com.peih68.leave.leaverequest.domain.LeaveRequestEntity;
@@ -81,6 +82,15 @@ class DashboardServiceTest {
         DashboardSummaryResponse s = service.summary(UserPrincipal.from(admin));
         // Sees both e1's and e3's pending (cross-manager); at least the two seeded here.
         assertThat(s.pendingApprovalCount()).isGreaterThanOrEqualTo(2L);
+    }
+
+    @Test
+    void adminSummaryAggregatesOrgWide() {
+        AdminSummaryResponse s = service.adminSummary();
+        assertThat(s.totalActiveEmployees()).isGreaterThanOrEqualTo(5L);
+        assertThat(s.pendingCount()).isGreaterThanOrEqualTo(2L); // e1 + e3 pending
+        assertThat(s.approvedCount()).isGreaterThanOrEqualTo(1L); // e1 approved covers today
+        assertThat(s.topDepartmentsThisMonth()).isNotEmpty();
     }
 
     // --- helpers ---
