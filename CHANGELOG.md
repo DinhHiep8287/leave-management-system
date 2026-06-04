@@ -7,6 +7,20 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added — v1.1: Admin/HR console (frontend)
+- Quản lý **người dùng** (`/admin/users`, HR/ADMIN): tìm kiếm/lọc (vai trò/phòng ban/trạng thái), phân trang; ADMIN tạo/sửa, đặt lại mật khẩu, kích hoạt/khóa.
+- Quản lý **phòng ban** + **loại nghỉ phép** (`/admin/...`, ADMIN): CRUD + soft delete; sửa loại nghỉ refresh luôn dropdown nộp đơn.
+- Quản lý **quỹ phép** (`/admin/balances`): khởi tạo năm (ADMIN), điều chỉnh có lý do (HR/ADMIN); **ngày lễ** (`/admin/holidays`, HR/ADMIN) CRUD đồng bộ shading lịch.
+- **Hồ sơ cá nhân** (`/profile`): sửa họ tên + đổi mật khẩu (mọi user).
+
+### Added — v1.1 Part 1: Holiday CRUD (backend)
+- `POST/PUT/DELETE /holidays` (ADMIN/HR) — REQUIREMENTS §7; unique-date 409, missing 404. `HolidayRequest` DTO + `existsByHolidayDate`. Tests: HolidayServiceTest (6), HolidayControllerTest (5). 167 backend tests.
+
+### Fixed — v1.0.x: CI + spec alignment
+- **CI**: `.github/workflows/ci.yml` (backend `gradle test` + Postgres service, frontend typecheck/lint/build). Sửa lỗi backend CI: `gradle-wrapper.jar` bị `.gitignore *.jar` loại → commit jar + negation `!**/gradle/wrapper/gradle-wrapper.jar`. Ép `TZ=Asia/Ho_Chi_Minh` cho test. E2E cleanup FK-safe (`E2ECleanup.wipeUsersFkSafe`) độc lập thứ tự chạy.
+- **§3** seed `SICK` quota 3 → 30 (migration V3).
+- **§5.5** người tạo hủy được đơn `APPROVED` khi chưa tới `start_date` (hoàn balance); sau ngày bắt đầu chỉ manager/HR/ADMIN.
+
 ### Added — Week 4 Part 7: Production config + deploy guide
 - `application-prod.yml`: Hikari pool lớn hơn, graceful shutdown, tắt Swagger UI, expose actuator `health,info` (probes), `server.error.include-message: never`, log INFO.
 - `docker-compose.prod.yml`: stack prod dùng image build sẵn (jar + nginx), backend không publish cổng (qua nginx `/api`), secret bắt buộc (`JWT_SECRET`/`POSTGRES_PASSWORD` fail-fast). `frontend/Dockerfile` nhận build-arg `VITE_API_BASE_URL` (mặc định `/api`); `nginx.conf` proxy `/api` → backend (cùng origin). `.env.prod.example`.

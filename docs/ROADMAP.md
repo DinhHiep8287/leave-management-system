@@ -34,7 +34,7 @@ Tài liệu này vạch lộ trình **sau khi hoàn thành MVP 4 tuần**, dựa
 
 ---
 
-## Milestone v1.0.x — Quick wins (½–1 ngày)
+## Milestone v1.0.x — Quick wins ✅ **Done**
 
 Sửa lệch nhỏ, rủi ro thấp, làm trước:
 
@@ -45,7 +45,7 @@ Sửa lệch nhỏ, rủi ro thấp, làm trước:
 3. **CI GitHub Actions** (đóng sai lệch tài liệu↔thực tế): workflow PR chạy
    `gradle test` (Postgres service container) + FE `typecheck/lint/build`.
 
-## Milestone v1.1 — Admin/HR console (phần lớn nhất còn thiếu)
+## Milestone v1.1 — Admin/HR console ✅ **Done**
 
 Giao diện quản trị cho backend đã có sẵn — biến sản phẩm thành "dùng được thật":
 
