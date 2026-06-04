@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 
+import { ErrorState } from "@/components/error-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -26,7 +27,7 @@ export function UsersPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [resetUser, setResetUser] = useState<User | null>(null);
 
-  const { data, isFetching } = useUsers({ q, role, departmentId, activeOnly, page });
+  const { data, isFetching, isError, refetch } = useUsers({ q, role, departmentId, activeOnly, page });
   const { data: depts } = useDepartmentOptions();
   const setActive = useSetUserActive();
 
@@ -59,6 +60,8 @@ export function UsersPage() {
         </div>
         {isAdmin && <Button onClick={openCreate}>Thêm người dùng</Button>}
       </header>
+
+      {isError && <ErrorState onRetry={() => void refetch()} />}
 
       <div className="flex flex-wrap gap-3">
         <Input

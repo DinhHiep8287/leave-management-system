@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { ErrorState } from "@/components/error-state";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
@@ -19,7 +20,7 @@ export function ApprovalInboxPage() {
   const [detailId, setDetailId] = useState<number | null>(null);
   const [decision, setDecision] = useState<{ mode: DecisionMode; id: number } | null>(null);
 
-  const { data, isLoading, isFetching } = useInbox(status, page);
+  const { data, isLoading, isFetching, isError, refetch } = useInbox(status, page);
   const items = data?.items ?? [];
   const totalPages = data?.totalPages ?? 1;
 
@@ -36,6 +37,8 @@ export function ApprovalInboxPage() {
           Đơn nghỉ phép của nhân viên thuộc phạm vi duyệt của bạn.
         </p>
       </header>
+
+      {isError && <ErrorState onRetry={() => void refetch()} />}
 
       <div className="flex flex-wrap items-center gap-3">
         <Select

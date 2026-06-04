@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
+import { ErrorState } from "@/components/error-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/features/auth/auth-context";
@@ -14,7 +15,7 @@ const REMAINING_COLOR = "#5eead4"; // teal-300
 export function DashboardPage() {
   const { user } = useAuth();
   const isHrAdmin = user?.role === "HR" || user?.role === "ADMIN";
-  const { data, isLoading } = useDashboardSummary();
+  const { data, isLoading, isError, refetch } = useDashboardSummary();
   const { data: admin, isLoading: adminLoading } = useAdminSummary(isHrAdmin);
 
   const statusData = useMemo(
@@ -48,6 +49,8 @@ export function DashboardPage() {
           Xin chào, <strong className="text-foreground">{user?.fullName}</strong>.
         </p>
       </header>
+
+      {isError && <ErrorState onRetry={() => void refetch()} />}
 
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard label="Chờ bạn duyệt" value={data?.pendingApprovalCount} loading={isLoading} />

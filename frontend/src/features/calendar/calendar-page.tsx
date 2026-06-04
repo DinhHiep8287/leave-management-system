@@ -17,6 +17,7 @@ import {
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import { ErrorState } from "@/components/error-state";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { useAuth } from "@/features/auth/auth-context";
@@ -61,7 +62,7 @@ export function CalendarPage() {
   const { data: types } = useLeaveTypes(true);
   const { data: depts } = useDepartments(isHrAdmin);
   const { data: users } = useUserOptions();
-  const { data: entries, isFetching } = useCalendar(fromStr, toStr, {
+  const { data: entries, isFetching, isError, refetch } = useCalendar(fromStr, toStr, {
     departmentId,
     leaveTypeId,
     userId,
@@ -191,6 +192,8 @@ export function CalendarPage() {
         </label>
         {isFetching && <span className="text-xs text-muted-foreground">Đang tải…</span>}
       </div>
+
+      {isError && <ErrorState onRetry={() => void refetch()} />}
 
       <div className="overflow-hidden rounded-lg border border-border">
         <div className="grid grid-cols-7 border-b border-border bg-muted/40 text-xs font-medium text-muted-foreground">

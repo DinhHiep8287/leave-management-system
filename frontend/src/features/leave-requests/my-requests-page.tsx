@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
+import { ErrorState } from "@/components/error-state";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,7 +38,7 @@ export function MyRequestsPage() {
   const [cancelId, setCancelId] = useState<number | null>(null);
   const [editRequest, setEditRequest] = useState<LeaveRequestResponse | null>(null);
 
-  const { data: requests, isLoading } = useMyRequests(user?.id, year, status);
+  const { data: requests, isLoading, isError, refetch } = useMyRequests(user?.id, year, status);
   const cancel = useCancelRequest();
   const todayIso = new Date().toISOString().slice(0, 10);
 
@@ -52,6 +53,8 @@ export function MyRequestsPage() {
           <Link to="/leave-requests/new">Nộp đơn mới</Link>
         </Button>
       </header>
+
+      {isError && <ErrorState onRetry={() => void refetch()} />}
 
       <div className="flex flex-wrap gap-3">
         <Select
