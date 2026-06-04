@@ -5,13 +5,27 @@ import type { CalendarEntry, DeptOption, Holiday } from "./types";
 type Envelope<T> = { data: T };
 type PageData<T> = { content: T[] };
 
+export type CalendarFilters = {
+  departmentId?: number;
+  leaveTypeId?: number;
+  userId?: number;
+  includePending: boolean;
+};
+
 export async function getCalendar(
   from: string,
   to: string,
-  departmentId?: number,
+  filters: CalendarFilters,
 ): Promise<CalendarEntry[]> {
   const res = await api.get<Envelope<CalendarEntry[]>>("/calendar", {
-    params: { from, to, departmentId },
+    params: {
+      from,
+      to,
+      departmentId: filters.departmentId,
+      leaveTypeId: filters.leaveTypeId,
+      userId: filters.userId,
+      includePending: filters.includePending,
+    },
   });
   return res.data.data;
 }

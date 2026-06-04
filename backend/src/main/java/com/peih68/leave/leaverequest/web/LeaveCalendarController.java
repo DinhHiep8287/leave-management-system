@@ -28,7 +28,11 @@ public class LeaveCalendarController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
             @RequestParam(required = false) Long departmentId,
+            @RequestParam(required = false) Long leaveTypeId,
+            @RequestParam(required = false) Long userId,
+            @RequestParam(name = "includePending", defaultValue = "false") boolean includePending,
             @AuthenticationPrincipal UserPrincipal principal) {
-        return ApiResponse.ok(calendarService.calendar(principal, from, to, departmentId));
+        return ApiResponse.ok(
+                calendarService.calendar(principal, from, to, departmentId, leaveTypeId, userId, includePending));
     }
 }

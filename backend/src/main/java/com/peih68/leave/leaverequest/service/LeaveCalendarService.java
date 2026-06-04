@@ -25,17 +25,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Read-only team leave calendar. Returns the leave occurrences overlapping a date
- * window, scoped to what the caller may see: an EMPLOYEE sees only their own; a
- * MANAGER sees their direct reports plus themselves; HR/ADMIN see everyone (or one
- * department when {@code departmentId} is supplied).
+ * Read-only team leave calendar (REQUIREMENTS §6). Returns leave occurrences overlapping
+ * a date window, scoped to what the caller may see: an EMPLOYEE sees their whole
+ * department; a MANAGER sees their department plus their direct reports; HR/ADMIN see
+ * everyone, or one department via {@code departmentId} / one person via {@code userId}.
+ * Only APPROVED leave is shown by default; {@code includePending} also surfaces pending
+ * requests for planning. Optionally filtered by {@code leaveTypeId}.
  */
 @Service
 @RequiredArgsConstructor
 public class LeaveCalendarService {
 
-    /** Both APPROVED and PENDING are shown so planners can see tentative leave. */
-    private static final List<LeaveStatus> CALENDAR_STATUSES =
+    private static final List<LeaveStatus> APPROVED_ONLY = List.of(LeaveStatus.APPROVED);
+    private static final List<LeaveStatus> APPROVED_AND_PENDING =
             List.of(LeaveStatus.APPROVED, LeaveStatus.PENDING);
 
     /** Guard rail: a calendar query may span at most one quarter. */
@@ -47,7 +49,13 @@ public class LeaveCalendarService {
 
     @Transactional(readOnly = true)
     public List<CalendarEntryResponse> calendar(
-            UserPrincipal principal, LocalDate from, LocalDate to, Long departmentId) {
+            UserPrincipal principal,
+            LocalDate from,
+            LocalDate to,
+            Long departmentId,
+            Long leaveTypeId,
+            Long userId,
+            boolean includePending) {
         if (from == null || to == null) {
             throw new ApiException(ErrorCode.VALIDATION_ERROR, "from and to are required");
         }
@@ -59,27 +67,37 @@ public class LeaveCalendarService {
                     "calendar range must not exceed %d days".formatted(MAX_RANGE_DAYS));
         }
 
-        List<LeaveRequestEntity> rows = fetchInScope(principal, from, to, departmentId);
-        return toEntries(rows);
+        List<LeaveStatus> statuses = includePending ? APPROVED_AND_PENDING : APPROVED_ONLY;
+        List<LeaveRequestEntity> rows = fetchInScope(principal, from, to, departmentId, statuses);
+
+        return toEntries(rows.stream()
+                .filter(r -> leaveTypeId == null || leaveTypeId.equals(r.getLeaveTypeId()))
+                .filter(r -> userId == null || userId.equals(r.getUserId()))
+                .toList());
     }
 
     private List<LeaveRequestEntity> fetchInScope(
-            UserPrincipal principal, LocalDate from, LocalDate to, Long departmentId) {
+            UserPrincipal principal, LocalDate from, LocalDate to, Long departmentId,
+            List<LeaveStatus> statuses) {
         Role role = principal.getRole();
         if (role == Role.ADMIN || role == Role.HR) {
             if (departmentId == null) {
-                return requestRepository.findOverlapping(CALENDAR_STATUSES, from, to);
+                return requestRepository.findOverlapping(statuses, from, to);
             }
-            return queryForUsers(deptMemberIds(departmentId), from, to);
+            return queryForUsers(deptMemberIds(departmentId), from, to, statuses);
         }
 
+        // Employee/Manager: their whole department, plus a manager's direct reports.
         Set<Long> userIds = new HashSet<>();
         userIds.add(principal.getId());
+        userRepository.findById(principal.getId())
+                .map(UserEntity::getDepartmentId)
+                .ifPresent(deptId -> userIds.addAll(deptMemberIds(deptId)));
         if (role == Role.MANAGER) {
             userRepository.findByManagerIdAndIsActiveTrue(principal.getId())
                     .forEach(u -> userIds.add(u.getId()));
         }
-        return queryForUsers(userIds, from, to);
+        return queryForUsers(userIds, from, to, statuses);
     }
 
     private Set<Long> deptMemberIds(Long departmentId) {
@@ -89,11 +107,11 @@ public class LeaveCalendarService {
     }
 
     private List<LeaveRequestEntity> queryForUsers(
-            Set<Long> userIds, LocalDate from, LocalDate to) {
+            Set<Long> userIds, LocalDate from, LocalDate to, List<LeaveStatus> statuses) {
         if (userIds.isEmpty()) {
             return List.of();
         }
-        return requestRepository.findOverlappingForUsers(userIds, CALENDAR_STATUSES, from, to);
+        return requestRepository.findOverlappingForUsers(userIds, statuses, from, to);
     }
 
     /** Map entities to DTOs, batch-resolving user names and leave-type codes (no N+1). */

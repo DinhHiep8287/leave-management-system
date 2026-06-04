@@ -1,11 +1,11 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-import { getCalendar, getDepartments, getHolidays } from "./api";
+import { getCalendar, getDepartments, getHolidays, type CalendarFilters } from "./api";
 
-export function useCalendar(from: string, to: string, departmentId?: number) {
+export function useCalendar(from: string, to: string, filters: CalendarFilters) {
   return useQuery({
-    queryKey: ["calendar", from, to, departmentId ?? null],
-    queryFn: () => getCalendar(from, to, departmentId),
+    queryKey: ["calendar", from, to, filters],
+    queryFn: () => getCalendar(from, to, filters),
     placeholderData: keepPreviousData,
   });
 }

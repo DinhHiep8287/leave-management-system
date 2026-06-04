@@ -1,6 +1,7 @@
 package com.peih68.leave.leaverequest.web;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,7 +33,8 @@ class LeaveCalendarControllerTest {
     @Test
     @WithMockPrincipal(id = 7L, role = Role.EMPLOYEE)
     void authenticatedUserCanReadCalendar() throws Exception {
-        given(calendarService.calendar(any(), any(), any(), any())).willReturn(List.of());
+        given(calendarService.calendar(any(), any(), any(), any(), any(), any(), anyBoolean()))
+                .willReturn(List.of());
         mvc.perform(get("/calendar?from=2026-08-03&to=2026-08-07"))
                 .andExpect(status().isOk());
     }

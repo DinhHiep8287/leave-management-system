@@ -35,10 +35,9 @@ public class DashboardService {
 
         List<LeaveBalanceResponse> myBalances = leaveBalanceService.findByUser(principal.getId(), year);
 
-        // Reuse the calendar's scoping; keep only what is actually APPROVED for today.
-        List<CalendarEntryResponse> onLeaveToday = calendarService.calendar(principal, today, today, null).stream()
-                .filter(e -> e.status() == LeaveStatus.APPROVED)
-                .toList();
+        // Reuse the calendar's scoping; APPROVED-only by default.
+        List<CalendarEntryResponse> onLeaveToday =
+                calendarService.calendar(principal, today, today, null, null, null, false);
 
         long pendingApprovalCount = pendingApprovalCount(principal);
         long myPendingCount = requestRepository.countByUserIdAndStatus(principal.getId(), LeaveStatus.PENDING);
