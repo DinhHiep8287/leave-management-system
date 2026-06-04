@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { Link, NavLink, Outlet } from "react-router-dom";
 
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -66,10 +66,10 @@ export function AppLayout() {
           </div>
           <div className="ml-auto flex items-center gap-3">
             <ThemeToggle />
-            <div className="text-right">
+            <Link to="/profile" className="rounded-md px-2 py-1 text-right hover:bg-secondary">
               <p className="text-sm font-medium leading-tight">{user?.fullName}</p>
               <p className="text-xs text-muted-foreground">{roleLabel(role)}</p>
-            </div>
+            </Link>
             <Button variant="outline" size="sm" onClick={() => void logout()}>
               Đăng xuất
             </Button>
