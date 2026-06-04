@@ -27,10 +27,15 @@ import com.peih68.leave.user.repository.UserRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -183,11 +188,11 @@ public class LeaveRequestService {
         requireUser(userId);
         LocalDate from = year != null ? LocalDate.of(year, 1, 1) : LocalDate.of(1900, 1, 1);
         LocalDate to = year != null ? LocalDate.of(year, 12, 31) : LocalDate.of(9999, 12, 31);
-        return requestRepository
+        List<LeaveRequestEntity> rows = requestRepository
                 .findByUserIdAndStartDateBetweenOrderByStartDateDesc(userId, from, to).stream()
                 .filter(r -> status == null || r.getStatus() == status)
-                .map(this::toResponse)
                 .toList();
+        return toResponses(rows);
     }
 
     /** Approver inbox: a MANAGER sees their team's requests; HR/ADMIN see everyone's. */
@@ -205,7 +210,7 @@ public class LeaveRequestService {
                     ? requestRepository.findByManagerIdAndStatusOrderByStartDateAsc(principal.getId(), status, pageable)
                     : requestRepository.findByManagerIdOrderByStartDateAsc(principal.getId(), pageable);
         }
-        return page.map(this::toResponse);
+        return new PageImpl<>(toResponses(page.getContent()), pageable, page.getTotalElements());
     }
 
     /** Approve a pending request: hard-check + consume balance, then mark APPROVED. */
@@ -267,8 +272,15 @@ public class LeaveRequestService {
     @Transactional(readOnly = true)
     public List<ApprovalActionResponse> history(Long requestId) {
         requireRequest(requestId);
-        return approvalActionRepository.findByLeaveRequestIdOrderByCreatedAtAsc(requestId).stream()
-                .map(this::toActionResponse)
+        List<ApprovalActionEntity> actions =
+                approvalActionRepository.findByLeaveRequestIdOrderByCreatedAtAsc(requestId);
+        Map<Long, String> actorNames = userRepository
+                .findAllById(actions.stream().map(ApprovalActionEntity::getActorId).distinct().toList()).stream()
+                .collect(Collectors.toMap(UserEntity::getId, UserEntity::getFullName));
+        return actions.stream()
+                .map(a -> new ApprovalActionResponse(
+                        a.getId(), a.getAction(), a.getActorId(), actorNames.get(a.getActorId()),
+                        a.getPreviousStatus(), a.getNewStatus(), a.getComment(), a.getCreatedAt()))
                 .toList();
     }
 
@@ -301,13 +313,6 @@ public class LeaveRequestService {
 
     private static String comment(ApprovalDecisionRequest req) {
         return req == null ? null : req.comment();
-    }
-
-    private ApprovalActionResponse toActionResponse(ApprovalActionEntity a) {
-        String actorName = userRepository.findById(a.getActorId()).map(UserEntity::getFullName).orElse(null);
-        return new ApprovalActionResponse(
-                a.getId(), a.getAction(), a.getActorId(), actorName,
-                a.getPreviousStatus(), a.getNewStatus(), a.getComment(), a.getCreatedAt());
     }
 
     void recordAction(Long requestId, Long actorId, ApprovalAction action,
@@ -353,5 +358,31 @@ public class LeaveRequestService {
                 r.getStartDate(), r.getEndDate(), r.getStartHalf(), r.getEndHalf(),
                 r.getTotalDays(), r.getReason(), r.getStatus(),
                 r.getManagerId(), managerName, r.getCreatedAt());
+    }
+
+    /** Batch mapping for list endpoints — resolves user names and type codes once (no N+1). */
+    private List<LeaveRequestResponse> toResponses(List<LeaveRequestEntity> rows) {
+        if (rows.isEmpty()) {
+            return List.of();
+        }
+        Set<Long> userIds = rows.stream()
+                .flatMap(r -> Stream.of(r.getUserId(), r.getManagerId()))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<Long, String> userNames = userRepository.findAllById(userIds).stream()
+                .collect(Collectors.toMap(UserEntity::getId, UserEntity::getFullName));
+        Map<Long, String> typeCodes = leaveTypeRepository
+                .findAllById(rows.stream().map(LeaveRequestEntity::getLeaveTypeId).distinct().toList()).stream()
+                .collect(Collectors.toMap(LeaveTypeEntity::getId, LeaveTypeEntity::getCode));
+
+        return rows.stream()
+                .map(r -> new LeaveRequestResponse(
+                        r.getId(), r.getUserId(), userNames.get(r.getUserId()),
+                        r.getLeaveTypeId(), typeCodes.get(r.getLeaveTypeId()),
+                        r.getStartDate(), r.getEndDate(), r.getStartHalf(), r.getEndHalf(),
+                        r.getTotalDays(), r.getReason(), r.getStatus(),
+                        r.getManagerId(), r.getManagerId() == null ? null : userNames.get(r.getManagerId()),
+                        r.getCreatedAt()))
+                .toList();
     }
 }
