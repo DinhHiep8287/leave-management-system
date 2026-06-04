@@ -69,12 +69,19 @@ Giao diện quản trị cho backend đã có sẵn — biến sản phẩm thà
 13. **Báo cáo nâng cao** (§11): thêm lọc **phòng ban** cho CSV đơn nghỉ; báo cáo **tổng ngày
     nghỉ theo loại theo tháng/quý** (endpoint + FE + CSV).
 
-## Milestone v1.3 — Chất lượng & vận hành
+## Milestone v1.3 — Chất lượng sản phẩm (no deploy) ✅ **Done**
 
-14. **E2E frontend (Playwright)**: smoke login→nộp→duyệt, dùng skill `webapp-testing`.
-15. **i18n scaffolding** (§12): tách chuỗi, khung `vi` mặc định + `en` để mở rộng.
-16. **Bỏ N+1** ở list/inbox (`LeaveRequestService.toResponse`), security headers nginx.
-17. **Deploy thật** (Railway/Fly.io + Neon) + observability (actuator metrics, JSON logging).
+14. ✅ **E2E frontend (Playwright)**: `e2e/run_smoke.py` phủ luồng theo vai trò + dark mode + screenshots.
+15. ✅ **Bỏ N+1** ở list/inbox/history (`LeaveRequestService` batch lookups).
+16. ✅ **UX/a11y**: ErrorBoundary + ErrorState (retry) cho các trang query.
+17. ✅ **Hardening config (no deploy)**: nginx security headers; actuator metrics + JSON logging (profile prod).
+18. ✅ **Docs**: README có ảnh minh họa (`docs/screenshots/`).
+
+## Để sau (chưa làm trong v1.x)
+
+- **i18n** (§12): tách chuỗi, khung `vi` mặc định + `en` (refactor lớn — để v2).
+- **Deploy thật** (Railway/Fly.io + Neon) — guide + prod compose đã sẵn ở `docs/DEPLOYMENT.md`.
+- **CI tích hợp Playwright** (cần dựng full stack trong CI).
 
 ---
 

@@ -2,6 +2,20 @@
 
 Hệ thống quản lý nghỉ phép — mô phỏng quy trình nghiệp vụ phê duyệt đơn nghỉ phép thực tế trong doanh nghiệp.
 
+## Ảnh minh họa
+
+| Tổng quan (HR) | Lịch nghỉ phép |
+|---|---|
+| ![Dashboard HR](docs/screenshots/dashboard-hr.png) | ![Lịch](docs/screenshots/calendar.png) |
+
+| Đơn của tôi | Cần duyệt |
+|---|---|
+| ![Đơn của tôi](docs/screenshots/my-requests.png) | ![Cần duyệt](docs/screenshots/approvals.png) |
+
+| Quản lý người dùng | Quản lý người dùng (tối) |
+|---|---|
+| ![Người dùng](docs/screenshots/users.png) | ![Người dùng dark](docs/screenshots/users-dark.png) |
+
 ## Tính năng chính
 
 - Nhân viên tạo đơn nghỉ phép (loại nghỉ, thời gian, lý do, hỗ trợ nửa ngày).

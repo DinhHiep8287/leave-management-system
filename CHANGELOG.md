@@ -7,6 +7,13 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Changed — v1.3: Quality & polish (no deploy)
+- **Bỏ N+1**: `LeaveRequestService` list/inbox/history gom truy vấn tên user + mã loại nghỉ vào map (thay findById từng dòng). Hành vi không đổi.
+- **FE robustness**: `ErrorBoundary` cấp app + `ErrorState` (có nút thử lại) cho các trang dùng query (dashboard/đơn của tôi/cần duyệt/người dùng/lịch).
+- **Hardening (config-only)**: nginx security headers (CSP/X-Frame-Options/…); actuator expose `metrics` ở prod; JSON logging (logback-spring.xml + logstash encoder) ở profile prod.
+- **E2E Playwright** (`e2e/run_smoke.py`): smoke toàn bộ luồng theo vai trò (employee/manager/HR/admin) + dark mode, sinh screenshots cho README.
+- **Docs**: README có ảnh minh họa; CHANGELOG/ROADMAP cập nhật. 177 backend tests.
+
 ### Added — v1.2: Requests, calendar, dashboard & reports completion
 - **Sửa đơn PENDING** (§5.5): `PUT /leave-requests/{id}` (người tạo, chỉ PENDING, tính lại ngày + validate) + dialog sửa ở FE.
 - **Calendar** (§6): employee xem cả phòng ban (manager: phòng ban + cấp dưới); filter loại nghỉ/phòng ban/theo người (HR/ADMIN); APPROVED-only mặc định + tùy chọn kèm pending. FE thêm **view tuần** + bộ lọc.
