@@ -26,6 +26,9 @@ const CalendarPage = lazy(() =>
 const ReportsPage = lazy(() =>
   import("@/features/reports/reports-page").then((m) => ({ default: m.ReportsPage })),
 );
+const UsersPage = lazy(() =>
+  import("@/features/users/users-page").then((m) => ({ default: m.UsersPage })),
+);
 
 function PageFallback() {
   return <div className="p-6 text-sm text-muted-foreground">Đang tải…</div>;
@@ -88,6 +91,14 @@ export default function App() {
             element={
               <Suspense fallback={<PageFallback />}>
                 <ReportsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <UsersPage />
               </Suspense>
             }
           />

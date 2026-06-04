@@ -19,6 +19,7 @@ const NAV: NavItem[] = [
   { to: "/approvals", label: "Cần duyệt", show: APPROVER },
   { to: "/calendar", label: "Lịch nghỉ phép", show: ALL },
   { to: "/reports", label: "Báo cáo", show: HR_ADMIN },
+  { to: "/admin/users", label: "Người dùng", show: HR_ADMIN },
 ];
 
 export function AppLayout() {
