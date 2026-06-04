@@ -29,6 +29,12 @@ const ReportsPage = lazy(() =>
 const UsersPage = lazy(() =>
   import("@/features/users/users-page").then((m) => ({ default: m.UsersPage })),
 );
+const DepartmentsPage = lazy(() =>
+  import("@/features/departments/departments-page").then((m) => ({ default: m.DepartmentsPage })),
+);
+const LeaveTypesPage = lazy(() =>
+  import("@/features/leave-types/leave-types-page").then((m) => ({ default: m.LeaveTypesPage })),
+);
 
 function PageFallback() {
   return <div className="p-6 text-sm text-muted-foreground">Đang tải…</div>;
@@ -99,6 +105,22 @@ export default function App() {
             element={
               <Suspense fallback={<PageFallback />}>
                 <UsersPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/admin/departments"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <DepartmentsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/admin/leave-types"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <LeaveTypesPage />
               </Suspense>
             }
           />

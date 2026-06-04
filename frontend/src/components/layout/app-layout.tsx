@@ -10,6 +10,7 @@ type NavItem = { to: string; label: string; show: (role: string) => boolean };
 const ALL = () => true;
 const APPROVER = (role: string) => role === "MANAGER" || role === "HR" || role === "ADMIN";
 const HR_ADMIN = (role: string) => role === "HR" || role === "ADMIN";
+const ADMIN_ONLY = (role: string) => role === "ADMIN";
 
 // Text-led navigation per docs/UI-GUIDELINES.md (no decorative icons).
 const NAV: NavItem[] = [
@@ -20,6 +21,8 @@ const NAV: NavItem[] = [
   { to: "/calendar", label: "Lịch nghỉ phép", show: ALL },
   { to: "/reports", label: "Báo cáo", show: HR_ADMIN },
   { to: "/admin/users", label: "Người dùng", show: HR_ADMIN },
+  { to: "/admin/departments", label: "Phòng ban", show: ADMIN_ONLY },
+  { to: "/admin/leave-types", label: "Loại nghỉ phép", show: ADMIN_ONLY },
 ];
 
 export function AppLayout() {
