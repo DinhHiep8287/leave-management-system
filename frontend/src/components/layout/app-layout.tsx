@@ -23,6 +23,8 @@ const NAV: NavItem[] = [
   { to: "/admin/users", label: "Người dùng", show: HR_ADMIN },
   { to: "/admin/departments", label: "Phòng ban", show: ADMIN_ONLY },
   { to: "/admin/leave-types", label: "Loại nghỉ phép", show: ADMIN_ONLY },
+  { to: "/admin/balances", label: "Quỹ phép", show: HR_ADMIN },
+  { to: "/admin/holidays", label: "Ngày lễ", show: HR_ADMIN },
 ];
 
 export function AppLayout() {
