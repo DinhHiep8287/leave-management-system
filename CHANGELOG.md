@@ -7,6 +7,12 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added — v1.2: Requests, calendar, dashboard & reports completion
+- **Sửa đơn PENDING** (§5.5): `PUT /leave-requests/{id}` (người tạo, chỉ PENDING, tính lại ngày + validate) + dialog sửa ở FE.
+- **Calendar** (§6): employee xem cả phòng ban (manager: phòng ban + cấp dưới); filter loại nghỉ/phòng ban/theo người (HR/ADMIN); APPROVED-only mặc định + tùy chọn kèm pending. FE thêm **view tuần** + bộ lọc.
+- **Dashboard HR/ADMIN** (§10.3): `GET /dashboard/admin-summary` (tổng nhân viên, đơn theo trạng thái, top phòng ban tháng này) + khu "toàn tổ chức" trên FE (chart + quick links).
+- **Báo cáo** (§11): lọc phòng ban cho CSV đơn nghỉ; `GET /reports/leave-summary.csv?year=&groupBy=month|quarter` (tổng ngày duyệt theo loại theo tháng/quý). 177 backend tests.
+
 ### Added — v1.1: Admin/HR console (frontend)
 - Quản lý **người dùng** (`/admin/users`, HR/ADMIN): tìm kiếm/lọc (vai trò/phòng ban/trạng thái), phân trang; ADMIN tạo/sửa, đặt lại mật khẩu, kích hoạt/khóa.
 - Quản lý **phòng ban** + **loại nghỉ phép** (`/admin/...`, ADMIN): CRUD + soft delete; sửa loại nghỉ refresh luôn dropdown nộp đơn.

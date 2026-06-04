@@ -58,7 +58,7 @@ Giao diện quản trị cho backend đã có sẵn — biến sản phẩm thà
 8. **Ngày lễ (§7)**: **BE thêm CRUD** `POST/PUT/DELETE /holidays` (ADMIN/HR) + **FE** quản lý.
 9. **FE Đổi mật khẩu / trang hồ sơ cá nhân** (§9).
 
-## Milestone v1.2 — Hoàn chỉnh đơn, lịch, dashboard, báo cáo
+## Milestone v1.2 — Hoàn chỉnh đơn, lịch, dashboard, báo cáo ✅ **Done**
 
 10. **Sửa đơn PENDING** (§5.5): BE `PUT /leave-requests/{id}` (chỉ người tạo, chỉ PENDING,
     tính lại số ngày + validate như tạo mới) + FE.
