@@ -42,9 +42,21 @@ jobs:
           SPRING_DATASOURCE_URL_TEST: jdbc:postgresql://localhost:5432/leave_management_test
           POSTGRES_USER: leave_admin
           POSTGRES_PASSWORD: ci_test_password
+          # App + tests target Asia/Ho_Chi_Minh (REQUIREMENTS §12); the runner defaults
+          # to UTC. Align so date-sensitive behaviour matches the documented environment.
+          TZ: Asia/Ho_Chi_Minh
         run: |
           chmod +x ./gradlew
-          ./gradlew test --no-daemon
+          ./gradlew test --no-daemon --stacktrace
+      - name: Print test failures
+        if: failure()
+        run: |
+          echo "=== Test classes with failures ==="
+          for f in $(grep -rl '<failure\|<error' build/test-results/test/ 2>/dev/null); do
+            echo "----- $f -----"
+            grep -E 'testcase name=|<failure|<error|message=' "$f" | head -40
+            echo
+          done
 
   frontend:
     name: Frontend (typecheck / lint / build)
