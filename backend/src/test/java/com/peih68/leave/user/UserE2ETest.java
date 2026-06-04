@@ -22,6 +22,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import static com.peih68.leave.config.E2ECleanup.wipeUsersFkSafe;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
@@ -41,8 +43,7 @@ class UserE2ETest {
 
     @BeforeEach
     void setup() {
-        jdbc.update("DELETE FROM refresh_tokens");
-        jdbc.update("DELETE FROM users");
+        wipeUsersFkSafe(jdbc);
         engId = jdbc.queryForObject("SELECT id FROM departments WHERE code = 'ENG'", Long.class);
         UserEntity admin = userRepository.save(UserEntity.builder()
                 .employeeCode("U0001").email("u.admin@demo.local")
