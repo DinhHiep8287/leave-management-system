@@ -7,6 +7,11 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added — Hoàn chỉnh MVP (đóng nốt khoảng hở REQUIREMENTS)
+- **§10.2** dashboard thêm **"Đang nghỉ tuần này"** (`onLeaveThisWeekCount` — đếm distinct người nghỉ trong tuần ISO theo phạm vi người xem, bổ sung cho "hôm nay"). BE `DashboardService` + FE stat card. *(Đây là khoảng hở thật duy nhất còn lại.)*
+- **§5.3** (defense-in-depth): API đã chặn `start_date` quá khứ sẵn qua `@FutureOrPresent` trên DTO; thêm guard `start_date >= today` ở tầng service `submit`/`update` để chặn cả khi gọi service trực tiếp (bỏ qua bean validation) + test `submitWithPastStartDateIsRejected`.
+- Đến đây **toàn bộ REQUIREMENTS MVP đã đáp ứng, trừ i18n (§12)** (hoãn v2).
+
 ### Added — Phòng ban của tôi (danh bạ thành viên)
 - **BE** `GET /departments/mine` (self-scoped theo principal, không nhận id → không lộ phòng khác): trả phòng ban của người gọi + danh sách thành viên đang hoạt động (head xếp đầu, rồi theo tên), kèm `headName`. DTO `MyDepartmentResponse`/`DepartmentMemberResponse`; tái dùng `UserRepository.findByDepartmentIdAndIsActiveTrue`. Test E2E: `DepartmentE2ETest` khẳng định thấy thành viên cùng phòng + **không** lẫn người phòng SALES.
 - **FE** màn **"Phòng ban của tôi"** (`/my-department`, nav cho mọi vai trò): tên phòng + trưởng phòng + bảng thành viên (badge "Trưởng phòng"). Đáp ứng REQUIREMENTS §6 ở mức danh bạ phòng ban cho emp/manager.

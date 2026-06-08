@@ -70,11 +70,14 @@ Chi tiết xem [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md).
 
 ## Màn hình frontend
 
-- **Tổng quan** — stat cards + biểu đồ quỹ phép + đang nghỉ hôm nay.
-- **Nộp đơn** / **Đơn của tôi** — tạo, theo dõi, hủy đơn; xem lịch sử xử lý.
+- **Tổng quan** — stat cards (chờ duyệt, đang nghỉ hôm nay/tuần này, đơn chờ) + biểu đồ quỹ phép; HR/ADMIN có khu toàn tổ chức.
+- **Nộp đơn** / **Đơn của tôi** — tạo, sửa đơn PENDING, theo dõi, hủy đơn; xem lịch sử xử lý.
 - **Cần duyệt** (quản lý/HR/ADMIN) — inbox duyệt/từ chối.
-- **Lịch nghỉ phép** — lưới tháng theo phạm vi, lọc phòng ban.
-- **Báo cáo** (HR/ADMIN) — xuất CSV đơn nghỉ + quỹ phép.
+- **Lịch nghỉ phép** — lưới tháng/tuần theo phạm vi, lọc phòng ban/loại nghỉ/theo người.
+- **Phòng ban của tôi** — danh bạ thành viên cùng phòng (mọi vai trò).
+- **Hồ sơ cá nhân** — thông tin (phòng ban, quản lý), đổi mật khẩu.
+- **Báo cáo** (HR/ADMIN) — xuất CSV đơn nghỉ + quỹ phép + tổng hợp theo tháng/quý.
+- **Quản trị** (HR/ADMIN/ADMIN) — người dùng, phòng ban, loại nghỉ, quỹ phép, ngày lễ.
 
 ## Triển khai production
 
@@ -96,7 +99,7 @@ Chi tiết xem [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Trạng thái
 
-✅ MVP hoàn thành (4 tuần): auth, CRUD, đơn nghỉ + duyệt, lịch, dashboard, báo cáo CSV, cấu hình production.
+✅ **MVP hoàn chỉnh** (auth, CRUD, đơn nghỉ + duyệt, lịch tháng/tuần, dashboard theo vai trò, báo cáo CSV, console quản trị, cấu hình production) — đáp ứng toàn bộ `docs/REQUIREMENTS.md` **trừ i18n (§12)**, hoãn sang v2. Backend phủ test đầy đủ; FE build/lint sạch; có E2E Playwright (`e2e/`).
 
 ## Giấy phép
 

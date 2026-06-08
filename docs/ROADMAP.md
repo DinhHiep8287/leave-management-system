@@ -83,6 +83,13 @@ Giao diện quản trị cho backend đã có sẵn — biến sản phẩm thà
 - **(B) BE** `GET/PATCH /users/me` trả thêm `departmentName` + `managerName` (DTO `MeResponse`, resolve tên từ id; `UserResponse` dùng cho list/CRUD giữ nguyên để tránh N+1).
 - **(C) Danh bạ phòng ban**: `GET /departments/mine` (self-scoped, không lộ phòng khác) + FE màn **"Phòng ban của tôi"** (nav mọi vai trò) liệt kê thành viên cùng phòng, head xếp đầu.
 
+## MVP hoàn chỉnh (trừ i18n) ✅ **Done**
+
+- **§10.2** dashboard thêm **"đang nghỉ tuần này"** (đếm người nghỉ trong tuần ISO theo phạm vi của người xem) — bổ sung cho "đang nghỉ hôm nay". *Đây là khoảng hở thật duy nhất còn lại.*
+- **§5.3** (defense-in-depth): API vốn đã chặn `start_date` quá khứ qua `@FutureOrPresent` trên DTO; thêm guard tương đương ở tầng service `submit`/`update` + test, để chặn cả khi gọi service trực tiếp.
+
+→ Toàn bộ REQUIREMENTS MVP đã đáp ứng **trừ i18n (§12)**, được hoãn sang v2 theo thống nhất.
+
 ## Để sau (chưa làm trong v1.x)
 
 - **i18n** (§12): tách chuỗi, khung `vi` mặc định + `en` (refactor lớn — để v2).
