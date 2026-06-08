@@ -77,8 +77,15 @@ Giao diện quản trị cho backend đã có sẵn — biến sản phẩm thà
 17. ✅ **Hardening config (no deploy)**: nginx security headers; actuator metrics + JSON logging (profile prod).
 18. ✅ **Docs**: README có ảnh minh họa (`docs/screenshots/`).
 
+## Post-v1.3 — Hồ sơ hiển thị phòng ban + quản lý ✅ **Done**
+
+- **(A) FE Hồ sơ** hiển thị **Phòng ban** + **Quản lý** (read-only) — emp/manager trước đây không thấy phòng ban của mình.
+- **(B) BE** `GET/PATCH /users/me` trả thêm `departmentName` + `managerName` (DTO `MeResponse`, resolve tên từ id; `UserResponse` dùng cho list/CRUD giữ nguyên để tránh N+1).
+- **(C) — chưa làm**: màn "Phòng ban của tôi" liệt kê **đồng đội cùng phòng** cho emp/manager (cần endpoint + RBAC member-scope). Để khi có nhu cầu rõ — REQUIREMENTS §6 chỉ yêu cầu *lịch* cả phòng, không yêu cầu *danh bạ*.
+
 ## Để sau (chưa làm trong v1.x)
 
+- **Danh bạ phòng ban (C ở trên)**: `GET /departments/{id}/members` cho member cùng phòng + FE.
 - **i18n** (§12): tách chuỗi, khung `vi` mặc định + `en` (refactor lớn — để v2).
 - **Deploy thật** (Railway/Fly.io + Neon) — guide + prod compose đã sẵn ở `docs/DEPLOYMENT.md`.
 - **CI tích hợp Playwright** (cần dựng full stack trong CI).

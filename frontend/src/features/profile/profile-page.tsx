@@ -68,6 +68,8 @@ export function ProfilePage() {
               <ReadOnly label="Email" value={profile?.email} />
               <ReadOnly label="Vai trò" value={profile ? ROLE_LABELS[profile.role] : ""} />
               <ReadOnly label="Ngày vào làm" value={profile ? formatDate(profile.joinDate) : ""} />
+              <ReadOnly label="Phòng ban" value={profile?.departmentName ?? "Chưa gán"} />
+              <ReadOnly label="Quản lý" value={profile?.managerName ?? "Chưa gán"} />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="fullName">Họ tên</Label>

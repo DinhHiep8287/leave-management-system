@@ -5,6 +5,7 @@ import com.peih68.leave.common.web.ApiResponse;
 import com.peih68.leave.user.domain.Role;
 import com.peih68.leave.user.service.UserService;
 import com.peih68.leave.user.web.dto.ChangePasswordRequest;
+import com.peih68.leave.user.web.dto.MeResponse;
 import com.peih68.leave.user.web.dto.ResetPasswordRequest;
 import com.peih68.leave.user.web.dto.UpdateMeRequest;
 import com.peih68.leave.user.web.dto.UserCreateRequest;
@@ -45,15 +46,16 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ApiResponse<UserResponse> me(@AuthenticationPrincipal UserPrincipal principal) {
-        return ApiResponse.ok(userService.findById(principal.getId()));
+    public ApiResponse<MeResponse> me(@AuthenticationPrincipal UserPrincipal principal) {
+        return ApiResponse.ok(userService.findMe(principal.getId()));
     }
 
     @PatchMapping("/me")
-    public ApiResponse<UserResponse> updateMe(
+    public ApiResponse<MeResponse> updateMe(
             @AuthenticationPrincipal UserPrincipal principal,
             @Valid @RequestBody UpdateMeRequest req) {
-        return ApiResponse.ok(userService.updateSelf(principal.getId(), req));
+        userService.updateSelf(principal.getId(), req);
+        return ApiResponse.ok(userService.findMe(principal.getId()));
     }
 
     @PostMapping("/me/password")

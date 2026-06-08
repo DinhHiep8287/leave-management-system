@@ -7,6 +7,9 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added — Hồ sơ: phòng ban + quản lý của tôi
+- `GET /users/me` (và `PATCH /users/me`) trả thêm `departmentName` + `managerName` (DTO mới `MeResponse` — resolve tên từ id, không đụng `UserResponse` dùng chung cho list/CRUD nên không gây N+1). FE trang **Hồ sơ cá nhân** hiển thị Phòng ban + Quản lý (read-only). Lý do: emp/manager trước đây không thấy phòng ban của mình vì `/me` chỉ trả `departmentId` (số) và profile không render. Xem `docs/REQUIREMENTS.md §9`.
+
 ### Changed — v1.3: Quality & polish (no deploy)
 - **Bỏ N+1**: `LeaveRequestService` list/inbox/history gom truy vấn tên user + mã loại nghỉ vào map (thay findById từng dòng). Hành vi không đổi.
 - **FE robustness**: `ErrorBoundary` cấp app + `ErrorState` (có nút thử lại) cho các trang dùng query (dashboard/đơn của tôi/cần duyệt/người dùng/lịch).

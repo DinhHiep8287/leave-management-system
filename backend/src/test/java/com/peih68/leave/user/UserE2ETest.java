@@ -74,6 +74,9 @@ class UserE2ETest {
                 "/users/me", HttpMethod.GET, authed(userToken, null), JsonNode.class);
         assertThat(me.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(me.getBody().path("data").path("email").asText()).isEqualTo("alice@demo.local");
+        // /me resolves department + manager names (not just ids)
+        assertThat(me.getBody().path("data").path("departmentName").asText()).isEqualTo("Engineering");
+        assertThat(me.getBody().path("data").path("managerName").asText()).isEqualTo("U Admin");
 
         // User CANNOT read another user
         ResponseEntity<JsonNode> other = rest.exchange(

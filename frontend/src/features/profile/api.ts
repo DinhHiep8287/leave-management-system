@@ -1,15 +1,16 @@
 import { api } from "@/lib/api";
-import type { User } from "@/features/users/types";
+
+import type { MyProfile } from "./types";
 
 type Envelope<T> = { data: T };
 
-export async function getMyProfile(): Promise<User> {
-  const res = await api.get<Envelope<User>>("/users/me");
+export async function getMyProfile(): Promise<MyProfile> {
+  const res = await api.get<Envelope<MyProfile>>("/users/me");
   return res.data.data;
 }
 
-export async function updateMyName(fullName: string): Promise<User> {
-  const res = await api.patch<Envelope<User>>("/users/me", { fullName });
+export async function updateMyName(fullName: string): Promise<MyProfile> {
+  const res = await api.patch<Envelope<MyProfile>>("/users/me", { fullName });
   return res.data.data;
 }
 

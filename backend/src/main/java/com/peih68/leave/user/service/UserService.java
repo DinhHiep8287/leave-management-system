@@ -3,11 +3,13 @@ package com.peih68.leave.user.service;
 import com.peih68.leave.auth.repository.RefreshTokenRepository;
 import com.peih68.leave.common.exception.ApiException;
 import com.peih68.leave.common.exception.ErrorCode;
+import com.peih68.leave.department.domain.DepartmentEntity;
 import com.peih68.leave.department.repository.DepartmentRepository;
 import com.peih68.leave.user.domain.Role;
 import com.peih68.leave.user.domain.UserEntity;
 import com.peih68.leave.user.repository.UserRepository;
 import com.peih68.leave.user.web.dto.ChangePasswordRequest;
+import com.peih68.leave.user.web.dto.MeResponse;
 import com.peih68.leave.user.web.dto.ResetPasswordRequest;
 import com.peih68.leave.user.web.dto.UpdateMeRequest;
 import com.peih68.leave.user.web.dto.UserCreateRequest;
@@ -124,6 +126,21 @@ public class UserService {
     @Transactional(readOnly = true)
     public UserResponse findById(Long id) {
         return toResponse(findOrThrow(id));
+    }
+
+    /** Profile view: resolves department + manager names for /users/me. */
+    @Transactional(readOnly = true)
+    public MeResponse findMe(Long id) {
+        UserEntity e = findOrThrow(id);
+        String departmentName = departmentRepository.findById(e.getDepartmentId())
+                .map(DepartmentEntity::getName).orElse(null);
+        String managerName = e.getManagerId() == null ? null
+                : userRepository.findById(e.getManagerId()).map(UserEntity::getFullName).orElse(null);
+        return new MeResponse(
+                e.getId(), e.getEmployeeCode(), e.getEmail(), e.getFullName(),
+                e.getRole(), e.getDepartmentId(), departmentName,
+                e.getManagerId(), managerName, e.getJoinDate(),
+                Boolean.TRUE.equals(e.getIsActive()), e.getCreatedAt(), e.getUpdatedAt());
     }
 
     @Transactional(readOnly = true)
