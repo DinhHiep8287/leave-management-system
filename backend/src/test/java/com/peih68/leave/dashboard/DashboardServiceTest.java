@@ -65,6 +65,7 @@ class DashboardServiceTest {
         DashboardSummaryResponse s = service.summary(UserPrincipal.from(manager));
         assertThat(s.pendingApprovalCount()).isEqualTo(1L);   // only e1's pending
         assertThat(s.onLeaveTodayCount()).isEqualTo(1);       // e1 approved covers today
+        assertThat(s.onLeaveThisWeekCount()).isEqualTo(1);    // e1 approved overlaps this week
         assertThat(s.myPendingCount()).isEqualTo(0L);
         assertThat(s.myBalances()).isNotNull();
     }
@@ -75,6 +76,7 @@ class DashboardServiceTest {
         assertThat(s.pendingApprovalCount()).isEqualTo(0L);   // not an approver
         assertThat(s.myPendingCount()).isEqualTo(1L);
         assertThat(s.onLeaveTodayCount()).isEqualTo(1);       // own approved covers today
+        assertThat(s.onLeaveThisWeekCount()).isEqualTo(1);    // own approved overlaps this week
     }
 
     @Test

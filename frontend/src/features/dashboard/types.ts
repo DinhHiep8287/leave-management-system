@@ -31,6 +31,7 @@ export type AdminSummary = {
 export type DashboardSummary = {
   pendingApprovalCount: number;
   onLeaveTodayCount: number;
+  onLeaveThisWeekCount: number;
   myPendingCount: number;
   myBalances: LeaveBalance[];
   onLeaveToday: CalendarEntry[];

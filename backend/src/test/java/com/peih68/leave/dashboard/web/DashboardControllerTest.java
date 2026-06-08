@@ -35,7 +35,7 @@ class DashboardControllerTest {
     @WithMockPrincipal(id = 3L, role = Role.MANAGER)
     void authenticatedUserGetsSummary() throws Exception {
         given(dashboardService.summary(any()))
-                .willReturn(new DashboardSummaryResponse(2L, 1, 0L, List.of(), List.of()));
+                .willReturn(new DashboardSummaryResponse(2L, 1, 1, 0L, List.of(), List.of()));
         mvc.perform(get("/dashboard/summary"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.pendingApprovalCount").value(2))

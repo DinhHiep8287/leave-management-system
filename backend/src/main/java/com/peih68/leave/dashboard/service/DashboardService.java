@@ -46,11 +46,18 @@ public class DashboardService {
         List<CalendarEntryResponse> onLeaveToday =
                 calendarService.calendar(principal, today, today, null, null, null, false);
 
+        // Distinct people on leave this ISO week (Mon..Sun) within the caller's scope (§10.2).
+        LocalDate weekStart = today.with(java.time.DayOfWeek.MONDAY);
+        LocalDate weekEnd = weekStart.plusDays(6);
+        long onLeaveThisWeek = calendarService.calendar(principal, weekStart, weekEnd, null, null, null, false)
+                .stream().map(CalendarEntryResponse::userId).distinct().count();
+
         long pendingApprovalCount = pendingApprovalCount(principal);
         long myPendingCount = requestRepository.countByUserIdAndStatus(principal.getId(), LeaveStatus.PENDING);
 
         return new DashboardSummaryResponse(
-                pendingApprovalCount, onLeaveToday.size(), myPendingCount, myBalances, onLeaveToday);
+                pendingApprovalCount, onLeaveToday.size(), (int) onLeaveThisWeek,
+                myPendingCount, myBalances, onLeaveToday);
     }
 
     /** HR/ADMIN-wide figures (REQUIREMENTS §10.3). */

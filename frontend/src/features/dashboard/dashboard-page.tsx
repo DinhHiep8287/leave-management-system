@@ -52,9 +52,10 @@ export function DashboardPage() {
 
       {isError && <ErrorState onRetry={() => void refetch()} />}
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Chờ bạn duyệt" value={data?.pendingApprovalCount} loading={isLoading} />
         <StatCard label="Đang nghỉ hôm nay" value={data?.onLeaveTodayCount} loading={isLoading} />
+        <StatCard label="Đang nghỉ tuần này" value={data?.onLeaveThisWeekCount} loading={isLoading} />
         <StatCard label="Đơn chờ của tôi" value={data?.myPendingCount} loading={isLoading} />
       </div>
 

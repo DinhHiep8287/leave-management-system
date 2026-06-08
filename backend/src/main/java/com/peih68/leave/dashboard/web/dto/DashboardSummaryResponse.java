@@ -8,6 +8,7 @@ import java.util.List;
 public record DashboardSummaryResponse(
         long pendingApprovalCount,
         int onLeaveTodayCount,
+        int onLeaveThisWeekCount,
         long myPendingCount,
         List<LeaveBalanceResponse> myBalances,
         List<CalendarEntryResponse> onLeaveToday) {}

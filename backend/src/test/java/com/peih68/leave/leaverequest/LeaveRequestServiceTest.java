@@ -121,6 +121,15 @@ class LeaveRequestServiceTest {
     }
 
     @Test
+    void submitWithPastStartDateIsRejected() {
+        // Requirements §5.3: start_date must not be in the past.
+        LocalDate past = LocalDate.now().minusDays(3);
+        assertThatThrownBy(() -> service.submit(req(unpaidTypeId, past, past), UserPrincipal.from(employee)))
+                .isInstanceOf(ApiException.class)
+                .satisfies(e -> assertThat(((ApiException) e).getCode()).isEqualTo(ErrorCode.VALIDATION_ERROR));
+    }
+
+    @Test
     void submitEntirelyWeekendIsRejected() {
         // Sat 2026-07-11 .. Sun 2026-07-12 → 0 working days
         assertThatThrownBy(() -> service.submit(

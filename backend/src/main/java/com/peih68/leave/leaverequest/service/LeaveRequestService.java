@@ -63,6 +63,9 @@ public class LeaveRequestService {
         UserEntity user = requireUser(principal.getId());
         LeaveTypeEntity type = requireActiveLeaveType(req.leaveTypeId());
 
+        if (req.startDate().isBefore(LocalDate.now())) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "startDate must not be in the past");
+        }
         if (req.endDate().isBefore(req.startDate())) {
             throw new ApiException(ErrorCode.VALIDATION_ERROR, "endDate must not be before startDate");
         }
@@ -130,6 +133,9 @@ public class LeaveRequestService {
         requireStatus(r, LeaveStatus.PENDING);
         LeaveTypeEntity type = requireActiveLeaveType(req.leaveTypeId());
 
+        if (req.startDate().isBefore(LocalDate.now())) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "startDate must not be in the past");
+        }
         if (req.endDate().isBefore(req.startDate())) {
             throw new ApiException(ErrorCode.VALIDATION_ERROR, "endDate must not be before startDate");
         }
