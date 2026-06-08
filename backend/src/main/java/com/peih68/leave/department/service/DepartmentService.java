@@ -4,9 +4,14 @@ import com.peih68.leave.common.exception.ApiException;
 import com.peih68.leave.common.exception.ErrorCode;
 import com.peih68.leave.department.domain.DepartmentEntity;
 import com.peih68.leave.department.repository.DepartmentRepository;
+import com.peih68.leave.department.web.dto.DepartmentMemberResponse;
 import com.peih68.leave.department.web.dto.DepartmentRequest;
 import com.peih68.leave.department.web.dto.DepartmentResponse;
+import com.peih68.leave.department.web.dto.MyDepartmentResponse;
+import com.peih68.leave.user.domain.UserEntity;
 import com.peih68.leave.user.repository.UserRepository;
+import java.util.Comparator;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -66,6 +71,28 @@ public class DepartmentService {
     @Transactional(readOnly = true)
     public Page<DepartmentResponse> list(String q, boolean activeOnly, Pageable pageable) {
         return departmentRepository.search(q, activeOnly, pageable).map(DepartmentService::toResponse);
+    }
+
+    /** The caller's own department + active members (head first, then by name). */
+    @Transactional(readOnly = true)
+    public MyDepartmentResponse myDepartment(Long userId) {
+        UserEntity me = userRepository.findById(userId)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "User not found: " + userId));
+        DepartmentEntity dept = findOrThrow(me.getDepartmentId());
+        Long headId = dept.getHeadUserId();
+        String headName = headId == null ? null
+                : userRepository.findById(headId).map(UserEntity::getFullName).orElse(null);
+        List<DepartmentMemberResponse> members = userRepository
+                .findByDepartmentIdAndIsActiveTrue(dept.getId()).stream()
+                .sorted(Comparator
+                        .comparing((UserEntity u) -> !u.getId().equals(headId)) // head first
+                        .thenComparing(UserEntity::getFullName, String.CASE_INSENSITIVE_ORDER))
+                .map(u -> new DepartmentMemberResponse(
+                        u.getId(), u.getFullName(), u.getEmail(), u.getRole(),
+                        u.getId().equals(headId)))
+                .toList();
+        return new MyDepartmentResponse(
+                dept.getId(), dept.getCode(), dept.getName(), headId, headName, members);
     }
 
     private DepartmentEntity findOrThrow(Long id) {

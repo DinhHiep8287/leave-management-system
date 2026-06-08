@@ -113,6 +113,27 @@ class DepartmentE2ETest {
     }
 
     @Test
+    void employee_seesOwnDepartmentMembers_butNotOtherDepartments() {
+        // A user in another department (SALES) must not leak into the ENG roster.
+        Long salesId = jdbc.queryForObject("SELECT id FROM departments WHERE code = 'SALES'", Long.class);
+        userRepository.save(UserEntity.builder()
+                .employeeCode("D0003").email("sales.emp@demo.local")
+                .passwordHash(passwordEncoder.encode("Admin@12345"))
+                .fullName("Sales Person").role(Role.EMPLOYEE).departmentId(salesId)
+                .joinDate(LocalDate.of(2024, 1, 1)).isActive(true).build());
+
+        ResponseEntity<JsonNode> resp = rest.exchange(
+                "/departments/mine", HttpMethod.GET, authed(employeeToken, null), JsonNode.class);
+
+        assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
+        JsonNode data = resp.getBody().path("data");
+        assertThat(data.path("name").asText()).isEqualTo("Engineering");
+        String members = data.path("members").toString();
+        assertThat(members).contains("Dept Admin").contains("Dept Employee");
+        assertThat(members).doesNotContain("Sales Person");
+    }
+
+    @Test
     void employee_cannotCreate() {
         ResponseEntity<JsonNode> resp = rest.exchange(
                 "/departments", HttpMethod.POST,

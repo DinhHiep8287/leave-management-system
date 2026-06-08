@@ -44,6 +44,9 @@ const HolidaysPage = lazy(() =>
 const ProfilePage = lazy(() =>
   import("@/features/profile/profile-page").then((m) => ({ default: m.ProfilePage })),
 );
+const MyDepartmentPage = lazy(() =>
+  import("@/features/my-department/my-department-page").then((m) => ({ default: m.MyDepartmentPage })),
+);
 
 function PageFallback() {
   return <div className="p-6 text-sm text-muted-foreground">Đang tải…</div>;
@@ -146,6 +149,14 @@ export default function App() {
             element={
               <Suspense fallback={<PageFallback />}>
                 <HolidaysPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/my-department"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <MyDepartmentPage />
               </Suspense>
             }
           />

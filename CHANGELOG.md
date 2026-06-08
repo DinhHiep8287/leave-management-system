@@ -7,6 +7,10 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added — Phòng ban của tôi (danh bạ thành viên)
+- **BE** `GET /departments/mine` (self-scoped theo principal, không nhận id → không lộ phòng khác): trả phòng ban của người gọi + danh sách thành viên đang hoạt động (head xếp đầu, rồi theo tên), kèm `headName`. DTO `MyDepartmentResponse`/`DepartmentMemberResponse`; tái dùng `UserRepository.findByDepartmentIdAndIsActiveTrue`. Test E2E: `DepartmentE2ETest` khẳng định thấy thành viên cùng phòng + **không** lẫn người phòng SALES.
+- **FE** màn **"Phòng ban của tôi"** (`/my-department`, nav cho mọi vai trò): tên phòng + trưởng phòng + bảng thành viên (badge "Trưởng phòng"). Đáp ứng REQUIREMENTS §6 ở mức danh bạ phòng ban cho emp/manager.
+
 ### Added — Hồ sơ: phòng ban + quản lý của tôi
 - `GET /users/me` (và `PATCH /users/me`) trả thêm `departmentName` + `managerName` (DTO mới `MeResponse` — resolve tên từ id, không đụng `UserResponse` dùng chung cho list/CRUD nên không gây N+1). FE trang **Hồ sơ cá nhân** hiển thị Phòng ban + Quản lý (read-only). Lý do: emp/manager trước đây không thấy phòng ban của mình vì `/me` chỉ trả `departmentId` (số) và profile không render. Xem `docs/REQUIREMENTS.md §9`.
 

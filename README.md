@@ -16,6 +16,10 @@ Hệ thống quản lý nghỉ phép — mô phỏng quy trình nghiệp vụ ph
 |---|---|
 | ![Người dùng](docs/screenshots/users.png) | ![Người dùng dark](docs/screenshots/users-dark.png) |
 
+| Phòng ban của tôi | Hồ sơ cá nhân |
+|---|---|
+| ![Phòng ban của tôi](docs/screenshots/my-department.png) | ![Hồ sơ](docs/screenshots/profile.png) |
+
 ## Tính năng chính
 
 - Nhân viên tạo đơn nghỉ phép (loại nghỉ, thời gian, lý do, hỗ trợ nửa ngày).
