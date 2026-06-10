@@ -7,6 +7,12 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added — Seed dữ liệu demo tự nhiên (profile dev)
+- **`DemoLeaveSeeder`** (mới, gọi từ `DemoDataInitializer`, chỉ chạy khi DB trống): seed 10 nhân viên tên tiếng Việt (ENG +4, SALES +4, HR +2 — tổng 19 user) + quỹ phép năm hiện tại & năm trước + **~63 đơn nghỉ** trải 5 tháng qua tới +30 ngày tới (đủ APPROVED/PENDING/REJECTED/CANCELLED, nửa ngày, lý do tiếng Việt) + 2 điều chỉnh quỹ có audit.
+- **Bất biến được giữ như luồng thật**: `total_days` tính bằng `LeaveDayCalculator` + holidays thật; `used_days` đi qua `LeaveBalanceService.applyUsedDelta` (không bao giờ âm); mỗi user một tuần-slot riêng (không chồng lấn); `approval_actions` đúng state machine §5.4. Ngày **tương đối theo hôm nay** nên dữ liệu không bao giờ cũ; mỗi phòng có 1 người đang nghỉ hôm nay.
+- Đơn seed tương lai ≤ +30 ngày để không phá Playwright smoke (smoke nộp đơn ở +80 ngày và bấm nút Hủy đầu tiên). `e2e/run_smoke.py`: `shot()` chờ 1.2s trước khi chụp (networkidle không tin cậy với Vite HMR websocket).
+- Reset để seed lại: `docker compose down -v && docker compose up` (nhớ tạo lại DB test: `docker compose exec postgres createdb -U leave_admin leave_management_test`).
+
 ### Added — Hoàn chỉnh MVP (đóng nốt khoảng hở REQUIREMENTS)
 - **§10.2** dashboard thêm **"Đang nghỉ tuần này"** (`onLeaveThisWeekCount` — đếm distinct người nghỉ trong tuần ISO theo phạm vi người xem, bổ sung cho "hôm nay"). BE `DashboardService` + FE stat card. *(Đây là khoảng hở thật duy nhất còn lại.)*
 - **§5.3** (defense-in-depth): API đã chặn `start_date` quá khứ sẵn qua `@FutureOrPresent` trên DTO; thêm guard `start_date >= today` ở tầng service `submit`/`update` để chặn cả khi gọi service trực tiếp (bỏ qua bean validation) + test `submitWithPastStartDateIsRejected`.

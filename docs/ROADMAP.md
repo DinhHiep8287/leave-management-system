@@ -90,6 +90,13 @@ Giao diện quản trị cho backend đã có sẵn — biến sản phẩm thà
 
 → Toàn bộ REQUIREMENTS MVP đã đáp ứng **trừ i18n (§12)**, được hoãn sang v2 theo thống nhất.
 
+## Seed dữ liệu demo tự nhiên ✅ **Done**
+
+- `DemoLeaveSeeder` (profile dev, DB trống mới chạy): 19 user (10 tên tiếng Việt mới), quỹ phép
+  2 năm, ~63 đơn nghỉ tương đối theo ngày hiện tại (đủ trạng thái, nửa ngày, mỗi phòng 1 người
+  đang nghỉ hôm nay), 2 điều chỉnh quỹ có audit. Bất biến giữ nguyên như luồng thật
+  (LeaveDayCalculator, applyUsedDelta, không chồng lấn, state machine §5.4).
+
 ## Để sau (chưa làm trong v1.x)
 
 - **i18n** (§12): tách chuỗi, khung `vi` mặc định + `en` (refactor lớn — để v2).

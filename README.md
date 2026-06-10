@@ -68,6 +68,8 @@ Chi tiết xem [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md).
 
 Đăng nhập demo (profile `dev`): `admin@demo.local / Admin@12345` (ADMIN), `eng.manager@demo.local / User@12345` (quản lý), `eng.emp1@demo.local / User@12345` (nhân viên).
 
+DB dev được **seed sẵn dữ liệu demo phong phú** (19 nhân viên 3 phòng ban, quỹ phép, ~60 đơn nghỉ trải 5 tháng với đủ trạng thái — ngày tính tương đối theo hôm nay nên không bao giờ cũ). Muốn seed lại từ đầu: `docker compose down -v && docker compose up`.
+
 ## Màn hình frontend
 
 - **Tổng quan** — stat cards (chờ duyệt, đang nghỉ hôm nay/tuần này, đơn chờ) + biểu đồ quỹ phép; HR/ADMIN có khu toàn tổ chức.

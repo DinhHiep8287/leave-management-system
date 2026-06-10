@@ -93,7 +93,16 @@ Ví dụ: `V5__add_request_attachment_url.sql`.
 ```bash
 docker compose down -v
 docker compose up
+# DB test bị xóa theo — tạo lại trước khi chạy backend test:
+docker compose exec postgres createdb -U leave_admin leave_management_test
 ```
+
+### Dữ liệu demo (profile dev)
+Khi DB **trống**, `DemoDataInitializer` + `DemoLeaveSeeder` tự seed: 19 user (3 phòng ban,
+xem tài khoản trong README), quỹ phép năm hiện tại + năm trước, ~63 đơn nghỉ trải 5 tháng
+qua tới +30 ngày tới (đủ trạng thái, có người đang nghỉ hôm nay ở mỗi phòng), 2 điều chỉnh
+quỹ có audit. Ngày tính **tương đối theo hôm nay** nên reset lúc nào dữ liệu cũng "tươi".
+DB đã có user thì seeder bỏ qua — muốn seed lại phải reset hoàn toàn (ở trên).
 
 ## 6. Testing
 
