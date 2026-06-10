@@ -58,6 +58,8 @@ def nav(page, link_name: str, heading: str) -> None:
 
 
 def shot(page, name: str) -> None:
+    # networkidle is unreliable under Vite (HMR websocket); give queries a beat to render.
+    page.wait_for_timeout(1200)
     page.screenshot(path=os.path.join(SHOTS, name + ".png"), full_page=True)
 
 
