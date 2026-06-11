@@ -242,12 +242,13 @@ export function CalendarPage() {
                       key={e.leaveRequestId}
                       type="button"
                       onClick={() => setDetailId(e.leaveRequestId)}
-                      title={`${e.userFullName} · ${e.leaveTypeCode}`}
+                      title={`${e.userFullName} · ${e.leaveTypeCode} — bấm để xem chi tiết`}
                       className={cn(
-                        "block w-full truncate rounded px-1.5 py-0.5 text-left text-[11px]",
+                        "block w-full cursor-pointer truncate rounded px-1.5 py-0.5 text-left text-[11px]",
+                        "transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                         e.status === "APPROVED"
-                          ? "bg-primary/15 text-primary"
-                          : "bg-amber-100 text-amber-800",
+                          ? "bg-primary/15 text-primary hover:bg-primary/30"
+                          : "bg-amber-100 text-amber-800 hover:bg-amber-200",
                       )}
                     >
                       {e.userFullName}

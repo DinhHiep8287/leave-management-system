@@ -2,8 +2,16 @@ import { useMemo, useState } from "react";
 
 import { ErrorState } from "@/components/error-state";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { TableSkeletonRows } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useAuth } from "@/features/auth/auth-context";
 import { cn } from "@/lib/utils";
@@ -26,8 +34,9 @@ export function UsersPage() {
   const [formUser, setFormUser] = useState<User | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [resetUser, setResetUser] = useState<User | null>(null);
+  const [toggleUser, setToggleUser] = useState<User | null>(null);
 
-  const { data, isFetching, isError, refetch } = useUsers({ q, role, departmentId, activeOnly, page });
+  const { data, isLoading, isFetching, isError, refetch } = useUsers({ q, role, departmentId, activeOnly, page });
   const { data: depts } = useDepartmentOptions();
   const setActive = useSetUserActive();
 
@@ -131,10 +140,11 @@ export function UsersPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {items.length === 0 && (
+            {isLoading && <TableSkeletonRows rows={5} colSpan={isAdmin ? 7 : 6} />}
+            {!isLoading && items.length === 0 && (
               <TableRow>
                 <TableCell colSpan={isAdmin ? 7 : 6} className="text-center text-muted-foreground">
-                  Không có người dùng.
+                  Không tìm thấy người dùng nào khớp bộ lọc.
                 </TableCell>
               </TableRow>
             )}
@@ -168,7 +178,7 @@ export function UsersPage() {
                         variant="outline"
                         size="sm"
                         disabled={setActive.isPending}
-                        onClick={() => setActive.mutate({ id: u.id, active: !u.active })}
+                        onClick={() => setToggleUser(u)}
                       >
                         {u.active ? "Khóa" : "Kích hoạt"}
                       </Button>
@@ -184,7 +194,7 @@ export function UsersPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-end gap-3 text-sm">
           <span className="text-muted-foreground">
-            Trang {page + 1} / {totalPages}
+            Trang {page + 1} / {totalPages} · {data?.totalElements ?? 0} người dùng
           </span>
           <Button variant="outline" size="sm" disabled={page <= 0} onClick={() => setPage((p) => p - 1)}>
             Trước
@@ -202,6 +212,43 @@ export function UsersPage() {
 
       <UserFormDialog open={formOpen} user={formUser} onClose={() => setFormOpen(false)} />
       <ResetPasswordDialog user={resetUser} onClose={() => setResetUser(null)} />
+
+      <Dialog open={toggleUser != null} onOpenChange={(o) => !o && setToggleUser(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>
+              {toggleUser?.active ? "Khóa tài khoản?" : "Kích hoạt tài khoản?"}
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            {toggleUser?.active
+              ? `${toggleUser?.fullName} sẽ bị đăng xuất khỏi mọi thiết bị và không thể đăng nhập cho tới khi được kích hoạt lại.`
+              : `${toggleUser?.fullName} sẽ đăng nhập lại được ngay sau khi kích hoạt.`}
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setToggleUser(null)}>
+              Đóng
+            </Button>
+            <Button
+              variant={toggleUser?.active ? "destructive" : "default"}
+              disabled={setActive.isPending}
+              onClick={() => {
+                if (!toggleUser) return;
+                setActive.mutate(
+                  { id: toggleUser.id, active: !toggleUser.active },
+                  { onSuccess: () => setToggleUser(null) },
+                );
+              }}
+            >
+              {setActive.isPending
+                ? "Đang xử lý…"
+                : toggleUser?.active
+                  ? "Xác nhận khóa"
+                  : "Xác nhận kích hoạt"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

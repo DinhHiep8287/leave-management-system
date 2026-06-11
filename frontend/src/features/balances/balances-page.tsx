@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { TableSkeletonRows } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useAuth } from "@/features/auth/auth-context";
 import type { LeaveBalance } from "@/features/dashboard/types";
@@ -115,13 +116,7 @@ export function BalancesPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {isFetching && (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground">
-                        Đang tải…
-                      </TableCell>
-                    </TableRow>
-                  )}
+                  {isFetching && <TableSkeletonRows rows={4} colSpan={6} />}
                   {!isFetching && (balances?.length ?? 0) === 0 && (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center text-muted-foreground">

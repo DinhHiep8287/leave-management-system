@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Select } from "@/components/ui/select";
+import { TableSkeletonRows } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useAuth } from "@/features/auth/auth-context";
 import { formatDate } from "@/lib/format";
@@ -98,17 +99,14 @@ export function MyRequestsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading && (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground">
-                  Đang tải…
-                </TableCell>
-              </TableRow>
-            )}
+            {isLoading && <TableSkeletonRows rows={4} colSpan={6} />}
             {!isLoading && requests?.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground">
-                  Chưa có đơn nào.
+                <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                  <p>Chưa có đơn nào trong bộ lọc này.</p>
+                  <Button asChild variant="outline" size="sm" className="mt-3">
+                    <Link to="/leave-requests/new">Nộp đơn mới</Link>
+                  </Button>
                 </TableCell>
               </TableRow>
             )}

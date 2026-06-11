@@ -4,6 +4,7 @@ import { ErrorState } from "@/components/error-state";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
+import { TableSkeletonRows } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { RequestDetailDialog } from "@/features/leave-requests/request-detail-dialog";
 import { STATUS_LABELS, type LeaveStatus } from "@/features/leave-requests/types";
@@ -71,17 +72,11 @@ export function ApprovalInboxPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading && (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center text-muted-foreground">
-                  Đang tải…
-                </TableCell>
-              </TableRow>
-            )}
+            {isLoading && <TableSkeletonRows rows={4} colSpan={7} />}
             {!isLoading && items.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-muted-foreground">
-                  Không có đơn nào.
+                <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
+                  Không có đơn nào trong bộ lọc này — bạn đã xử lý hết.
                 </TableCell>
               </TableRow>
             )}
@@ -128,7 +123,7 @@ export function ApprovalInboxPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-end gap-3 text-sm">
           <span className="text-muted-foreground">
-            Trang {page + 1} / {totalPages}
+            Trang {page + 1} / {totalPages} · {data?.totalElements ?? 0} đơn
           </span>
           <Button
             variant="outline"
