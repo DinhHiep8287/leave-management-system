@@ -14,8 +14,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.peih68.leave.auth.service.JwtService;
 import com.peih68.leave.common.exception.GlobalExceptionHandler;
 import com.peih68.leave.config.MethodSecurityTestConfig;
+import com.peih68.leave.config.WithMockPrincipal;
 import com.peih68.leave.user.domain.Role;
 import com.peih68.leave.user.service.UserService;
+import com.peih68.leave.user.web.dto.MeResponse;
 import com.peih68.leave.user.web.dto.UserCreateRequest;
 import com.peih68.leave.user.web.dto.UserResponse;
 import java.time.LocalDate;
@@ -111,6 +113,20 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"newPassword\":\"newPassword1\"}"))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockPrincipal(id = 5L, role = Role.EMPLOYEE)
+    void me_returnsResolvedDepartmentAndManagerNames() throws Exception {
+        given(userService.findMe(5L)).willReturn(new MeResponse(
+                5L, "E0005", "e@x.com", "Eng Employee", Role.EMPLOYEE,
+                1L, "Engineering", 3L, "Eng Manager",
+                LocalDate.of(2025, 1, 1), true, OffsetDateTime.now(), OffsetDateTime.now()));
+
+        mvc.perform(get("/users/me"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.departmentName").value("Engineering"))
+                .andExpect(jsonPath("$.data.managerName").value("Eng Manager"));
     }
 
     @Test

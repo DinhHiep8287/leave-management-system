@@ -12,10 +12,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.peih68.leave.auth.service.JwtService;
+import com.peih68.leave.config.WithMockPrincipal;
 import com.peih68.leave.department.service.DepartmentService;
+import com.peih68.leave.department.web.dto.DepartmentMemberResponse;
 import com.peih68.leave.department.web.dto.DepartmentRequest;
 import com.peih68.leave.department.web.dto.DepartmentResponse;
+import com.peih68.leave.department.web.dto.MyDepartmentResponse;
+import com.peih68.leave.user.domain.Role;
 import java.time.OffsetDateTime;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -86,6 +91,21 @@ class DepartmentControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(new DepartmentRequest("QA TEAM!", "X", null, true))))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockPrincipal(id = 5L, role = Role.EMPLOYEE)
+    void employee_canViewOwnDepartmentRoster() throws Exception {
+        given(departmentService.myDepartment(5L)).willReturn(new MyDepartmentResponse(
+                1L, "ENG", "Engineering", 3L, "Eng Manager",
+                List.of(new DepartmentMemberResponse(3L, "Eng Manager", "m@x.com", Role.MANAGER, true),
+                        new DepartmentMemberResponse(5L, "Eng Employee", "e@x.com", Role.EMPLOYEE, false))));
+
+        mvc.perform(get("/departments/mine"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.name").value("Engineering"))
+                .andExpect(jsonPath("$.data.headName").value("Eng Manager"))
+                .andExpect(jsonPath("$.data.members[0].isHead").value(true));
     }
 
     @Test
