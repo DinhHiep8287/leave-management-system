@@ -21,11 +21,13 @@ import com.peih68.leave.leaverequest.web.dto.LeaveRequestCreateRequest;
 import com.peih68.leave.leaverequest.web.dto.LeaveRequestResponse;
 import com.peih68.leave.leavetype.domain.LeaveTypeEntity;
 import com.peih68.leave.leavetype.repository.LeaveTypeRepository;
+import com.peih68.leave.notification.service.NotificationService;
 import com.peih68.leave.user.domain.Role;
 import com.peih68.leave.user.domain.UserEntity;
 import com.peih68.leave.user.repository.UserRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -56,6 +58,9 @@ public class LeaveRequestService {
     private final HolidayService holidayService;
     private final LeaveDayCalculator dayCalculator;
     private final AuditLogWriter auditLogWriter;
+    private final NotificationService notificationService;
+
+    private static final DateTimeFormatter DM = DateTimeFormatter.ofPattern("dd/MM");
 
     /** An employee submits a leave request for themselves. */
     @Transactional
@@ -119,6 +124,7 @@ public class LeaveRequestService {
                 .build());
 
         recordAction(entity.getId(), user.getId(), ApprovalAction.CREATED, null, LeaveStatus.PENDING, null);
+        notifyAbout(entity, ApprovalAction.CREATED, user.getId());
         log.info("user {} submitted leave request {} ({} days)", user.getId(), entity.getId(), totalDays);
         return toResponse(entity);
     }
@@ -179,6 +185,7 @@ public class LeaveRequestService {
 
         recordAction(r.getId(), principal.getId(), ApprovalAction.UPDATED,
                 LeaveStatus.PENDING, LeaveStatus.PENDING, null);
+        notifyAbout(r, ApprovalAction.UPDATED, principal.getId());
         log.info("user {} edited leave request {} ({} days)", principal.getId(), r.getId(), totalDays);
         return toResponse(r);
     }
@@ -306,8 +313,56 @@ public class LeaveRequestService {
         recordAction(r.getId(), actor.getId(), action, previous, next, comment);
         auditLogWriter.record(actor.getId(), "LEAVE_REQUEST_" + action.name(), "leave_request", r.getId(),
                 "{\"status\":\"" + previous + "\"}", "{\"status\":\"" + next + "\"}");
+        notifyAbout(r, action, actor.getId());
         log.info("request {} {} by user {} ({} -> {})", r.getId(), action, actor.getId(), previous, next);
         return toResponse(r);
+    }
+
+    /**
+     * In-app notification for a lifecycle event, created in the same transaction.
+     * CREATED/UPDATED go to the approver; APPROVED/REJECTED go to the requester;
+     * CANCELLED goes to whichever side did not act.
+     */
+    private void notifyAbout(LeaveRequestEntity r, ApprovalAction action, Long actorId) {
+        String requesterName = userRepository.findById(r.getUserId())
+                .map(UserEntity::getFullName).orElse("Nhân viên");
+        String typeCode = leaveTypeRepository.findById(r.getLeaveTypeId())
+                .map(LeaveTypeEntity::getCode).orElse("");
+        String range = DM.format(r.getStartDate()) + "–" + DM.format(r.getEndDate());
+
+        Long recipient;
+        String message;
+        switch (action) {
+            case CREATED -> {
+                recipient = r.getManagerId();
+                message = "%s nộp đơn nghỉ %s (%s), đang chờ bạn duyệt".formatted(requesterName, range, typeCode);
+            }
+            case UPDATED -> {
+                recipient = r.getManagerId();
+                message = "%s sửa đơn nghỉ đang chờ duyệt, hiện là %s (%s)".formatted(requesterName, range, typeCode);
+            }
+            case APPROVED -> {
+                recipient = r.getUserId();
+                message = "Đơn nghỉ %s (%s) của bạn đã được duyệt".formatted(range, typeCode);
+            }
+            case REJECTED -> {
+                recipient = r.getUserId();
+                message = "Đơn nghỉ %s (%s) của bạn bị từ chối".formatted(range, typeCode);
+            }
+            case CANCELLED -> {
+                boolean byRequester = r.getUserId().equals(actorId);
+                recipient = byRequester ? r.getManagerId() : r.getUserId();
+                message = byRequester
+                        ? "%s đã hủy đơn nghỉ %s (%s)".formatted(requesterName, range, typeCode)
+                        : "Đơn nghỉ %s (%s) của bạn đã bị hủy".formatted(range, typeCode);
+            }
+            default -> {
+                return;
+            }
+        }
+        if (recipient != null && !recipient.equals(actorId)) {
+            notificationService.notify(recipient, r.getId(), action, message);
+        }
     }
 
     private void requireStatus(LeaveRequestEntity r, LeaveStatus expected) {

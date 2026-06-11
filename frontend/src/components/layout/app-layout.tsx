@@ -5,6 +5,7 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/auth-context";
+import { NotificationBell } from "@/features/notifications/notification-bell";
 import { cn } from "@/lib/utils";
 
 type NavItem = { to: string; label: string; show: (role: string) => boolean };
@@ -110,6 +111,7 @@ export function AppLayout() {
             <span className="text-sm font-semibold text-foreground">Quản lý nghỉ phép</span>
           </div>
           <div className="ml-auto flex items-center gap-3">
+            <NotificationBell />
             <ThemeToggle />
             <Link to="/profile" className="rounded-md px-2 py-1 text-right hover:bg-secondary">
               <p className="text-sm font-medium leading-tight">{user?.fullName}</p>

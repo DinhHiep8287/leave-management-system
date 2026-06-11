@@ -77,6 +77,7 @@ class LeaveRequestE2ETest {
     }
 
     private void wipe() {
+        jdbc.update("DELETE FROM notifications");
         jdbc.update("DELETE FROM approval_actions");
         jdbc.update("DELETE FROM leave_requests");
         jdbc.update("DELETE FROM audit_log");

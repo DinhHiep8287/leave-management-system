@@ -16,6 +16,7 @@ public final class E2ECleanup {
 
     /** Delete user-scoped data in FK-safe order (children first), then users. */
     public static void wipeUsersFkSafe(JdbcTemplate jdbc) {
+        jdbc.update("DELETE FROM notifications");
         jdbc.update("DELETE FROM approval_actions");
         jdbc.update("DELETE FROM leave_requests");
         jdbc.update("DELETE FROM leave_balances");
