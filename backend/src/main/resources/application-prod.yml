@@ -3,8 +3,12 @@
 spring:
   datasource:
     hikari:
-      maximum-pool-size: 20
-      minimum-idle: 5
+      # Sized for serverless Postgres (Neon suspends idle computes after ~5 minutes):
+      # keep the pool small and retire connections before the server can cut them.
+      # Do NOT add keepalive-time — pinging would keep Neon awake and burn compute hours.
+      maximum-pool-size: 10
+      minimum-idle: 1
+      max-lifetime: 270000
   lifecycle:
     timeout-per-shutdown-phase: 30s
 
