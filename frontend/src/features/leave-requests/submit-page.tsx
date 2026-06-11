@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,25 +10,11 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
 import { useLeaveTypes, useSubmitLeaveRequest } from "./hooks";
-import { HALF_LABELS, type LeaveHalf } from "./types";
+import { HALVES, leaveRequestSchema, type LeaveRequestFormValues } from "./schema";
+import { HALF_LABELS } from "./types";
 
-const HALVES: LeaveHalf[] = ["FULL_DAY", "MORNING", "AFTERNOON"];
-
-const schema = z
-  .object({
-    leaveTypeId: z.coerce.number().int().positive("Chọn loại nghỉ phép"),
-    startDate: z.string().min(1, "Chọn ngày bắt đầu"),
-    endDate: z.string().min(1, "Chọn ngày kết thúc"),
-    startHalf: z.enum(["FULL_DAY", "MORNING", "AFTERNOON"]),
-    endHalf: z.enum(["FULL_DAY", "MORNING", "AFTERNOON"]),
-    reason: z.string().trim().min(1, "Nhập lý do nghỉ").max(2000, "Lý do tối đa 2000 ký tự"),
-  })
-  .refine((d) => d.endDate >= d.startDate, {
-    message: "Ngày kết thúc phải từ ngày bắt đầu trở đi",
-    path: ["endDate"],
-  });
-
-type FormValues = z.infer<typeof schema>;
+type FormValues = LeaveRequestFormValues;
+const schema = leaveRequestSchema;
 
 export function SubmitLeaveRequestPage() {
   const navigate = useNavigate();
