@@ -11,6 +11,7 @@ Run:     python e2e/run_smoke.py
 
 import datetime
 import os
+import subprocess
 import sys
 
 from playwright.sync_api import expect, sync_playwright
@@ -90,6 +91,25 @@ def step(msg: str) -> None:
     print("STEP:", msg, flush=True)
 
 
+def cleanup_db() -> None:
+    """Hard-delete the cancelled smoke request so repeated runs don't pile up rows."""
+    sql = (
+        "DELETE FROM approval_actions WHERE leave_request_id IN "
+        "(SELECT id FROM leave_requests WHERE reason='E2E smoke'); "
+        "DELETE FROM leave_requests WHERE reason='E2E smoke';"
+    )
+    try:
+        subprocess.run(
+            ["docker", "compose", "exec", "-T", "postgres",
+             "psql", "-U", "leave_admin", "-d", "leave_management", "-c", sql],
+            cwd=os.path.join(os.path.dirname(__file__), ".."),
+            check=True, capture_output=True, timeout=30,
+        )
+        print("STEP: cleaned smoke rows from dev DB", flush=True)
+    except Exception as e:  # noqa: BLE001 — cleanup is best-effort, never fail the smoke
+        print("WARN: could not clean smoke rows:", repr(e)[:200], flush=True)
+
+
 def run() -> None:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -137,6 +157,7 @@ def run() -> None:
         logout(page)
 
         browser.close()
+    cleanup_db()
     print("E2E SMOKE OK")
 
 

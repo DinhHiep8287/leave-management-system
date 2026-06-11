@@ -36,5 +36,8 @@ Override the frontend URL with `E2E_BASE_URL` if needed.
 
 - Demo accounts (dev profile): `eng.emp1@demo.local` / `eng.manager@demo.local` /
   `hr@demo.local` / `admin@demo.local` (passwords `User@12345`, admin `Admin@12345`).
+- After the run, the script **hard-deletes its own cancelled smoke request** from the dev DB
+  (via `docker compose exec postgres psql`) so repeated runs don't accumulate rows. If docker
+  is unavailable it prints a warning and the smoke still passes.
 - Not wired into CI yet — running Playwright in CI needs the full stack up (postgres +
   backend + frontend); tracked as a follow-up in `docs/ROADMAP.md`.
