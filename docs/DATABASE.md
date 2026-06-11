@@ -77,9 +77,10 @@ Index: `(department_id)`, `(manager_id)`, `(email)`.
 | total_days | NUMERIC(5,1) | NOT NULL | Quota gốc |
 | used_days | NUMERIC(5,1) | NOT NULL DEFAULT 0 | |
 | adjusted_days | NUMERIC(5,1) | NOT NULL DEFAULT 0 | HR điều chỉnh +/- |
+| carried_over_days | NUMERIC(5,1) | NOT NULL DEFAULT 0 | Phép tồn chuyển từ năm trước (V5, v2.0.0) |
 | created_at, updated_at | TIMESTAMPTZ | | |
 
-`remaining = total_days + adjusted_days - used_days` (computed ở app, không lưu).
+`remaining = total_days + adjusted_days + carried_over_days - used_days` (computed ở app, không lưu).
 
 UNIQUE `(user_id, leave_type_id, year)`.
 
@@ -178,13 +179,29 @@ Migration cuối cùng sẽ seed dữ liệu demo:
 - 3 phòng ban: ENGINEERING, HR, SALES
 - 10 ngày lễ Việt Nam 2026
 
+### 2.x. `notifications` (V4, v2.0.0)
+
+| Cột | Kiểu | Ràng buộc | Ghi chú |
+|---|---|---|---|
+| id | BIGSERIAL | PK | |
+| user_id | BIGINT | FK users(id) NOT NULL, ON DELETE CASCADE | Người nhận |
+| leave_request_id | BIGINT | FK leave_requests(id) NULL, ON DELETE CASCADE | |
+| event_type | VARCHAR(30) | CHECK (CREATED/UPDATED/APPROVED/REJECTED/CANCELLED) | |
+| message | TEXT | NOT NULL | Tiếng Việt, render thẳng |
+| is_read | BOOLEAN | NOT NULL DEFAULT false | |
+| created_at, read_at | TIMESTAMPTZ | | Không có updated_at/created_by |
+
+INDEX `(user_id, is_read)`. Ghi trong **cùng transaction** với transition của đơn.
+
 ## 5. Migration plan (Flyway)
 
 ```
-V1__create_baseline_schema.sql      # Tất cả bảng trên
-V2__seed_leave_types.sql            # 4 loại nghỉ phép
-V3__seed_holidays_2026.sql          # Ngày lễ VN 2026
-V4__seed_demo_users.sql             # User demo (chỉ profile dev)
+V1__create_baseline_schema.sql   # Schema 9 bảng baseline
+V2__seed_reference_data.sql      # 3 phòng ban, 4 loại nghỉ, 10 ngày lễ VN 2026
+V3__fix_sick_quota.sql           # SICK quota 3 -> 30 (REQUIREMENTS §3)
+V4__notifications.sql            # Bảng notifications (v2.0.0)
+V5__carry_over.sql               # Cột leave_balances.carried_over_days (v2.0.0)
 ```
 
-> Migration V4 chỉ chạy ở profile `dev` (kiểm soát qua `spring.flyway.locations`).
+> User demo KHÔNG seed qua migration — `DemoDataInitializer`/`DemoLeaveSeeder`
+> (CommandLineRunner, chỉ profile `dev`, chỉ khi DB trống) đảm nhiệm.

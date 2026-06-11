@@ -135,6 +135,16 @@ leave-management-system/
 - **Request log**: log mọi request với traceId.
 - **Audit**: bảng `audit_log` ghi lại thay đổi quan trọng (approve, reject, cancel, balance adjustment) với `actor_id`, `action`, `target_type`, `target_id`, `old_value`, `new_value`, `timestamp`.
 
+## 5b. Notification (v2.0.0)
+
+- **In-app**: `NotificationService` ghi bảng `notifications` trong **cùng transaction** với
+  transition của đơn (CREATED/UPDATED → manager; APPROVED/REJECTED → requester; CANCELLED →
+  bên còn lại; không tự thông báo cho người thao tác). FE chuông polling 30 giây.
+- **Email**: `LeaveRequestService` publish `LeaveRequestChangedEvent`;
+  `EmailNotificationListener` (`@Async` + `@TransactionalEventListener(AFTER_COMMIT)`) gửi
+  SMTP — lỗi mail không bao giờ ảnh hưởng transaction nghiệp vụ. Cờ `app.mail.enabled`
+  (mặc định false); dev bật sẵn với **Mailpit** (UI :8025).
+
 ## 6. Error handling
 
 - Global `@RestControllerAdvice` → response chuẩn `ErrorResponse`.

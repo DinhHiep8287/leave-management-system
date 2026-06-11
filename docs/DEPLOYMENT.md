@@ -171,6 +171,10 @@ curl https://<railway-domain>/api/actuator/health          # {"status":"UP",...}
 docker run --rm postgres:16-alpine pg_dump "postgresql://<user>:<pw>@<host>/neondb?sslmode=require" > backup-$(date +%F).sql
 ```
 
+- **Email notification (mặc định TẮT ở prod)**: bật khi có tài khoản SMTP (Resend/Brevo free)
+  bằng env trên Railway: `MAIL_ENABLED=true` + `SPRING_MAIL_HOST`, `SPRING_MAIL_PORT`,
+  `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD` (relaxed binding của Spring tự map sang
+  `spring.mail.*`). Không bật thì hệ thống vẫn đủ chức năng — đã có thông báo in-app.
 - **Chi phí**: xem Railway Usage sau 4-5 ngày để ngoại suy $/tháng và quyết định lên Hobby.
 - **Hikari + Neon**: prod đã cấu hình pool nhỏ + `max-lifetime` 4.5 phút (ngắn hơn mốc Neon
   suspend ~5 phút) và cố ý KHÔNG bật keepalive (sẽ giữ Neon thức, tốn compute-hours).

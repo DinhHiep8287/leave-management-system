@@ -37,6 +37,10 @@ ngủ để tiết kiệm tài nguyên) — các lượt sau nhanh bình thườ
 |---|---|
 | ![Phòng ban của tôi](docs/screenshots/my-department.png) | ![Hồ sơ](docs/screenshots/profile.png) |
 
+| Thông báo (chuông) | Giao diện mobile |
+|---|---|
+| ![Thông báo](docs/screenshots/notification-bell.png) | ![Mobile](docs/screenshots/mobile-nav.png) |
+
 ## Tính năng chính
 
 - Nhân viên tạo đơn nghỉ phép (loại nghỉ, thời gian, lý do, hỗ trợ nửa ngày).
@@ -45,6 +49,8 @@ ngủ để tiết kiệm tài nguyên) — các lượt sau nhanh bình thườ
 - Quản lý số ngày phép còn lại của từng nhân viên theo loại nghỉ.
 - Lịch tổng hợp nghỉ phép theo tháng/tuần, lọc theo phòng ban.
 - Dashboard riêng cho từng vai trò.
+- Thông báo in-app (chuông) + email khi đơn được nộp/duyệt/từ chối/hủy.
+- Chuyển phép tồn sang năm sau (carry-over có trần, ADMIN thao tác).
 
 ## Công nghệ
 

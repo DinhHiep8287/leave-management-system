@@ -11,6 +11,7 @@ Run:     python e2e/run_smoke.py
 
 import datetime
 import os
+import re
 import subprocess
 import sys
 
@@ -135,9 +136,15 @@ def run() -> None:
         step("logout employee")
         logout(page)
 
-        # Manager: approver inbox.
+        # Manager: approver inbox + notification bell (the employee's submit/cancel
+        # above must have produced unread notifications for this manager).
         step("login manager")
         login(page, *USERS["manager"])
+        bell = page.get_by_role("button", name="Thông báo", exact=False)
+        expect(bell).to_have_attribute("aria-label", re.compile("chưa đọc"), timeout=30_000)
+        bell.click()
+        expect(page.get_by_text("đơn nghỉ", exact=False).first).to_be_visible(timeout=30_000)
+        bell.click()  # close the dropdown
         nav(page, "Cần duyệt", "Cần duyệt")
         shot(page, "approvals")
         logout(page)

@@ -130,23 +130,23 @@ phạm vi** theo quyết định 06/2026 — UI tiếng Việt duy nhất, xem R
 
 (Guide đầy đủ as-built trong `docs/DEPLOYMENT.md`.)
 
-## v2.0.0 — Tính năng mở rộng (REQUIREMENTS §13) (~3-4 tuần)
+## v2.0.0 — Tính năng mở rộng + cải tiến UI/UX ✅ **Done**
 
-Mỗi mục là một quyết định riêng khi bắt đầu — thứ tự đề xuất theo giá trị/độ rủi ro:
+1. ✅ **In-app notification (chuông)**: bảng `notifications` (V4), ghi cùng transaction với
+   transition; API self-scoped; FE chuông + badge, polling 30s, mark-read.
+2. ✅ **Email notification**: event `@Async` AFTER_COMMIT + Mailpit dev (UI :8025);
+   `app.mail.enabled` mặc định false — prod bật sau khi có SMTP (xem DEPLOYMENT.md).
+3. ✅ **Carry-over phép**: cột `carried_over_days` (V5) + `POST /leave-balances/carry-over`
+   (ADMIN, có trần, idempotent, audit) + UI trang Quỹ phép. REQUIREMENTS §4 đã đổi spec.
+4. ✅ **Gói UI/UX**: mobile nav, preview số ngày + hint quỹ khi nộp đơn, confirm khóa user,
+   skeleton, empty-state CTA, pagination tổng số, affordance lịch.
 
-1. **In-app notification (chuông)**: bảng `notifications` (migration mới), phát sự kiện khi
-   submit/approve/reject/cancel (`@TransactionalEventListener`), `GET /notifications` +
-   mark-read; FE chuông + badge số chưa đọc, polling 30s (chưa cần WebSocket).
-2. **Email notification**: `spring-boot-starter-mail` + **Mailpit** container cho dev;
-   template duyệt/từ chối/cần duyệt; gửi async, không chặn transaction nghiệp vụ.
-3. **Carry-over phép** (§13): cột `carried_over_days` + endpoint/job đầu năm chuyển
-   `remaining` năm cũ (cap N ngày, N cấu hình); cập nhật `remaining()` + REQUIREMENTS.
-4. **Upload file đính kèm** (giấy bác sĩ…): bảng `attachments`, lưu local volume
-   (chưa cần S3), giới hạn type/size, endpoint upload/download có RBAC participant.
-5. **Duyệt nhiều cấp** (để cuối / có thể sang v2.1): đổi state machine — rủi ro cao nhất,
-   chỉ làm khi 1-4 xong và thật sự cần.
+## v2.1 — Để sau
 
-**Mỗi feature đi trọn chu trình**: BE + test → FE → bổ sung e2e smoke → docs.
+- **Upload file đính kèm** (giấy bác sĩ…): cần object storage ngoài (Cloudflare R2/S3) vì
+  filesystem Railway ephemeral; bảng `attachments` + RBAC download.
+- **Duyệt nhiều cấp**: đổi state machine — rủi ro cao, chỉ làm khi thật sự cần.
+- **Bật email prod**: đăng ký SMTP (Resend/Brevo free) + env `MAIL_ENABLED=true`.
 
 ## Nguyên tắc docs cho mọi bản nâng cấp (bắt buộc)
 
