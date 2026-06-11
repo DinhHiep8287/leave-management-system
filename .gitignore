@@ -115,3 +115,6 @@ playwright-report/
 # Auto-load convenience only; the real skills live in .agents/skills/.
 # Junctions don't track cleanly in git on Windows — recreate locally if needed.
 .claude/skills/
+
+# pnpm package store created by in-container installs (bind-mounted)
+frontend/.pnpm-store/
