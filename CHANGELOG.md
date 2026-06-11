@@ -8,7 +8,7 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 
 ### Added — v1.2.0: Deploy thật (Vercel + Railway + Neon)
-- **Demo trực tuyến**: https://leave-management-system-nine-phi.vercel.app — Vercel (SPA + rewrite `/api`) → Railway (Spring Boot Docker, App Sleeping) → Neon (Postgres Singapore, free).
+- **Demo trực tuyến**: https://quanlynghiphep.vercel.app — Vercel (SPA + rewrite `/api`) → Railway (Spring Boot Docker, App Sleeping) → Neon (Postgres Singapore, free).
 - **Repo**: `server.port: ${PORT:8080}` (PaaS inject PORT); Hikari prod thu nhỏ pool + `max-lifetime` 4.5 phút hợp Neon scale-to-zero (cố ý không keepalive); `frontend/vercel.json` (rewrite `/api` → Railway, SPA fallback, security headers + HSTS).
 - **Vận hành**: Neon migrate V1-V3 + seed demo một lần (19 user/63 đơn, 4 câu SQL nhất quán 0 lệch); admin đổi mật khẩu mạnh (pgcrypto `crypt/bf` — thay htpasswd khi không pull được image); backup tay `pg_dump` + Neon PITR; cap RAM `JAVA_TOOL_OPTIONS=-Xmx320m`.
 - **Bài học ghi vào DEPLOYMENT.md**: `APP_CORS_ALLOWED_ORIGINS` bắt buộc kể cả khi dùng Vercel rewrites (browser luôn gửi `Origin` với POST → Spring CORS trả 403 nếu thiếu; curl không Origin vẫn 200 — dễ chẩn đoán nhầm).

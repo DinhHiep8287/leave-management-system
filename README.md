@@ -7,7 +7,7 @@ Hệ thống quản lý nghỉ phép — mô phỏng quy trình nghiệp vụ ph
 
 ## Demo trực tuyến
 
-**https://leave-management-system-nine-phi.vercel.app**
+**https://quanlynghiphep.vercel.app**
 
 | Vai trò | Tài khoản | Mật khẩu |
 |---|---|---|

@@ -122,7 +122,7 @@ phạm vi** theo quyết định 06/2026 — UI tiếng Việt duy nhất, xem R
 ## v1.2.0 — Deploy thật + vận hành ✅ **Done**
 
 1. ✅ **Phương án**: tách dịch vụ **Vercel + Railway + Neon** (free/trial; Railway App Sleeping
-   để tiết kiệm credit). Demo: https://leave-management-system-nine-phi.vercel.app
+   để tiết kiệm credit). Demo: https://quanlynghiphep.vercel.app
 2. ✅ **TLS/HTTPS + headers**: Vercel TLS mặc định; security headers + HSTS qua `vercel.json`.
 3. ✅ **Vận hành**: seed demo một lần vào Neon; admin mật khẩu mạnh riêng; backup tay
    `pg_dump` + Neon PITR; KHÔNG uptime ping (xung đột App Sleeping); JSON log trên Railway.
