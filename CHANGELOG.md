@@ -7,7 +7,11 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-### Added — v1.1.0: Hoàn thiện kiểm thử & CI
+_Chưa có._
+
+## [1.1.0] - 2026-06-11 — Hoàn thiện kiểm thử & CI
+
+### Added
 - **FE unit tests (Vitest + Testing Library)**: 24 test cho `formatDate`/`formatDateTime`, `apiErrorMessage`, `cn`, Zod schema đơn nghỉ (tách `features/leave-requests/schema.ts` dùng chung cho submit + edit — trước đó trùng lặp 2 nơi), `ErrorState` (render + retry). Script `pnpm test`; cấu hình trong `vite.config.ts` (jsdom + globals).
 - **CI**: job frontend thêm bước `pnpm test`; **job `e2e` mới** dựng full stack bằng `docker compose up -d --build` (seeder dev đổ dữ liệu vào DB trống của CI), poll `/api/health` + `:5173`, chạy `e2e/run_smoke.py` (Playwright/chromium); khi fail dump logs + upload screenshots làm artifact.
 - **README badges**: CI status + License MIT.

@@ -104,7 +104,7 @@ Chi tiết xem [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Trạng thái
 
-✅ **v1.0.0 — MVP hoàn chỉnh** (auth, CRUD, đơn nghỉ + duyệt, lịch tháng/tuần, dashboard theo vai trò, báo cáo CSV, console quản trị, cấu hình production) — đáp ứng toàn bộ `docs/REQUIREMENTS.md`. UI tiếng Việt duy nhất (không làm i18n — xem REQUIREMENTS §14). Backend phủ test đầy đủ; FE build/lint sạch; có E2E Playwright (`e2e/`). Kế hoạch tiếp theo: `docs/ROADMAP.md`.
+✅ **v1.1.0 — Kiểm thử đầy đủ mọi tầng** (backend JUnit + FE Vitest + E2E Playwright, tất cả chạy trong CI). Mốc trước: **v1.0.0 — MVP hoàn chỉnh** (auth, CRUD, đơn nghỉ + duyệt, lịch tháng/tuần, dashboard theo vai trò, báo cáo CSV, console quản trị, cấu hình production) — đáp ứng toàn bộ `docs/REQUIREMENTS.md`. UI tiếng Việt duy nhất (không làm i18n — xem REQUIREMENTS §14). Backend phủ test đầy đủ; FE build/lint sạch; có E2E Playwright (`e2e/`). Kế hoạch tiếp theo: `docs/ROADMAP.md`.
 
 ## Giấy phép
 

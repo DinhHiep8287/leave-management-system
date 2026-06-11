@@ -108,7 +108,7 @@ phạm vi** theo quyết định 06/2026 — UI tiếng Việt duy nhất, xem R
 >
 > **Mốc v1.0.0 đã tag** (2026-06-11, CI xanh) — các bản dưới đây bắt đầu từ đó.
 
-## v1.1.0 — Hoàn thiện kiểm thử & CI ✅ **Done**
+## v1.1.0 — Hoàn thiện kiểm thử & CI ✅ **Done** (tag 2026-06-11, CI 3 job xanh)
 
 1. ✅ **FE unit test (Vitest + Testing Library)**: 24 test — `lib/format`, `lib/api-error`,
    `lib/utils`, Zod schema đơn nghỉ (tách `schema.ts` dùng chung submit/edit), `ErrorState`.
