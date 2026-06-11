@@ -46,6 +46,15 @@ services:
     networks:
       - leave-net
 
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: leave-mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025"   # Web UI: http://localhost:8025
+    networks:
+      - leave-net
+
   frontend:
     build:
       context: ./frontend

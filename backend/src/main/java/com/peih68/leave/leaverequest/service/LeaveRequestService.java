@@ -13,6 +13,7 @@ import com.peih68.leave.leaverequest.domain.ApprovalActionEntity;
 import com.peih68.leave.leaverequest.domain.LeaveDayCalculator;
 import com.peih68.leave.leaverequest.domain.LeaveRequestEntity;
 import com.peih68.leave.leaverequest.domain.LeaveStatus;
+import com.peih68.leave.leaverequest.event.LeaveRequestChangedEvent;
 import com.peih68.leave.leaverequest.repository.ApprovalActionRepository;
 import com.peih68.leave.leaverequest.repository.LeaveRequestRepository;
 import com.peih68.leave.leaverequest.web.dto.ApprovalActionResponse;
@@ -59,6 +60,7 @@ public class LeaveRequestService {
     private final LeaveDayCalculator dayCalculator;
     private final AuditLogWriter auditLogWriter;
     private final NotificationService notificationService;
+    private final org.springframework.context.ApplicationEventPublisher events;
 
     private static final DateTimeFormatter DM = DateTimeFormatter.ofPattern("dd/MM");
 
@@ -362,6 +364,8 @@ public class LeaveRequestService {
         }
         if (recipient != null && !recipient.equals(actorId)) {
             notificationService.notify(recipient, r.getId(), action, message);
+            // Consumed async AFTER_COMMIT by the email listener (no-op unless app.mail.enabled).
+            events.publishEvent(new LeaveRequestChangedEvent(recipient, r.getId(), action, message));
         }
     }
 

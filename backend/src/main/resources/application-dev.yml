@@ -1,4 +1,7 @@
 spring:
+  mail:
+    host: mailpit
+    port: 1025
   jpa:
     show-sql: false
     properties:
@@ -14,3 +17,7 @@ logging:
   level:
     org.hibernate.SQL: DEBUG
     org.springframework.security: DEBUG
+
+app:
+  mail:
+    enabled: true
