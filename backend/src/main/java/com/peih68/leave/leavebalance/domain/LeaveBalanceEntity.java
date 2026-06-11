@@ -42,8 +42,12 @@ public class LeaveBalanceEntity extends BaseEntity {
     @Column(name = "adjusted_days", nullable = false, precision = 5, scale = 1)
     private BigDecimal adjustedDays;
 
-    /** remaining = total + adjusted - used (computed, not persisted). */
+    @Column(name = "carried_over_days", nullable = false, precision = 5, scale = 1)
+    @Builder.Default
+    private BigDecimal carriedOverDays = BigDecimal.ZERO;
+
+    /** remaining = total + adjusted + carried_over - used (computed, not persisted). */
     public BigDecimal remaining() {
-        return totalDays.add(adjustedDays).subtract(usedDays);
+        return totalDays.add(adjustedDays).add(carriedOverDays).subtract(usedDays);
     }
 }

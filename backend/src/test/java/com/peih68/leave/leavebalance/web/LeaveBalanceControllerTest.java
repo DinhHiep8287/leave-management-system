@@ -74,6 +74,21 @@ class LeaveBalanceControllerTest {
 
     @Test
     @WithMockPrincipal(id = 7L, role = Role.EMPLOYEE)
+    void employee_cannotCarryOver() throws Exception {
+        mvc.perform(post("/leave-balances/carry-over?fromYear=2026").with(csrf()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockPrincipal(id = 1L, role = Role.ADMIN)
+    void admin_canCarryOver() throws Exception {
+        given(leaveBalanceService.carryOverYear(anyInt(), any(), any())).willReturn(3);
+        mvc.perform(post("/leave-balances/carry-over?fromYear=2026&capDays=5").with(csrf()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockPrincipal(id = 7L, role = Role.EMPLOYEE)
     void employee_cannotAdjust() throws Exception {
         mvc.perform(patch("/leave-balances/5/adjust").with(csrf())
                         .contentType("application/json")

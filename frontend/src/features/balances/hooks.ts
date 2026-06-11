@@ -3,7 +3,7 @@ import { toast } from "sonner";
 
 import { apiErrorMessage } from "@/lib/api-error";
 
-import { adjustBalance, getUserBalances, initializeYear, listUserOptions } from "./api";
+import { adjustBalance, getUserBalances, initializeYear, listUserOptions, carryOverYear } from "./api";
 
 export function useUserOptions() {
   return useQuery({ queryKey: ["user-options"], queryFn: listUserOptions, staleTime: 5 * 60_000 });
@@ -26,6 +26,19 @@ export function useInitializeYear() {
       toast.success(`Đã khởi tạo ${r.created} dòng quỹ phép cho năm ${r.year}`);
     },
     onError: (e) => toast.error(apiErrorMessage(e, "Khởi tạo thất bại")),
+  });
+}
+
+export function useCarryOver() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ fromYear, capDays }: { fromYear: number; capDays: number }) =>
+      carryOverYear(fromYear, capDays),
+    onSuccess: (r) => {
+      void qc.invalidateQueries({ queryKey: ["user-balances"] });
+      toast.success(`Đã chuyển phép tồn cho ${r.carried} dòng (từ năm ${r.fromYear}, tối đa ${r.capDays} ngày)`);
+    },
+    onError: (e) => toast.error(apiErrorMessage(e, "Chuyển phép tồn thất bại")),
   });
 }
 

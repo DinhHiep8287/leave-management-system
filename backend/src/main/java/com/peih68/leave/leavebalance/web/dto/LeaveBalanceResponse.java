@@ -12,4 +12,5 @@ public record LeaveBalanceResponse(
         BigDecimal totalDays,
         BigDecimal usedDays,
         BigDecimal adjustedDays,
+        BigDecimal carriedOverDays,
         BigDecimal remainingDays) {}

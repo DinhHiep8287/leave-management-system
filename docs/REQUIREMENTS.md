@@ -35,7 +35,9 @@ Mỗi loại có cấu hình:
 ## 4. Số ngày phép (Leave Balance)
 
 - Tính theo **năm dương lịch** (1/1 — 31/12).
-- Không carry over sang năm sau.
+- **Carry-over** (từ v2.0.0): phép còn dư của năm cũ được chuyển sang năm mới, **tối đa `cap` ngày**
+  (mặc định 5, ADMIN nhập khi chạy). Thao tác thủ công bởi ADMIN đầu năm (idempotent — chạy lại
+  không cộng dồn). `remaining = total + adjusted + carried_over - used`.
 - Admin có thể điều chỉnh thủ công.
 - Khi đơn được **APPROVED** → trừ vào balance. Khi đơn bị **CANCELLED** sau approve → hoàn lại.
 - Mỗi nhân viên có 1 record balance/(loại nghỉ phép, năm).
@@ -160,20 +162,18 @@ PENDING ──approve──> APPROVED ──cancel(by employee/HR)──> CANCEL
 
 ## 13. Không thuộc phạm vi MVP
 
-Để rõ ràng — các tính năng **không** làm trong MVP:
+Để rõ ràng — các tính năng **không** làm trong MVP. Một số đã được bổ sung ở v2.0.0:
 
-- ❌ Email/SMS notification
-- ❌ In-app notification (chuông)
+- ✅ ~~In-app notification (chuông)~~ — đã làm ở v2.0.0.
+- ✅ ~~Email notification~~ — đã làm ở v2.0.0 (mặc định tắt ở prod, bật qua `MAIL_ENABLED`; SMS không làm).
+- ✅ ~~Carry over phép sang năm sau~~ — đã làm ở v2.0.0 (xem §4).
 - ❌ Workflow duyệt nhiều cấp
-- ❌ Carry over phép sang năm sau
-- ❌ Upload file (giấy bác sĩ…)
+- ❌ Upload file (giấy bác sĩ…) — cân nhắc v2.1 (cần object storage ngoài).
 - ❌ Mobile app native
 - ❌ Self-register
 - ❌ Quên mật khẩu tự reset qua email
 - ❌ Phân quyền chi tiết (chỉ có RBAC đơn giản)
-- ❌ Báo cáo Excel phức tạp với biểu đồ
-
-Các tính năng này có thể bổ sung ở v2.
+- ❌ Báo cáo Excel phức tạp với biểu đồ (CSV hiện tại mở được bằng Excel)
 
 ## 14. Loại trừ vĩnh viễn (không nằm trong v2)
 

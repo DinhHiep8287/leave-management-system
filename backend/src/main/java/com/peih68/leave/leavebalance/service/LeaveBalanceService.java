@@ -88,7 +88,8 @@ public class LeaveBalanceService {
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "Leave balance not found: " + id));
         BigDecimal before = entity.getAdjustedDays();
         BigDecimal after = before.add(req.adjustedDaysDelta());
-        if (entity.getTotalDays().add(after).subtract(entity.getUsedDays()).compareTo(BigDecimal.ZERO) < 0) {
+        if (entity.getTotalDays().add(after).add(entity.getCarriedOverDays())
+                .subtract(entity.getUsedDays()).compareTo(BigDecimal.ZERO) < 0) {
             throw new ApiException(ErrorCode.VALIDATION_ERROR,
                     "Adjustment would make remaining balance negative");
         }
@@ -125,11 +126,66 @@ public class LeaveBalanceService {
         if (newUsed.signum() < 0) {
             throw new ApiException(ErrorCode.VALIDATION_ERROR, "used days cannot drop below zero");
         }
-        if (entity.getTotalDays().add(entity.getAdjustedDays()).subtract(newUsed).signum() < 0) {
+        if (entity.getTotalDays().add(entity.getAdjustedDays())
+                .add(entity.getCarriedOverDays()).subtract(newUsed).signum() < 0) {
             throw new ApiException(ErrorCode.INSUFFICIENT_BALANCE,
                     "insufficient balance to consume %s days".formatted(delta));
         }
         entity.setUsedDays(newUsed);
+    }
+
+    /**
+     * Carries the remaining balance of {@code fromYear} into {@code fromYear + 1}, capped
+     * at {@code capDays} per (user, type). Creates the target-year row from the type's
+     * default quota when missing. Idempotent: rows whose carried_over_days is already set
+     * are skipped, so re-running never double-counts. Admin-triggered (no scheduler — the
+     * production container sleeps when idle, so cron would be unreliable).
+     */
+    @Transactional
+    public int carryOverYear(int fromYear, BigDecimal capDays, UserPrincipal actor) {
+        if (capDays == null || capDays.signum() <= 0) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "capDays must be positive");
+        }
+        int toYear = fromYear + 1;
+        int carriedCount = 0;
+        for (LeaveBalanceEntity src : balanceRepository.findByYearOrderByUserIdAscLeaveTypeIdAsc(fromYear)) {
+            LeaveTypeEntity type = requireLeaveType(src.getLeaveTypeId());
+            if (!Boolean.TRUE.equals(type.getRequiresBalance())) {
+                continue;
+            }
+            BigDecimal remaining = src.remaining();
+            if (remaining.signum() <= 0) {
+                continue;
+            }
+            LeaveBalanceEntity target = balanceRepository
+                    .findByUserIdAndLeaveTypeIdAndYear(src.getUserId(), src.getLeaveTypeId(), toYear)
+                    .orElseGet(() -> balanceRepository.save(LeaveBalanceEntity.builder()
+                            .userId(src.getUserId())
+                            .leaveTypeId(src.getLeaveTypeId())
+                            .year(toYear)
+                            .totalDays(type.getDefaultQuotaDays())
+                            .usedDays(BigDecimal.ZERO)
+                            .adjustedDays(BigDecimal.ZERO)
+                            .build()));
+            if (target.getCarriedOverDays().signum() > 0) {
+                continue; // already carried over — idempotent
+            }
+            BigDecimal carried = remaining.min(capDays);
+            target.setCarriedOverDays(carried);
+            auditLogWriter.record(
+                    actor == null ? null : actor.getId(),
+                    "LEAVE_BALANCE_CARRY_OVER",
+                    "leave_balance",
+                    target.getId(),
+                    toJson(Map.of("carriedOverDays", BigDecimal.ZERO)),
+                    toJson(linkedMap(
+                            "carriedOverDays", carried,
+                            "fromYear", fromYear,
+                            "capDays", capDays)));
+            carriedCount++;
+        }
+        log.info("carryOverYear({} -> {}) carried {} balances (cap {})", fromYear, toYear, carriedCount, capDays);
+        return carriedCount;
     }
 
     @Transactional(readOnly = true)
@@ -155,7 +211,8 @@ public class LeaveBalanceService {
         return new LeaveBalanceResponse(
                 b.getId(), b.getUserId(), user.getFullName(),
                 b.getLeaveTypeId(), type.getCode(), b.getYear(),
-                b.getTotalDays(), b.getUsedDays(), b.getAdjustedDays(), b.remaining());
+                b.getTotalDays(), b.getUsedDays(), b.getAdjustedDays(),
+                b.getCarriedOverDays(), b.remaining());
     }
 
     private static Map<String, Object> linkedMap(Object... kv) {

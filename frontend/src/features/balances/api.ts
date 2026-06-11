@@ -13,6 +13,18 @@ export async function initializeYear(year: number): Promise<{ year: number; crea
   return res.data.data;
 }
 
+export async function carryOverYear(
+  fromYear: number,
+  capDays: number,
+): Promise<{ fromYear: number; capDays: number; carried: number }> {
+  const res = await api.post<Envelope<{ fromYear: number; capDays: number; carried: number }>>(
+    "/leave-balances/carry-over",
+    {},
+    { params: { fromYear, capDays } },
+  );
+  return res.data.data;
+}
+
 export async function getUserBalances(userId: number, year: number): Promise<LeaveBalance[]> {
   const res = await api.get<Envelope<LeaveBalance[]>>(`/users/${userId}/leave-balances`, {
     params: { year },

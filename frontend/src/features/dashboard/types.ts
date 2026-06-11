@@ -10,6 +10,7 @@ export type LeaveBalance = {
   totalDays: number;
   usedDays: number;
   adjustedDays: number;
+  carriedOverDays: number;
   remainingDays: number;
 };
 

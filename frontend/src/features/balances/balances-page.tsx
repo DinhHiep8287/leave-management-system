@@ -10,7 +10,7 @@ import { useAuth } from "@/features/auth/auth-context";
 import type { LeaveBalance } from "@/features/dashboard/types";
 
 import { AdjustBalanceDialog } from "./adjust-dialog";
-import { useInitializeYear, useUserBalances, useUserOptions } from "./hooks";
+import { useCarryOver, useInitializeYear, useUserBalances, useUserOptions } from "./hooks";
 
 const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = [CURRENT_YEAR + 1, CURRENT_YEAR, CURRENT_YEAR - 1];
@@ -27,6 +27,9 @@ export function BalancesPage() {
   const { data: users } = useUserOptions();
   const { data: balances, isFetching } = useUserBalances(userId, year);
   const initialize = useInitializeYear();
+  const carryOver = useCarryOver();
+  const [carryFromYear, setCarryFromYear] = useState(CURRENT_YEAR - 1);
+  const [carryCap, setCarryCap] = useState(5);
 
   return (
     <div className="space-y-6">
@@ -61,6 +64,42 @@ export function BalancesPage() {
               </Button>
               <p className="text-xs text-muted-foreground">
                 Tạo dòng quỹ phép cho mọi nhân viên đang hoạt động (bỏ qua dòng đã có).
+              </p>
+            </div>
+            <div className="mt-4 flex flex-wrap items-end gap-3 border-t border-border pt-4">
+              <div className="space-y-1.5">
+                <Label>Chuyển phép tồn từ năm</Label>
+                <Select
+                  className="w-32"
+                  value={carryFromYear}
+                  onChange={(e) => setCarryFromYear(Number(e.target.value))}
+                >
+                  {YEARS.map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Tối đa (ngày)</Label>
+                <Select className="w-24" value={carryCap} onChange={(e) => setCarryCap(Number(e.target.value))}>
+                  {[3, 5, 7, 10].map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+              <Button
+                variant="outline"
+                disabled={carryOver.isPending}
+                onClick={() => carryOver.mutate({ fromYear: carryFromYear, capDays: carryCap })}
+              >
+                {carryOver.isPending ? "Đang chuyển…" : "Chuyển phép tồn"}
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                Chuyển phép còn dư sang năm {carryFromYear + 1}; chạy lại không cộng dồn.
               </p>
             </div>
           </CardContent>
@@ -111,15 +150,16 @@ export function BalancesPage() {
                     <TableHead>Tổng</TableHead>
                     <TableHead>Đã dùng</TableHead>
                     <TableHead>Điều chỉnh</TableHead>
+                    <TableHead>Chuyển từ năm trước</TableHead>
                     <TableHead>Còn lại</TableHead>
                     <TableHead className="text-right">Thao tác</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {isFetching && <TableSkeletonRows rows={4} colSpan={6} />}
+                  {isFetching && <TableSkeletonRows rows={4} colSpan={7} />}
                   {!isFetching && (balances?.length ?? 0) === 0 && (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground">
+                      <TableCell colSpan={7} className="text-center text-muted-foreground">
                         Chưa có quỹ phép cho năm này.
                       </TableCell>
                     </TableRow>
@@ -130,6 +170,7 @@ export function BalancesPage() {
                       <TableCell>{b.totalDays}</TableCell>
                       <TableCell>{b.usedDays}</TableCell>
                       <TableCell>{b.adjustedDays}</TableCell>
+                      <TableCell>{b.carriedOverDays}</TableCell>
                       <TableCell>{b.remainingDays}</TableCell>
                       <TableCell className="text-right">
                         <Button variant="ghost" size="sm" onClick={() => setAdjustTarget(b)}>

@@ -51,6 +51,17 @@ public class LeaveBalanceController {
         return ApiResponse.ok(Map.of("year", year, "created", created));
     }
 
+    /** Carries remaining leave of fromYear into fromYear+1, capped per (user, type). */
+    @PostMapping("/leave-balances/carry-over")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<Map<String, Object>> carryOver(
+            @RequestParam int fromYear,
+            @RequestParam(defaultValue = "5") java.math.BigDecimal capDays,
+            @AuthenticationPrincipal UserPrincipal actor) {
+        int carried = leaveBalanceService.carryOverYear(fromYear, capDays, actor);
+        return ApiResponse.ok(Map.of("fromYear", fromYear, "capDays", capDays, "carried", carried));
+    }
+
     @PatchMapping("/leave-balances/{id}/adjust")
     @PreAuthorize("hasAnyRole('ADMIN','HR')")
     public ApiResponse<LeaveBalanceResponse> adjust(
