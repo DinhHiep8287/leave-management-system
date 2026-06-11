@@ -2,6 +2,9 @@
 
 Hệ thống quản lý nghỉ phép — mô phỏng quy trình nghiệp vụ phê duyệt đơn nghỉ phép thực tế trong doanh nghiệp.
 
+[![CI](https://github.com/DinhHiep8287/leave-management-system/actions/workflows/ci.yml/badge.svg)](https://github.com/DinhHiep8287/leave-management-system/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 ## Ảnh minh họa
 
 | Tổng quan (HR) | Lịch nghỉ phép |

@@ -119,11 +119,18 @@ docker compose exec backend ./gradlew test jacocoTestReport
 # Report: backend/build/reports/jacoco/test/html/index.html
 ```
 
-### Frontend
+### Frontend (Vitest)
 ```bash
-docker compose exec frontend npm run test
-docker compose exec frontend npm run test:watch
+# Unit tests (jsdom + Testing Library; file *.test.ts(x) cạnh mã nguồn)
+docker compose exec frontend pnpm test
+docker compose exec frontend pnpm test:watch
+
+# Quality gate đầy đủ (giống CI)
+docker compose exec frontend sh -lc "pnpm typecheck && pnpm lint && pnpm test && pnpm build"
 ```
+
+### E2E (Playwright)
+Xem `e2e/README.md` — chạy local với dev stack đang bật, và tự động trong CI (job `e2e`).
 
 ## 7. Code quality
 

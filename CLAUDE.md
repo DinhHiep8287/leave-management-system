@@ -63,9 +63,10 @@ docker compose up --build
 # Chạy test backend
 docker compose exec backend ./gradlew test
 
-# Chạy lint/format frontend
-docker compose exec frontend npm run lint
-docker compose exec frontend npm run format
+# Frontend quality gate (pnpm, không phải npm)
+docker compose exec frontend pnpm lint
+docker compose exec frontend pnpm test        # Vitest unit tests
+docker compose exec frontend sh -lc "pnpm typecheck && pnpm lint && pnpm test && pnpm build"
 
 # Reset database
 docker compose down -v && docker compose up

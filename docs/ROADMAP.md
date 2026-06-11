@@ -108,21 +108,16 @@ phạm vi** theo quyết định 06/2026 — UI tiếng Việt duy nhất, xem R
 >
 > **Mốc v1.0.0 đã tag** (2026-06-11, CI xanh) — các bản dưới đây bắt đầu từ đó.
 
-## v1.1.0 — Hoàn thiện kiểm thử & CI (~1 tuần)
+## v1.1.0 — Hoàn thiện kiểm thử & CI ✅ **Done**
 
-Mục tiêu: lấp 2 khoảng trống kiểm thử cuối (FE unit test, e2e trong CI).
-
-1. **FE unit test (Vitest + Testing Library)**: setup vitest trong container frontend;
-   test các tầng thuần trước — `lib/format`, `lib/api-error`, Zod schema của form nộp đơn
-   (nửa ngày, ngày quá khứ), component nhỏ (`ErrorState`, `Badge` trạng thái). Script `pnpm test`.
-2. **Playwright vào CI**: job mới trong `.github/workflows/ci.yml` — dựng stack bằng
-   `docker compose up -d` (postgres + backend + frontend), đợi health, chạy `e2e/run_smoke.py`
-   headless, upload screenshots làm artifact khi fail. Lưu ý: seeder dev sẽ chạy trên DB trống
-   của CI → smoke có dữ liệu thật để assert.
-3. **CI bổ sung**: bước `pnpm test` vào job frontend; (tùy chọn) JaCoCo coverage report backend.
-4. **README badges**: CI status + license.
-
-**Hoàn thành khi**: CI 3 job xanh (backend / frontend+unit / e2e), badge hiển thị, docs cập nhật.
+1. ✅ **FE unit test (Vitest + Testing Library)**: 24 test — `lib/format`, `lib/api-error`,
+   `lib/utils`, Zod schema đơn nghỉ (tách `schema.ts` dùng chung submit/edit), `ErrorState`.
+   Script `pnpm test`.
+2. ✅ **Playwright vào CI**: job `e2e` dựng full stack `docker compose up -d --build`, poll
+   health, chạy `run_smoke.py`; fail → dump logs + artifact screenshots. Seeder dev đổ dữ
+   liệu vào DB trống của CI.
+3. ✅ **CI**: bước `pnpm test` trong job frontend. (JaCoCo coverage: bỏ qua — chưa cần.)
+4. ✅ **README badges**: CI status + License MIT.
 
 ## v1.2.0 — Deploy thật + vận hành (~1 tuần)
 
