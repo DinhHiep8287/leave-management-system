@@ -97,24 +97,88 @@ Giao diện quản trị cho backend đã có sẵn — biến sản phẩm thà
   đang nghỉ hôm nay), 2 điều chỉnh quỹ có audit. Bất biến giữ nguyên như luồng thật
   (LeaveDayCalculator, applyUsedDelta, không chồng lấn, state machine §5.4).
 
-## Để sau (chưa làm trong v1.x)
-
-- **i18n** (§12): tách chuỗi, khung `vi` mặc định + `en` (refactor lớn — để v2).
-- **Deploy thật** (Railway/Fly.io + Neon) — guide + prod compose đã sẵn ở `docs/DEPLOYMENT.md`.
-- **CI tích hợp Playwright** (cần dựng full stack trong CI).
-
 ---
 
-## v2 — Tính năng hoãn lại (REQUIREMENTS §13)
+# Kế hoạch các bản nâng cấp sắp tới
 
-Chỉ làm khi có nhu cầu rõ, mỗi mục là một quyết định riêng:
+> **Quy ước phiên bản**: các mục "v1.0.x–v1.3" phía trên là **tên đợt làm việc lịch sử**, tất cả
+> nằm trong git tag **v1.0.0** (mốc MVP). Từ đây trở đi, mỗi bản nâng cấp dưới đây ứng với
+> **một git tag semver thật** (v1.1.0, v1.2.0, …), tag sau khi CI xanh.
+>
+> **Điều kiện bắt đầu**: đã push toàn bộ commit hiện tại, CI xanh, tag `v1.0.0` (đang chờ).
 
-- Thông báo email / in-app (chuông) khi có đơn cần duyệt / được duyệt.
-- Workflow duyệt **nhiều cấp**.
-- Carry over phép sang năm sau.
-- Upload file (giấy bác sĩ…).
-- Self-register · Quên mật khẩu tự reset qua email.
-- Phân quyền chi tiết (permission-level thay cho RBAC đơn giản).
+## v1.1.0 — Hoàn thiện kiểm thử & CI (~1 tuần)
+
+Mục tiêu: lấp 2 khoảng trống kiểm thử cuối (FE unit test, e2e trong CI) — nền móng an toàn cho i18n.
+
+1. **FE unit test (Vitest + Testing Library)**: setup vitest trong container frontend;
+   test các tầng thuần trước — `lib/format`, `lib/api-error`, Zod schema của form nộp đơn
+   (nửa ngày, ngày quá khứ), component nhỏ (`ErrorState`, `Badge` trạng thái). Script `pnpm test`.
+2. **Playwright vào CI**: job mới trong `.github/workflows/ci.yml` — dựng stack bằng
+   `docker compose up -d` (postgres + backend + frontend), đợi health, chạy `e2e/run_smoke.py`
+   headless, upload screenshots làm artifact khi fail. Lưu ý: seeder dev sẽ chạy trên DB trống
+   của CI → smoke có dữ liệu thật để assert.
+3. **CI bổ sung**: bước `pnpm test` vào job frontend; (tùy chọn) JaCoCo coverage report backend.
+4. **README badges**: CI status + license.
+
+**Hoàn thành khi**: CI 3 job xanh (backend / frontend+unit / e2e), badge hiển thị, docs cập nhật.
+
+## v1.2.0 — i18n vi/en (REQUIREMENTS §12) (~1-2 tuần)
+
+Mục tiêu: trả nốt yêu cầu cuối cùng của REQUIREMENTS. Làm SAU v1.1.0 vì refactor chuỗi
+toàn FE cần lưới test đỡ.
+
+1. **FE**: `react-i18next` + `src/locales/vi.json`/`en.json`; tách chuỗi từ toàn bộ pages/
+   components (nav, form, bảng, toast, dialog); `LanguageToggle` ở header (cạnh ThemeToggle),
+   lưu localStorage; Zod error message theo locale; `formatDate` dùng locale date-fns tương ứng.
+2. **BE**: KHÔNG i18n server-side đầy đủ — chuẩn hóa response lỗi để FE dịch theo `error.code`
+   (+ `fieldErrors[].field`); message tiếng Anh giữ làm fallback. Seed/demo data giữ tiếng Việt.
+3. **e2e**: smoke chạy 2 lần (vi + en) hoặc dùng selector ổn định không phụ thuộc ngôn ngữ.
+
+**Hoàn thành khi**: toggle vi/en phủ 100% UI, không còn chuỗi hardcode trong component,
+build + smoke xanh cả 2 ngôn ngữ.
+
+## v1.3.0 — Deploy thật + vận hành (~1 tuần)
+
+Mục tiêu: sản phẩm có URL công khai cho portfolio. Guide + prod compose đã sẵn
+(`docs/DEPLOYMENT.md`), chỉ còn thực thi.
+
+1. **Chọn 1 phương án** (quyết định riêng khi bắt đầu): VPS đơn chạy `docker-compose.prod.yml`
+   (rẻ, đúng guide) HOẶC tách dịch vụ Railway/Fly.io + Neon + Vercel (free-tier).
+2. **TLS/HTTPS**: bật `Strict-Transport-Security` đã comment sẵn trong `frontend/nginx.conf`;
+   Let's Encrypt (Caddy/certbot) hoặc TLS của platform.
+3. **Vận hành tối thiểu**: tạo admin prod đầu tiên (theo guide, prod không seed), backup
+   `pg_dump` định kỳ, uptime check (UptimeRobot), xem JSON log + `/actuator/health`.
+4. **README**: link demo live + tài khoản demo riêng cho prod (không dùng mật khẩu dev).
+
+**Hoàn thành khi**: URL công khai login được, health OK, backup chạy, README có link.
+
+## v2.0.0 — Tính năng mở rộng (REQUIREMENTS §13) (~3-4 tuần)
+
+Mỗi mục là một quyết định riêng khi bắt đầu — thứ tự đề xuất theo giá trị/độ rủi ro:
+
+1. **In-app notification (chuông)**: bảng `notifications` (migration mới), phát sự kiện khi
+   submit/approve/reject/cancel (`@TransactionalEventListener`), `GET /notifications` +
+   mark-read; FE chuông + badge số chưa đọc, polling 30s (chưa cần WebSocket).
+2. **Email notification**: `spring-boot-starter-mail` + **Mailpit** container cho dev;
+   template duyệt/từ chối/cần duyệt; gửi async, không chặn transaction nghiệp vụ.
+3. **Carry-over phép** (§13): cột `carried_over_days` + endpoint/job đầu năm chuyển
+   `remaining` năm cũ (cap N ngày, N cấu hình); cập nhật `remaining()` + REQUIREMENTS.
+4. **Upload file đính kèm** (giấy bác sĩ…): bảng `attachments`, lưu local volume
+   (chưa cần S3), giới hạn type/size, endpoint upload/download có RBAC participant.
+5. **Duyệt nhiều cấp** (để cuối / có thể sang v2.1): đổi state machine — rủi ro cao nhất,
+   chỉ làm khi 1-4 xong và thật sự cần.
+
+**Mỗi feature đi trọn chu trình**: BE + test → FE → bổ sung e2e smoke → docs.
+
+## Nguyên tắc docs cho mọi bản nâng cấp (bắt buộc)
+
+- `CHANGELOG.md`: entry dưới `[Unreleased]` ngay khi làm; khi tag → tách thành `[x.y.z] - ngày`.
+- `docs/ROADMAP.md`: đánh dấu ✅ từng mục khi xong.
+- `docs/REQUIREMENTS.md`: cập nhật nếu spec đổi (vd carry-over đảo ngược §4).
+- `docs/ARCHITECTURE.md` + `docs/DATABASE.md`: cập nhật khi thêm bảng/luồng (notifications, attachments).
+- `CLAUDE.md`: thêm gotcha vận hành mới gặp; cập nhật lộ trình.
+- Tag semver chỉ đặt khi CI xanh.
 
 ## Không làm — kể cả v2 (REQUIREMENTS §14)
 

@@ -7,6 +7,11 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added — Chuẩn bị mốc v1.0.0
+- Controller-slice test cho `GET /departments/mine` + `GET /users/me` (lấp 2 khoảng trống `@WebMvcTest` cuối).
+- `e2e/run_smoke.py` tự **xóa cứng** đơn smoke đã hủy sau mỗi lần chạy (best-effort qua psql) — DB dev không tích rác.
+- `docs/ROADMAP.md`: kế hoạch chi tiết các bản nâng cấp **v1.1.0 (test/CI) → v1.2.0 (i18n) → v1.3.0 (deploy) → v2.0.0 (notification/email/carry-over/attachment)** kèm quy ước semver-tag và nguyên tắc docs bắt buộc.
+
 ### Added — Seed dữ liệu demo tự nhiên (profile dev)
 - **`DemoLeaveSeeder`** (mới, gọi từ `DemoDataInitializer`, chỉ chạy khi DB trống): seed 10 nhân viên tên tiếng Việt (ENG +4, SALES +4, HR +2 — tổng 19 user) + quỹ phép năm hiện tại & năm trước + **~63 đơn nghỉ** trải 5 tháng qua tới +30 ngày tới (đủ APPROVED/PENDING/REJECTED/CANCELLED, nửa ngày, lý do tiếng Việt) + 2 điều chỉnh quỹ có audit.
 - **Bất biến được giữ như luồng thật**: `total_days` tính bằng `LeaveDayCalculator` + holidays thật; `used_days` đi qua `LeaveBalanceService.applyUsedDelta` (không bao giờ âm); mỗi user một tuần-slot riêng (không chồng lấn); `approval_actions` đúng state machine §5.4. Ngày **tương đối theo hôm nay** nên dữ liệu không bao giờ cũ; mỗi phòng có 1 người đang nghỉ hôm nay.
