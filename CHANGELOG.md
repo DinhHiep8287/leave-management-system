@@ -7,7 +7,11 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-### Added — v1.2.0: Deploy thật (Vercel + Railway + Neon)
+_Chưa có._
+
+## [1.2.0] - 2026-06-12 — Deploy thật (Vercel + Railway + Neon)
+
+### Added
 - **Demo trực tuyến**: https://quanlynghiphep.vercel.app — Vercel (SPA + rewrite `/api`) → Railway (Spring Boot Docker, App Sleeping) → Neon (Postgres Singapore, free).
 - **Repo**: `server.port: ${PORT:8080}` (PaaS inject PORT); Hikari prod thu nhỏ pool + `max-lifetime` 4.5 phút hợp Neon scale-to-zero (cố ý không keepalive); `frontend/vercel.json` (rewrite `/api` → Railway, SPA fallback, security headers + HSTS).
 - **Vận hành**: Neon migrate V1-V3 + seed demo một lần (19 user/63 đơn, 4 câu SQL nhất quán 0 lệch); admin đổi mật khẩu mạnh (pgcrypto `crypt/bf` — thay htpasswd khi không pull được image); backup tay `pg_dump` + Neon PITR; cap RAM `JAVA_TOOL_OPTIONS=-Xmx320m`.
