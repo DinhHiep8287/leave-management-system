@@ -152,7 +152,7 @@ PENDING ──approve──> APPROVED ──cancel(by employee/HR)──> CANCEL
 ## 12. Phi chức năng (Non-functional)
 
 - **Timezone**: Asia/Ho_Chi_Minh.
-- **Ngôn ngữ UI**: Tiếng Việt (i18n để chừa chỗ thêm tiếng Anh sau).
+- **Ngôn ngữ UI**: Tiếng Việt (duy nhất — không làm i18n, xem §14).
 - **Hiệu năng**: thiết kế cho công ty cỡ ≤ 500 nhân viên.
 - **Audit**: mọi action quan trọng (approve/reject/cancel, thay đổi balance) → ghi log.
 - **Bảo mật**: password BCrypt cost ≥ 12, JWT secret từ env, không log thông tin nhạy cảm.
@@ -179,6 +179,7 @@ Các tính năng này có thể bổ sung ở v2.
 
 Các tính năng đã cân nhắc và **quyết định không làm**, kể cả tương lai:
 
+- ❌ **i18n vi/en** — UI tiếng Việt duy nhất; không có nhu cầu tiếng Anh cho dự án này (quyết định 06/2026, trước đó dự kiến "chừa chỗ" ở §12).
 - ❌ Tích hợp Google Calendar / Outlook (2-way sync) — OAuth + đồng bộ phức tạp, không tương xứng giá trị.
 - ❌ Multi-tenant / multi-company — kiến trúc khác hoàn toàn, không hợp với mục tiêu portfolio.
 - ❌ SSO (Google Workspace / Microsoft 365) — chỉ cần khi triển khai cho công ty thật, không cần cho portfolio.

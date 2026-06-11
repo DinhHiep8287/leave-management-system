@@ -7,10 +7,13 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Removed — Loại i18n vĩnh viễn khỏi phạm vi
+- **i18n vi/en bị loại bỏ hoàn toàn** (kể cả tương lai): UI tiếng Việt duy nhất theo quyết định của chủ dự án (06/2026). REQUIREMENTS §12 sửa lại, i18n chuyển vào §14 (loại trừ vĩnh viễn); ROADMAP gỡ bản v1.2.0-i18n và đánh số lại (deploy → v1.2.0). Hệ quả: MVP đáp ứng **toàn bộ** REQUIREMENTS, không còn ngoại lệ.
+
 ### Added — Chuẩn bị mốc v1.0.0
 - Controller-slice test cho `GET /departments/mine` + `GET /users/me` (lấp 2 khoảng trống `@WebMvcTest` cuối).
 - `e2e/run_smoke.py` tự **xóa cứng** đơn smoke đã hủy sau mỗi lần chạy (best-effort qua psql) — DB dev không tích rác.
-- `docs/ROADMAP.md`: kế hoạch chi tiết các bản nâng cấp **v1.1.0 (test/CI) → v1.2.0 (i18n) → v1.3.0 (deploy) → v2.0.0 (notification/email/carry-over/attachment)** kèm quy ước semver-tag và nguyên tắc docs bắt buộc.
+- `docs/ROADMAP.md`: kế hoạch chi tiết các bản nâng cấp **v1.1.0 (test/CI) → v1.2.0 (deploy thật) → v2.0.0 (notification/email/carry-over/attachment)** kèm quy ước semver-tag và nguyên tắc docs bắt buộc.
 
 ### Added — Seed dữ liệu demo tự nhiên (profile dev)
 - **`DemoLeaveSeeder`** (mới, gọi từ `DemoDataInitializer`, chỉ chạy khi DB trống): seed 10 nhân viên tên tiếng Việt (ENG +4, SALES +4, HR +2 — tổng 19 user) + quỹ phép năm hiện tại & năm trước + **~63 đơn nghỉ** trải 5 tháng qua tới +30 ngày tới (đủ APPROVED/PENDING/REJECTED/CANCELLED, nửa ngày, lý do tiếng Việt) + 2 điều chỉnh quỹ có audit.

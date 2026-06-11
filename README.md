@@ -101,7 +101,7 @@ Chi tiết xem [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Trạng thái
 
-✅ **MVP hoàn chỉnh** (auth, CRUD, đơn nghỉ + duyệt, lịch tháng/tuần, dashboard theo vai trò, báo cáo CSV, console quản trị, cấu hình production) — đáp ứng toàn bộ `docs/REQUIREMENTS.md` **trừ i18n (§12)**, hoãn sang v2. Backend phủ test đầy đủ; FE build/lint sạch; có E2E Playwright (`e2e/`).
+✅ **MVP hoàn chỉnh** (auth, CRUD, đơn nghỉ + duyệt, lịch tháng/tuần, dashboard theo vai trò, báo cáo CSV, console quản trị, cấu hình production) — đáp ứng toàn bộ `docs/REQUIREMENTS.md`. UI tiếng Việt duy nhất (không làm i18n — xem REQUIREMENTS §14). Backend phủ test đầy đủ; FE build/lint sạch; có E2E Playwright (`e2e/`).
 
 ## Giấy phép
 
