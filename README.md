@@ -5,6 +5,20 @@ Hệ thống quản lý nghỉ phép — mô phỏng quy trình nghiệp vụ ph
 [![CI](https://github.com/DinhHiep8287/leave-management-system/actions/workflows/ci.yml/badge.svg)](https://github.com/DinhHiep8287/leave-management-system/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+## Demo trực tuyến
+
+**https://leave-management-system-nine-phi.vercel.app**
+
+| Vai trò | Tài khoản | Mật khẩu |
+|---|---|---|
+| Nhân viên | `eng.emp1@demo.local` | `User@12345` |
+| Quản lý | `eng.manager@demo.local` | `User@12345` |
+| HR | `hr@demo.local` | `User@12345` |
+
+Hạ tầng: Vercel (SPA) + Railway (Spring Boot) + Neon (Postgres). Chạy trên free/hobby tier
+nên **lượt truy cập đầu sau khi nhàn rỗi có thể chờ ~20-40 giây** (backend và database tự
+ngủ để tiết kiệm tài nguyên) — các lượt sau nhanh bình thường.
+
 ## Ảnh minh họa
 
 | Tổng quan (HR) | Lịch nghỉ phép |
@@ -104,7 +118,7 @@ Chi tiết xem [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Trạng thái
 
-✅ **v1.1.0 — Kiểm thử đầy đủ mọi tầng** (backend JUnit + FE Vitest + E2E Playwright, tất cả chạy trong CI). Mốc trước: **v1.0.0 — MVP hoàn chỉnh** (auth, CRUD, đơn nghỉ + duyệt, lịch tháng/tuần, dashboard theo vai trò, báo cáo CSV, console quản trị, cấu hình production) — đáp ứng toàn bộ `docs/REQUIREMENTS.md`. UI tiếng Việt duy nhất (không làm i18n — xem REQUIREMENTS §14). Backend phủ test đầy đủ; FE build/lint sạch; có E2E Playwright (`e2e/`). Kế hoạch tiếp theo: `docs/ROADMAP.md`.
+✅ **v1.2.0 — Deploy thật** (Vercel + Railway + Neon, demo trực tuyến ở đầu trang). Mốc trước: **v1.1.0** — kiểm thử đầy đủ mọi tầng trong CI; **v1.0.0 — MVP hoàn chỉnh** (auth, CRUD, đơn nghỉ + duyệt, lịch tháng/tuần, dashboard theo vai trò, báo cáo CSV, console quản trị, cấu hình production) — đáp ứng toàn bộ `docs/REQUIREMENTS.md`. UI tiếng Việt duy nhất (không làm i18n — xem REQUIREMENTS §14). Backend phủ test đầy đủ; FE build/lint sạch; có E2E Playwright (`e2e/`). Kế hoạch tiếp theo: `docs/ROADMAP.md`.
 
 ## Giấy phép
 

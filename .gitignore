@@ -118,3 +118,4 @@ playwright-report/
 
 # pnpm package store created by in-container installs (bind-mounted)
 frontend/.pnpm-store/
+.env.neon

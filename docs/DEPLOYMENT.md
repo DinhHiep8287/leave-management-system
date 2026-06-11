@@ -1,8 +1,10 @@
 # Deployment Guide
 
-Hướng dẫn triển khai production cho Leave Management System. Bản này mô tả cách chạy
-toàn bộ stack bằng Docker Compose trên một host, và gợi ý cho kiểu deploy tách dịch vụ.
-Đây là **hướng dẫn** — chưa deploy thật lên cloud nào.
+Hướng dẫn triển khai production cho Leave Management System. Có hai phương án:
+
+1. **Một host bằng Docker Compose** (phần đầu tài liệu) — VPS tự quản.
+2. **Tách dịch vụ Railway + Neon + Vercel** (phần "Deploy tách dịch vụ") — **đã deploy thật**
+   từ v1.2.0; demo trực tuyến link trong README.
 
 ## Kiến trúc production
 
@@ -84,16 +86,94 @@ docker compose -f docker-compose.prod.yml exec postgres pg_dump -U leave_admin l
 git pull && docker compose -f docker-compose.prod.yml up -d --build
 ```
 
-## Deploy tách dịch vụ (gợi ý, chưa thực thi)
+## Deploy tách dịch vụ: Railway + Neon + Vercel (đã thực thi — v1.2.0)
 
-Khi không chạy chung một host:
+```
+Browser ──▶ Vercel (SPA + rewrite /api) ──▶ Railway (Spring Boot, Docker) ──▶ Neon (Postgres)
+```
 
-- **Database**: dịch vụ Postgres quản lý như **Neon** / RDS. Đặt `SPRING_DATASOURCE_*` trỏ tới đó.
-- **Backend**: build image từ `backend/Dockerfile`, deploy lên **Railway** / **Fly.io**.
-  Cấu hình env: `SPRING_PROFILES_ACTIVE=prod`, `SPRING_DATASOURCE_*`, `JWT_SECRET`,
-  `APP_CORS_ALLOWED_ORIGINS=https://<domain-FE>`.
-- **Frontend**: build tĩnh (`pnpm build`) với `VITE_API_BASE_URL=https://<api-domain>/api`,
-  deploy lên **Vercel** / **Netlify**. Khi đó block proxy `/api` trong `nginx.conf` không dùng tới.
+Trình tự khuyến nghị: **Neon → Vercel → Railway cuối cùng** (trial Railway $5 hết hạn sau
+30 ngày kể từ lúc tạo tài khoản — để đồng hồ chạy muộn nhất).
+
+### 1. Neon (Postgres, free)
+
+- Tạo project (region **ap-southeast-1 Singapore**, Postgres 16). Lấy **connection string
+  DIRECT** — KHÔNG dùng endpoint `-pooler` (Hikari đã là pool; Flyway không hợp PgBouncer
+  transaction mode). Bỏ tham số `channel_binding` khi chuyển sang dạng JDBC.
+- Chạy thử backend prod local trỏ Neon để Flyway migrate:
+
+```bash
+docker compose -f docker-compose.prod.yml build backend
+docker run --rm -p 8081:8080   -e SPRING_PROFILES_ACTIVE=prod   -e SPRING_DATASOURCE_URL='jdbc:postgresql://<host>/neondb?sslmode=require'   -e SPRING_DATASOURCE_USERNAME=... -e SPRING_DATASOURCE_PASSWORD=...   -e JWT_SECRET=<tạm ≥32 ký tự> -e TZ=Asia/Ho_Chi_Minh   leave-management-system-backend
+# chờ /api/actuator/health = UP, log Flyway "applied 3 migrations"
+# LƯU Ý: build prod ghi đè image dev cùng tên → sau đó `docker compose build backend`
+```
+
+- **(Tùy chọn, dùng cho demo) seed dữ liệu demo MỘT lần**: chạy lại container trên với
+  `SPRING_PROFILES_ACTIVE=dev` → seeder đổ 19 user + ~63 đơn; tắt container ngay sau log
+  "Seeded ... demo leave requests". Prod sau đó không bao giờ seed lại (DB đã có user).
+- **Đổi mật khẩu admin** thành mật khẩu mạnh riêng (mật khẩu demo là công khai). Dùng
+  pgcrypto ngay trên Neon (không cần htpasswd):
+
+```bash
+docker run --rm postgres:16-alpine psql "postgresql://<user>:<pw>@<host>/neondb?sslmode=require"   -c "CREATE EXTENSION IF NOT EXISTS pgcrypto;"   -c "UPDATE users SET password_hash = crypt('<MẬT-KHẨU-MỚI>', gen_salt('bf', 12)) WHERE email='admin@demo.local';"
+```
+
+### 2. Vercel (frontend, free Hobby)
+
+- Import repo → **Root Directory = `frontend`**, framework Vite.
+- Env var bắt buộc: **`VITE_API_BASE_URL=/api`** (fallback trong `lib/api.ts` là localhost).
+- `frontend/vercel.json` (đã có trong repo) lo: rewrite `/api/*` → domain Railway
+  (same-origin với browser), SPA fallback, security headers + HSTS.
+
+### 3. Railway (backend, trial $5/30 ngày → Hobby $5/tháng)
+
+- New Project → Deploy from GitHub repo → **Settings → Root Directory = `backend`**
+  (tự nhận `backend/Dockerfile`).
+- Variables:
+
+```
+SPRING_PROFILES_ACTIVE=prod
+SPRING_DATASOURCE_URL=jdbc:postgresql://<neon-host>/neondb?sslmode=require
+SPRING_DATASOURCE_USERNAME=...
+SPRING_DATASOURCE_PASSWORD=...
+JWT_SECRET=<sinh mới ≥32 ký tự — KHÔNG dùng secret dev>
+JAVA_TOOL_OPTIONS=-Xmx320m -XX:MaxMetaspaceSize=128m
+TZ=Asia/Ho_Chi_Minh
+APP_CORS_ALLOWED_ORIGINS=https://<app>.vercel.app
+```
+
+  **`APP_CORS_ALLOWED_ORIGINS` là bắt buộc kể cả khi dùng Vercel rewrites**: browser luôn
+  gửi header `Origin` với POST; Spring CORS thấy Origin không nằm trong allowlist sẽ trả
+  **403** dù request đến qua proxy. (Quên biến này → login fail 403, curl không Origin vẫn 200.)
+- **Deploy → Serverless (App Sleeping): BẬT** — ngủ sau ~10 phút không có traffic, không tính
+  phí compute khi ngủ. KHÔNG đặt uptime ping nếu bật (xung đột, đốt credit).
+  Cap RAM bằng `JAVA_TOOL_OPTIONS` ở trên → burn khi thức ~$4/tháng.
+- Healthcheck Path: `/api/actuator/health`. Region: Southeast Asia nếu chọn được (gần Neon).
+- Networking → Generate Domain (target port **8080**) → điền domain vào
+  `frontend/vercel.json` (rewrite destination) → commit + push → Vercel tự redeploy.
+
+### 4. Kiểm tra sau deploy
+
+```bash
+curl https://<railway-domain>/api/actuator/health          # {"status":"UP",...}
+# Browser: https://<app>.vercel.app → login demo → dashboard/lịch có dữ liệu
+```
+
+### 5. Vận hành
+
+- **Cold start**: App Sleeping + Neon scale-to-zero → lượt truy cập đầu sau khi nhàn rỗi chờ
+  ~20-40s. Đã ghi chú trong README cho người xem demo.
+- **Backup**: Neon free có restore-window tích hợp (PITR ngắn). Backup tay định kỳ từ máy local
+  (KHÔNG đẩy dump lên GitHub Actions artifact — repo public):
+
+```bash
+docker run --rm postgres:16-alpine pg_dump "postgresql://<user>:<pw>@<host>/neondb?sslmode=require" > backup-$(date +%F).sql
+```
+
+- **Chi phí**: xem Railway Usage sau 4-5 ngày để ngoại suy $/tháng và quyết định lên Hobby.
+- **Hikari + Neon**: prod đã cấu hình pool nhỏ + `max-lifetime` 4.5 phút (ngắn hơn mốc Neon
+  suspend ~5 phút) và cố ý KHÔNG bật keepalive (sẽ giữ Neon thức, tốn compute-hours).
 
 ## Checklist bảo mật
 

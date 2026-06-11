@@ -119,20 +119,16 @@ phạm vi** theo quyết định 06/2026 — UI tiếng Việt duy nhất, xem R
 3. ✅ **CI**: bước `pnpm test` trong job frontend. (JaCoCo coverage: bỏ qua — chưa cần.)
 4. ✅ **README badges**: CI status + License MIT.
 
-## v1.2.0 — Deploy thật + vận hành (~1 tuần)
+## v1.2.0 — Deploy thật + vận hành ✅ **Done**
 
-Mục tiêu: sản phẩm có URL công khai cho portfolio. Guide + prod compose đã sẵn
-(`docs/DEPLOYMENT.md`), chỉ còn thực thi.
+1. ✅ **Phương án**: tách dịch vụ **Vercel + Railway + Neon** (free/trial; Railway App Sleeping
+   để tiết kiệm credit). Demo: https://leave-management-system-nine-phi.vercel.app
+2. ✅ **TLS/HTTPS + headers**: Vercel TLS mặc định; security headers + HSTS qua `vercel.json`.
+3. ✅ **Vận hành**: seed demo một lần vào Neon; admin mật khẩu mạnh riêng; backup tay
+   `pg_dump` + Neon PITR; KHÔNG uptime ping (xung đột App Sleeping); JSON log trên Railway.
+4. ✅ **README**: link demo + tài khoản demo + ghi chú cold-start.
 
-1. **Chọn 1 phương án** (quyết định riêng khi bắt đầu): VPS đơn chạy `docker-compose.prod.yml`
-   (rẻ, đúng guide) HOẶC tách dịch vụ Railway/Fly.io + Neon + Vercel (free-tier).
-2. **TLS/HTTPS**: bật `Strict-Transport-Security` đã comment sẵn trong `frontend/nginx.conf`;
-   Let's Encrypt (Caddy/certbot) hoặc TLS của platform.
-3. **Vận hành tối thiểu**: tạo admin prod đầu tiên (theo guide, prod không seed), backup
-   `pg_dump` định kỳ, uptime check (UptimeRobot), xem JSON log + `/actuator/health`.
-4. **README**: link demo live + tài khoản demo riêng cho prod (không dùng mật khẩu dev).
-
-**Hoàn thành khi**: URL công khai login được, health OK, backup chạy, README có link.
+(Guide đầy đủ as-built trong `docs/DEPLOYMENT.md`.)
 
 ## v2.0.0 — Tính năng mở rộng (REQUIREMENTS §13) (~3-4 tuần)
 
