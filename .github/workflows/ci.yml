@@ -59,7 +59,7 @@ jobs:
           done
 
   frontend:
-    name: Frontend (typecheck / lint / build)
+    name: Frontend (typecheck / lint / test / build)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -82,5 +82,55 @@ jobs:
         run: pnpm typecheck
       - name: Lint
         run: pnpm lint
+      - name: Unit tests
+        run: pnpm test
       - name: Build
         run: pnpm build
+
+  e2e:
+    name: E2E (Playwright smoke)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start the dev stack
+        run: |
+          cp .env.example .env
+          docker compose up -d --build
+      - name: Wait for backend + frontend
+        run: |
+          echo "Waiting for backend /api/health (gradle bootRun compiles inside the container)..."
+          for i in $(seq 1 120); do
+            if curl -fsS http://localhost:8080/api/health >/dev/null 2>&1; then
+              echo "backend up after ~$((i*5))s"; break
+            fi
+            if [ "$i" = "120" ]; then echo "backend never became healthy"; exit 1; fi
+            sleep 5
+          done
+          for i in $(seq 1 36); do
+            if curl -fsS http://localhost:5173 >/dev/null 2>&1; then
+              echo "frontend up"; break
+            fi
+            if [ "$i" = "36" ]; then echo "frontend never became ready"; exit 1; fi
+            sleep 5
+          done
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Playwright
+        run: |
+          pip install playwright
+          playwright install --with-deps chromium
+      - name: Run smoke
+        run: python e2e/run_smoke.py
+      - name: Dump container logs
+        if: failure()
+        run: docker compose logs backend frontend --tail 200
+      - name: Upload screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-screenshots
+          path: docs/screenshots/
+          if-no-files-found: ignore

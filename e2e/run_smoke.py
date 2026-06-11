@@ -43,18 +43,18 @@ def login(page, email: str, password: str) -> None:
     page.get_by_role("button", name="Đăng nhập").click()
     # Landing page may be the dashboard or the last protected route visited; just
     # assert we are authenticated, then navigate explicitly where needed.
-    expect(page.get_by_role("button", name="Đăng xuất")).to_be_visible(timeout=10_000)
+    expect(page.get_by_role("button", name="Đăng xuất")).to_be_visible(timeout=60_000)
     page.wait_for_load_state("networkidle")
 
 
 def logout(page) -> None:
     page.get_by_role("button", name="Đăng xuất").click()
-    expect(page.get_by_role("button", name="Đăng nhập")).to_be_visible(timeout=10_000)
+    expect(page.get_by_role("button", name="Đăng nhập")).to_be_visible(timeout=60_000)
 
 
 def nav(page, link_name: str, heading: str) -> None:
     page.get_by_role("link", name=link_name, exact=True).click()
-    expect(page.get_by_role("heading", name=heading)).to_be_visible(timeout=10_000)
+    expect(page.get_by_role("heading", name=heading)).to_be_visible(timeout=60_000)
     page.wait_for_load_state("networkidle")
 
 
@@ -79,7 +79,7 @@ def submit_and_cancel(page) -> None:
     page.get_by_label("Lý do").fill("E2E smoke")
     page.get_by_role("button", name="Nộp đơn", exact=True).click()
     # Redirects to "my requests"
-    expect(page.get_by_role("heading", name="Đơn của tôi")).to_be_visible(timeout=10_000)
+    expect(page.get_by_role("heading", name="Đơn của tôi")).to_be_visible(timeout=60_000)
     page.wait_for_load_state("networkidle")
     # Cancel the just-created pending request (first "Hủy" button), confirm dialog.
     page.get_by_role("button", name="Hủy", exact=True).first.click()
@@ -111,9 +111,15 @@ def cleanup_db() -> None:
 
 
 def run() -> None:
+    # Also clean BEFORE running: a previous failed run may have submitted its smoke
+    # request but died before cancelling it, which would 409 this run's submission.
+    cleanup_db()
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page(viewport={"width": 1366, "height": 900})
+        # First load compiles the whole Vite module graph on demand (slow on cold
+        # dev servers, both locally after dependency changes and in CI).
+        page.set_default_navigation_timeout(90_000)
 
         # Employee: dashboard, submit + cancel, my requests, calendar, profile.
         step("login employee")
@@ -140,7 +146,7 @@ def run() -> None:
         step("login hr")
         login(page, *USERS["hr"])
         nav(page, "Tổng quan", "Tổng quan")
-        expect(page.get_by_text("Toàn tổ chức")).to_be_visible(timeout=10_000)
+        expect(page.get_by_text("Toàn tổ chức")).to_be_visible(timeout=60_000)
         shot(page, "dashboard-hr")
         nav(page, "Báo cáo", "Báo cáo")
         shot(page, "reports")
