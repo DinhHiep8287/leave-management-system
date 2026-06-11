@@ -106,7 +106,7 @@ phạm vi** theo quyết định 06/2026 — UI tiếng Việt duy nhất, xem R
 > nằm trong git tag **v1.0.0** (mốc MVP). Từ đây trở đi, mỗi bản nâng cấp dưới đây ứng với
 > **một git tag semver thật** (v1.1.0, v1.2.0, …), tag sau khi CI xanh.
 >
-> **Điều kiện bắt đầu**: đã push toàn bộ commit hiện tại, CI xanh, tag `v1.0.0` (đang chờ).
+> **Mốc v1.0.0 đã tag** (2026-06-11, CI xanh) — các bản dưới đây bắt đầu từ đó.
 
 ## v1.1.0 — Hoàn thiện kiểm thử & CI (~1 tuần)
 

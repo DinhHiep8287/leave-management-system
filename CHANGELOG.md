@@ -7,6 +7,14 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+_Chưa có._
+
+## [1.0.0] - 2026-06-11 — MVP hoàn chỉnh
+
+Mốc MVP: auth JWT, CRUD đầy đủ, quy trình đơn nghỉ + duyệt, lịch tháng/tuần, dashboard theo
+vai trò, báo cáo CSV, console quản trị, cấu hình production, E2E Playwright, seed demo.
+Gồm toàn bộ các đợt v1.0.x → v1.3 (lịch sử bên dưới). CI xanh tại thời điểm tag.
+
 ### Removed — Loại i18n vĩnh viễn khỏi phạm vi
 - **i18n vi/en bị loại bỏ hoàn toàn** (kể cả tương lai): UI tiếng Việt duy nhất theo quyết định của chủ dự án (06/2026). REQUIREMENTS §12 sửa lại, i18n chuyển vào §14 (loại trừ vĩnh viễn); ROADMAP gỡ bản v1.2.0-i18n và đánh số lại (deploy → v1.2.0). Hệ quả: MVP đáp ứng **toàn bộ** REQUIREMENTS, không còn ngoại lệ.
 
