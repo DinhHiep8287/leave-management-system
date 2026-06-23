@@ -7,12 +7,20 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-### Added — v2.0.0: Tính năng mở rộng + cải tiến UI/UX
+## [2.0.0] - 2026-06-22 — Tính năng mở rộng + cải tiến UI/UX
+
+### Added
 - **In-app notification (chuông)**: bảng `notifications` (V4) + package `notification/`. Sự kiện đơn (nộp/sửa → manager; duyệt/từ chối → người nộp; hủy → bên còn lại, không tự báo mình) ghi notification **trong cùng transaction**. API self-scoped: list/unread-count/mark-read/read-all. FE chuông ở header: badge chưa đọc, polling 30s, click mở chi tiết đơn + mark read, "đánh dấu tất cả đã đọc".
 - **Email notification**: `LeaveRequestChangedEvent` + `EmailNotificationListener` (`@Async` AFTER_COMMIT) gửi mail tiếng Việt cho cùng người nhận. Cờ `app.mail.enabled` mặc định **false** (prod chạy không cần SMTP); dev bật sẵn với **Mailpit** (compose service mới, UI :8025). Lỗi mail log-and-swallow — không bao giờ ảnh hưởng transaction nghiệp vụ.
 - **Carry-over phép** (REQUIREMENTS §4 đổi spec): cột `carried_over_days` (V5) vào công thức `remaining`; `POST /leave-balances/carry-over?fromYear=&capDays=` (ADMIN) chuyển phép dư sang năm sau có trần, idempotent, tạo row năm đích từ quota mặc định, audit từng dòng. **Không dùng scheduler** (container prod ngủ khi idle) — ADMIN bấm tay trên trang Quỹ phép.
 - **UI/UX**: menu mobile (trước đây sidebar ẩn hẳn trên điện thoại); form nộp đơn **preview số ngày công live** (mirror `LeaveDayCalculator` client-side + holidays thật, 8 unit test) + hint "còn N ngày" theo loại nghỉ + cảnh báo vượt quỹ/toàn cuối tuần; dialog xác nhận khóa/kích hoạt user; skeleton loading cho các bảng; empty state có CTA; pagination hiện tổng số; affordance click trên entry lịch.
 - **e2e smoke** thêm bước kiểm chuông (manager phải có thông báo chưa đọc sau khi employee nộp đơn).
+
+### Verified
+- Backend: 196 test xanh trên PostgreSQL 16, Flyway V1–V5.
+- Frontend: typecheck, lint, 32 unit test và production build xanh.
+- Playwright smoke xanh qua luồng employee, manager + notification, HR, ADMIN và dark mode.
+- Đây là bản cuối dự kiến triển khai lên demo trực tuyến. Tính năng sau v2.0.0 chỉ phục vụ demo/test local.
 
 ## [1.2.0] - 2026-06-12 — Deploy thật (Vercel + Railway + Neon)
 

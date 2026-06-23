@@ -54,7 +54,7 @@ export function CalendarPage() {
     const gs = monthMode ? startOfWeek(ws, WEEK_OPTS) : ws;
     const ge = monthMode ? endOfWeek(we, WEEK_OPTS) : we;
     return { winStart: ws, winEnd: we, gs, ge, days: eachDayOfInterval({ start: gs, end: ge }) };
-  }, [view, refDate, monthMode]);
+  }, [refDate, monthMode]);
 
   const fromStr = format(grid.winStart, "yyyy-MM-dd");
   const toStr = format(grid.winEnd, "yyyy-MM-dd");

@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-Tài liệu hướng dẫn cho Claude Code khi làm việc trong repo này.
+Tài liệu hướng dẫn cho Codex khi làm việc trong repo này.
 
 ## Bối cảnh dự án
 
@@ -81,7 +81,7 @@ docker compose exec backend bash
 docker compose exec postgres psql -U leave_admin -d leave_management
 ```
 
-## Lưu ý cho Claude
+## Lưu ý cho Codex
 
 - **Đừng over-engineer**: không tự thêm Kafka, Redis, microservices, CQRS nếu user chưa yêu cầu.
 - **Đừng cài tool ngoài Docker**: mọi thứ phải chạy được qua `docker compose`.

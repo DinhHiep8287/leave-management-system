@@ -164,11 +164,16 @@ PENDING ──approve──> APPROVED ──cancel(by employee/HR)──> CANCEL
 
 Để rõ ràng — các tính năng **không** làm trong MVP. Một số đã được bổ sung ở v2.0.0:
 
+> v2.0.0 là mốc deploy cuối của miniproject. Tính năng bổ sung sau mốc này chỉ chạy ở môi trường
+> demo/test local, không triển khai lên Vercel/Railway/Neon.
+
 - ✅ ~~In-app notification (chuông)~~ — đã làm ở v2.0.0.
-- ✅ ~~Email notification~~ — đã làm ở v2.0.0 (mặc định tắt ở prod, bật qua `MAIL_ENABLED`; SMS không làm).
+- ✅ ~~Email notification~~ — đã làm ở v2.0.0 (Mailpit bật ở dev; production giữ tắt; SMS không làm).
 - ✅ ~~Carry over phép sang năm sau~~ — đã làm ở v2.0.0 (xem §4).
 - ❌ Workflow duyệt nhiều cấp
-- ❌ Upload file (giấy bác sĩ…) — cân nhắc v2.1 (cần object storage ngoài).
+- ❌ Upload file (giấy bác sĩ…) — cân nhắc sau v2.0.0 và **chỉ phục vụ demo/test local**. Metadata lưu
+  PostgreSQL, file lưu Docker named volume; không dùng object storage và không deploy tính năng
+  này lên hạ tầng production hiện tại.
 - ❌ Mobile app native
 - ❌ Self-register
 - ❌ Quên mật khẩu tự reset qua email

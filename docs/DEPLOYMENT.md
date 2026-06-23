@@ -6,6 +6,10 @@ Hướng dẫn triển khai production cho Leave Management System. Có hai phư
 2. **Tách dịch vụ Railway + Neon + Vercel** (phần "Deploy tách dịch vụ") — **đã deploy thật**
    từ v1.2.0; demo trực tuyến link trong README.
 
+`v2.0.0` là lần nâng cấp production cuối dự kiến của miniproject. Sau mốc này, tính năng mới chỉ
+chạy demo/test local. Trước khi dựng production Compose, phải tạo `.env` từ `.env.prod.example`;
+không dùng lại `.env` dev vì `VITE_API_BASE_URL` của dev trỏ trực tiếp tới `localhost:8080`.
+
 ## Kiến trúc production
 
 - **postgres** — PostgreSQL 16, dữ liệu trong named volume `postgres-data-prod`.
@@ -171,13 +175,12 @@ curl https://<railway-domain>/api/actuator/health          # {"status":"UP",...}
 docker run --rm postgres:16-alpine pg_dump "postgresql://<user>:<pw>@<host>/neondb?sslmode=require" > backup-$(date +%F).sql
 ```
 
-- **Email notification (mặc định TẮT ở prod)**: bật khi có tài khoản SMTP (Resend/Brevo free)
-  bằng env trên Railway: `MAIL_ENABLED=true` + `SPRING_MAIL_HOST`, `SPRING_MAIL_PORT`,
-  `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD` (relaxed binding của Spring tự map sang
-  `spring.mail.*`). Không bật thì hệ thống vẫn đủ chức năng — đã có thông báo in-app.
+- **Email notification giữ TẮT ở prod**: v2.0.0 dùng thông báo in-app trên production; SMTP/Mailpit
+  chỉ dùng để kiểm thử email ở local. Không cấu hình `MAIL_ENABLED=true` trên Railway.
 - **Chi phí**: xem Railway Usage sau 4-5 ngày để ngoại suy $/tháng và quyết định lên Hobby.
-- **Hikari + Neon**: prod đã cấu hình pool nhỏ + `max-lifetime` 4.5 phút (ngắn hơn mốc Neon
-  suspend ~5 phút) và cố ý KHÔNG bật keepalive (sẽ giữ Neon thức, tốn compute-hours).
+- **Hikari + Neon**: prod đã cấu hình pool nhỏ, `idle-timeout` 2 phút và `max-lifetime` 4.5 phút
+  (ngắn hơn mốc Neon suspend ~5 phút); cố ý KHÔNG bật keepalive vì sẽ giữ Neon thức và tốn
+  compute-hours.
 
 ## Checklist bảo mật
 

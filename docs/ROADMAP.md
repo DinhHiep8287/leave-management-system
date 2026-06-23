@@ -132,21 +132,26 @@ phạm vi** theo quyết định 06/2026 — UI tiếng Việt duy nhất, xem R
 
 ## v2.0.0 — Tính năng mở rộng + cải tiến UI/UX ✅ **Done**
 
+> **Mốc deploy cuối** của miniproject. Sau khi rollout v2.0.0 lên Vercel/Railway/Neon, các tính
+> năng mới chỉ phục vụ demo/test local; không tiếp tục mở rộng production.
+
 1. ✅ **In-app notification (chuông)**: bảng `notifications` (V4), ghi cùng transaction với
    transition; API self-scoped; FE chuông + badge, polling 30s, mark-read.
 2. ✅ **Email notification**: event `@Async` AFTER_COMMIT + Mailpit dev (UI :8025);
-   `app.mail.enabled` mặc định false — prod bật sau khi có SMTP (xem DEPLOYMENT.md).
+   `app.mail.enabled` mặc định false và giữ tắt ở production; Mailpit dùng để demo local.
 3. ✅ **Carry-over phép**: cột `carried_over_days` (V5) + `POST /leave-balances/carry-over`
    (ADMIN, có trần, idempotent, audit) + UI trang Quỹ phép. REQUIREMENTS §4 đã đổi spec.
 4. ✅ **Gói UI/UX**: mobile nav, preview số ngày + hint quỹ khi nộp đơn, confirm khóa user,
    skeleton, empty-state CTA, pagination tổng số, affordance lịch.
 
-## v2.1 — Để sau
+## Sau v2.0.0 — Chỉ demo/test local
 
-- **Upload file đính kèm** (giấy bác sĩ…): cần object storage ngoài (Cloudflare R2/S3) vì
-  filesystem Railway ephemeral; bảng `attachments` + RBAC download.
+- **Upload file đính kèm (chỉ demo local)** (giấy bác sĩ…): đây là miniproject portfolio nên
+  không deploy tính năng này lên Vercel/Railway/Neon và không dùng R2/S3. Metadata lưu trong
+  bảng `attachments`, file lưu ở Docker named volume; endpoint download phải kiểm tra RBAC.
+  Mất volume thì mất file là giới hạn được chấp nhận cho môi trường demo/test local.
 - **Duyệt nhiều cấp**: đổi state machine — rủi ro cao, chỉ làm khi thật sự cần.
-- **Bật email prod**: đăng ký SMTP (Resend/Brevo free) + env `MAIL_ENABLED=true`.
+- **Email**: tiếp tục dùng Mailpit local; không đưa SMTP thật vào production.
 
 ## Nguyên tắc docs cho mọi bản nâng cấp (bắt buộc)
 
@@ -154,7 +159,7 @@ phạm vi** theo quyết định 06/2026 — UI tiếng Việt duy nhất, xem R
 - `docs/ROADMAP.md`: đánh dấu ✅ từng mục khi xong.
 - `docs/REQUIREMENTS.md`: cập nhật nếu spec đổi (vd carry-over đảo ngược §4).
 - `docs/ARCHITECTURE.md` + `docs/DATABASE.md`: cập nhật khi thêm bảng/luồng (notifications, attachments).
-- `CLAUDE.md`: thêm gotcha vận hành mới gặp; cập nhật lộ trình.
+- `CLAUDE.md` + `AGENTS.md`: thêm gotcha vận hành mới gặp; cập nhật lộ trình và giữ hai file đồng bộ.
 - Tag semver chỉ đặt khi CI xanh.
 
 ## Không làm — kể cả v2 (REQUIREMENTS §14)
@@ -166,7 +171,7 @@ phạm vi** theo quyết định 06/2026 — UI tiếng Việt duy nhất, xem R
 
 ## Nguyên tắc xuyên suốt
 
-- Giữ ranh giới MVP: **không** thêm Kafka/Redis/microservices/CQRS (CLAUDE.md).
+- Giữ ranh giới MVP: **không** thêm Kafka/Redis/microservices/CQRS (`CLAUDE.md` / `AGENTS.md`).
 - Mỗi tính năng: BE (test) → FE (typecheck/lint/build + smoke) → commit theo Conventional Commits.
 - Bám `docs/UI-GUIDELINES.md` cho mọi màn hình mới.
 - Đổi spec/kiến trúc → cập nhật `REQUIREMENTS.md`/`ARCHITECTURE.md` tương ứng.

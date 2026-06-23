@@ -124,7 +124,14 @@ Chi tiết xem [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Trạng thái
 
-✅ **v1.2.0 — Deploy thật** (Vercel + Railway + Neon, demo trực tuyến ở đầu trang). Mốc trước: **v1.1.0** — kiểm thử đầy đủ mọi tầng trong CI; **v1.0.0 — MVP hoàn chỉnh** (auth, CRUD, đơn nghỉ + duyệt, lịch tháng/tuần, dashboard theo vai trò, báo cáo CSV, console quản trị, cấu hình production) — đáp ứng toàn bộ `docs/REQUIREMENTS.md`. UI tiếng Việt duy nhất (không làm i18n — xem REQUIREMENTS §14). Backend phủ test đầy đủ; FE build/lint sạch; có E2E Playwright (`e2e/`). Kế hoạch tiếp theo: `docs/ROADMAP.md`.
+✅ **Mã nguồn v2.0.0 — sẵn sàng cho lần deploy cuối**: bổ sung notification in-app, email
+AFTER_COMMIT (prod mặc định tắt), carry-over phép và gói cải tiến UI/UX. Quality gate hiện tại:
+196 backend test và 32 frontend unit test xanh; FE typecheck/lint/build sạch lỗi. Demo trực tuyến
+ở đầu trang vẫn là bản production đã deploy gần nhất cho tới khi rollout v2.0.0 hoàn tất.
+
+Đây là miniproject portfolio, không phải sản phẩm thương mại. Sau v2.0.0, các tính năng mở rộng
+chỉ phục vụ demo/test local và không tiếp tục triển khai lên Vercel/Railway/Neon. Xem
+[`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Giấy phép
 

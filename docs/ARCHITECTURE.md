@@ -176,19 +176,20 @@ Production:
 
 ## 9. Roadmap mở rộng (sau MVP)
 
+`v2.0.0` là mốc deploy cuối. Mọi thử nghiệm sau đó chỉ chạy local bằng Docker Compose, không mở
+rộng hạ tầng Vercel/Railway/Neon.
+
 **v2.0:**
 - Email + in-app notification → tách module `notification/`.
-- Quên mật khẩu / reset qua email (cần notification trước).
-- Upload file đính kèm cho đơn nghỉ → module `attachment/` + object storage.
-- Báo cáo Excel (.xlsx) phức tạp → Apache POI.
+- Carry-over phép → policy ở `leavebalance/` service, ADMIN chạy thủ công.
+- Gói cải tiến UI/UX cho mobile, form nộp đơn và trạng thái tải/rỗng.
 
-**v2.1:**
-- Multi-level approval → thêm bảng `approval_step`.
-- Carry over phép sang năm sau → policy ở `leavebalance/` service.
-- Self-register (admin duyệt).
-- Phân quyền chi tiết (permission level thay vì role-only).
+**Sau v2.0 (chỉ demo/test local):**
+- Upload file đính kèm → module `attachment/`, metadata trong PostgreSQL, file trong Docker named volume.
+- Multi-level approval → thêm bảng `approval_step` nếu cần thử nghiệm state machine.
+- Các thử nghiệm khác không được kéo thêm dịch vụ production hoặc object storage ngoài.
 
-**v3 (nice to have):**
+**v3 (nice to have, chỉ local):**
 - Mobile app → cùng API, thêm endpoint riêng nếu cần.
 
 **Loại trừ vĩnh viễn**: Google Calendar sync, multi-tenant, SSO. Xem `REQUIREMENTS.md §14`.

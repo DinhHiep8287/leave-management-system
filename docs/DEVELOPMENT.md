@@ -1,5 +1,14 @@
 # Hướng dẫn phát triển
 
+## Hỗ trợ coding agent
+
+Repo hỗ trợ đồng thời Claude Code và Codex:
+
+- Claude Code đọc chỉ dẫn dự án từ [`CLAUDE.md`](../CLAUDE.md).
+- Codex đọc chỉ dẫn dự án từ [`AGENTS.md`](../AGENTS.md).
+- Khi thay đổi tech stack, kiến trúc, lệnh phát triển hoặc gotcha vận hành, cập nhật đồng thời hai file để tránh chỉ dẫn bị lệch.
+- Skills dùng chung nằm trong `.agents/skills/`; cache và thiết lập riêng theo máy không được commit.
+
 ## 1. Yêu cầu môi trường
 
 | Bắt buộc | Khuyến nghị |

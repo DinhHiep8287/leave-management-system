@@ -115,6 +115,11 @@ playwright-report/
 # Auto-load convenience only; the real skills live in .agents/skills/.
 # Junctions don't track cleanly in git on Windows — recreate locally if needed.
 .claude/skills/
+.claude/settings.local.json
+
+# ===== Codex local cache =====
+# Generated reference/cache files are machine-local. Keep shared Codex config trackable.
+.codex-cache/
 
 # pnpm package store created by in-container installs (bind-mounted)
 frontend/.pnpm-store/
