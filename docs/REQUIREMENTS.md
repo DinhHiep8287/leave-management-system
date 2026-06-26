@@ -174,7 +174,7 @@ PENDING ──approve──> APPROVED ──cancel(by employee/HR)──> CANCEL
   PostgreSQL, file lưu Docker named volume; không dùng object storage và không deploy tính năng
   này lên hạ tầng production hiện tại. Tối đa 5 file/đơn, 5MB/file, chỉ PDF/JPG/PNG; chỉ sửa khi đơn `PENDING`.
 - ⏳ Báo cáo nâng cao — ưu tiên bộ lọc/phân tích theo phòng ban, loại nghỉ và tháng/quý; không cần Excel phức tạp.
-- ⏳ Cải thiện notification — tối ưu nội dung, trạng thái đọc/chưa đọc và điều hướng từ thông báo.
+- ✅ Cải thiện notification — có filter tất cả/chưa đọc, nhãn trạng thái đọc, loại sự kiện, thời điểm đọc và điều hướng từ thông báo tới chi tiết đơn.
 - ⏳ Chế độ xem lịch theo phòng ban — làm rõ phạm vi quan sát lịch cho Manager/HR.
 - ⏳ Cải thiện UI/UX — tiếp tục hoàn thiện responsive, validation, empty/loading/error state.
 - ❌ Mobile app native

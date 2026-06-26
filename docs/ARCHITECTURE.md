@@ -145,6 +145,9 @@ leave-management-system/
   SMTP — lỗi mail không bao giờ ảnh hưởng transaction nghiệp vụ. Cờ `app.mail.enabled`
   (mặc định false); dev bật sẵn với **Mailpit** (UI :8025).
 
+- **UI**: dropdown notification hỗ trợ lọc tất cả/chưa đọc, hiển thị loại sự kiện, trạng thái đọc,
+  thời điểm đọc và mở trực tiếp chi tiết đơn nghỉ liên quan.
+
 ## 5c. Attachment local-only
 
 - **Metadata**: bảng `attachments` trong PostgreSQL, FK tới `leave_requests` và `users`.

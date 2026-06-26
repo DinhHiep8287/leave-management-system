@@ -9,4 +9,5 @@ public record NotificationResponse(
         ApprovalAction eventType,
         String message,
         boolean isRead,
-        OffsetDateTime createdAt) {}
+        OffsetDateTime createdAt,
+        OffsetDateTime readAt) {}

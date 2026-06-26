@@ -40,7 +40,7 @@ class NotificationControllerTest {
     private static NotificationResponse sample() {
         return new NotificationResponse(9L, 4L, ApprovalAction.CREATED,
                 "Nhân viên nộp đơn nghỉ 06/07–10/07 (ANNUAL), đang chờ bạn duyệt",
-                false, OffsetDateTime.now());
+                false, OffsetDateTime.now(), null);
     }
 
     @Test
@@ -67,9 +67,10 @@ class NotificationControllerTest {
     @WithMockPrincipal(id = 3L, role = Role.EMPLOYEE)
     void markReadDelegatesWithPrincipalId() throws Exception {
         given(notificationService.markRead(9L, 3L)).willReturn(new NotificationResponse(
-                9L, 4L, ApprovalAction.APPROVED, "x", true, OffsetDateTime.now()));
+                9L, 4L, ApprovalAction.APPROVED, "x", true, OffsetDateTime.now(), OffsetDateTime.now()));
         mvc.perform(patch("/notifications/9/read"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.isRead").value(true));
+                .andExpect(jsonPath("$.data.isRead").value(true))
+                .andExpect(jsonPath("$.data.readAt").exists());
     }
 }

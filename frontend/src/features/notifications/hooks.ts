@@ -9,10 +9,10 @@ import {
 
 const POLL_MS = 30_000;
 
-export function useNotifications(enabled: boolean) {
+export function useNotifications(enabled: boolean, unreadOnly = false) {
   return useQuery({
-    queryKey: ["notifications"],
-    queryFn: () => listNotifications(10),
+    queryKey: ["notifications", unreadOnly ? "unread" : "all"],
+    queryFn: () => listNotifications(10, unreadOnly),
     enabled,
     refetchInterval: POLL_MS,
     staleTime: 10_000,

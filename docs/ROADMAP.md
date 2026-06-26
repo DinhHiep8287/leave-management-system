@@ -153,8 +153,8 @@ Các công việc tiếp theo chỉ phục vụ hoàn thiện miniproject và de
    Không dùng R2/S3 và không deploy tính năng này lên Vercel/Railway/Neon.
 2. **Báo cáo nâng cao**: bổ sung bộ lọc và số liệu tổng hợp hữu ích hơn, ví dụ theo phòng ban, loại nghỉ,
    tháng/quý và xu hướng sử dụng quỹ phép. Ưu tiên CSV/bảng tổng hợp trước, không cần Excel phức tạp.
-3. **Cải thiện notification**: làm rõ trạng thái đã đọc/chưa đọc, nội dung thông báo, điều hướng từ thông báo
-   tới đối tượng liên quan và trải nghiệm polling/refresh trong giao diện.
+3. ✅ **Cải thiện notification**: làm rõ trạng thái đã đọc/chưa đọc, bổ sung filter "Tất cả/Chưa đọc",
+   hiển thị loại sự kiện, thời điểm đọc và giữ điều hướng từ thông báo tới chi tiết đơn nghỉ.
 4. **Chế độ xem lịch theo phòng ban**: cải thiện calendar để người dùng quan sát lịch nghỉ theo phòng ban
    rõ hơn, phục vụ Manager/HR khi theo dõi nhân sự vắng mặt.
 5. **Cải thiện UI/UX**: tiếp tục tinh chỉnh trạng thái tải/rỗng/lỗi, responsive, form validation, thông tin

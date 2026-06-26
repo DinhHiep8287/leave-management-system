@@ -5,9 +5,9 @@ import type { Notification } from "./types";
 type Envelope<T> = { data: T };
 type PageData<T> = { content: T[] };
 
-export async function listNotifications(size = 10): Promise<Notification[]> {
+export async function listNotifications(size = 10, unreadOnly = false): Promise<Notification[]> {
   const res = await api.get<Envelope<PageData<Notification>>>("/notifications", {
-    params: { size },
+    params: { size, unreadOnly },
   });
   return res.data.data.content;
 }

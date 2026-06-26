@@ -69,6 +69,6 @@ public class NotificationService {
     private static NotificationResponse toResponse(NotificationEntity n) {
         return new NotificationResponse(
                 n.getId(), n.getLeaveRequestId(), n.getEventType(), n.getMessage(),
-                Boolean.TRUE.equals(n.getIsRead()), n.getCreatedAt());
+                Boolean.TRUE.equals(n.getIsRead()), n.getCreatedAt(), n.getReadAt());
     }
 }
