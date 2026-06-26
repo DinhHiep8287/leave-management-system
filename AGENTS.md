@@ -10,6 +10,7 @@ Tài liệu hướng dẫn cho Codex khi làm việc trong repo này.
 - **Phong cách user mong đợi**: Cẩn thận, chi tiết, đúng best practice — không cắt góc.
 - **Phạm vi attachment**: Upload file đính kèm chỉ để demo/test local. Lưu metadata trong PostgreSQL, file trong Docker named volume; không thêm R2/S3 và không deploy tính năng này lên production hiện tại.
 - **Mốc deploy cuối**: v2.0.0 là lần deploy production cuối dự kiến. Mọi tính năng sau đó chỉ dành cho demo/test local, không mở rộng Vercel/Railway/Neon hay thêm dịch vụ production.
+- **Định hướng hiện tại**: Không đưa phê duyệt nhiều cấp hoặc phân quyền chi tiết vào kế hoạch. Tập trung vào upload đính kèm local-only, báo cáo nâng cao, cải thiện notification, lịch theo phòng ban và UI/UX.
 
 ## Tech stack đã chốt
 
@@ -25,7 +26,7 @@ Tài liệu hướng dẫn cho Codex khi làm việc trong repo này.
 
 ## Quyết định kiến trúc quan trọng
 
-1. **Dockerize toàn bộ từ đầu** — kể cả backend & frontend dev đều chạy trong container. Tận dụng Spring DevTools + Vite HMR có polling để hot-reload qua volume mount.
+1. **Dockerize toàn bộ từ đầu** — kể cả backend & frontend đều chạy trong container. Frontend local hiện chạy `typecheck + vite build + vite preview` để ổn định trên Docker Desktop Windows; không ép Vite polling qua bind mount.
 2. **Package by feature** (không phải by layer) — `auth/`, `user/`, `leaverequest/`… mỗi feature có controller/service/repository riêng.
 3. **DTO tách rời Entity** — không bao giờ trả Entity qua API.
 4. **Flyway từ ngày đầu** — không dùng `ddl-auto: create/update`. Schema thay đổi qua migration.

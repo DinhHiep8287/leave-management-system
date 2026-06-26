@@ -127,7 +127,7 @@ PENDING ──approve──> APPROVED ──cancel(by employee/HR)──> CANCEL
 - **Đăng ký**: chỉ Admin tạo được tài khoản mới (MVP — không có self-register).
 - **Đổi mật khẩu**: nhân viên đổi được mật khẩu của chính mình.
 - **Reset mật khẩu**: Admin reset thủ công (MVP).
-- **Phân quyền**: theo `role` (RBAC đơn giản). Có thể thêm permission level sau.
+- **Phân quyền**: theo `role` (RBAC đơn giản), kết hợp kiểm tra phạm vi dữ liệu ở tầng nghiệp vụ.
 
 ## 10. Dashboard
 
@@ -170,14 +170,18 @@ PENDING ──approve──> APPROVED ──cancel(by employee/HR)──> CANCEL
 - ✅ ~~In-app notification (chuông)~~ — đã làm ở v2.0.0.
 - ✅ ~~Email notification~~ — đã làm ở v2.0.0 (Mailpit bật ở dev; production giữ tắt; SMS không làm).
 - ✅ ~~Carry over phép sang năm sau~~ — đã làm ở v2.0.0 (xem §4).
-- ❌ Workflow duyệt nhiều cấp
-- ❌ Upload file (giấy bác sĩ…) — cân nhắc sau v2.0.0 và **chỉ phục vụ demo/test local**. Metadata lưu
+- ⏳ Upload file (giấy bác sĩ…) — **chỉ phục vụ demo/test local**. Metadata lưu
   PostgreSQL, file lưu Docker named volume; không dùng object storage và không deploy tính năng
   này lên hạ tầng production hiện tại.
+- ⏳ Báo cáo nâng cao — ưu tiên bộ lọc/phân tích theo phòng ban, loại nghỉ và tháng/quý; không cần Excel phức tạp.
+- ⏳ Cải thiện notification — tối ưu nội dung, trạng thái đọc/chưa đọc và điều hướng từ thông báo.
+- ⏳ Chế độ xem lịch theo phòng ban — làm rõ phạm vi quan sát lịch cho Manager/HR.
+- ⏳ Cải thiện UI/UX — tiếp tục hoàn thiện responsive, validation, empty/loading/error state.
 - ❌ Mobile app native
 - ❌ Self-register
 - ❌ Quên mật khẩu tự reset qua email
-- ❌ Phân quyền chi tiết (chỉ có RBAC đơn giản)
+- ❌ Workflow duyệt nhiều cấp
+- ❌ Phân quyền chi tiết/permission matrix
 - ❌ Báo cáo Excel phức tạp với biểu đồ (CSV hiện tại mở được bằng Excel)
 
 ## 14. Loại trừ vĩnh viễn (không nằm trong v2)

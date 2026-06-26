@@ -144,14 +144,23 @@ phạm vi** theo quyết định 06/2026 — UI tiếng Việt duy nhất, xem R
 4. ✅ **Gói UI/UX**: mobile nav, preview số ngày + hint quỹ khi nộp đơn, confirm khóa user,
    skeleton, empty-state CTA, pagination tổng số, affordance lịch.
 
-## Sau v2.0.0 — Chỉ demo/test local
+## Định hướng hiện tại — Demo/test local
 
-- **Upload file đính kèm (chỉ demo local)** (giấy bác sĩ…): đây là miniproject portfolio nên
-  không deploy tính năng này lên Vercel/Railway/Neon và không dùng R2/S3. Metadata lưu trong
-  bảng `attachments`, file lưu ở Docker named volume; endpoint download phải kiểm tra RBAC.
-  Mất volume thì mất file là giới hạn được chấp nhận cho môi trường demo/test local.
-- **Duyệt nhiều cấp**: đổi state machine — rủi ro cao, chỉ làm khi thật sự cần.
-- **Email**: tiếp tục dùng Mailpit local; không đưa SMTP thật vào production.
+Các công việc tiếp theo chỉ phục vụ hoàn thiện miniproject và demo local, không mở rộng thêm hạ tầng production.
+Phê duyệt nhiều cấp và phân quyền chi tiết không nằm trong kế hoạch hiện tại vì làm tăng độ phức tạp nghiệp vụ
+trong khi giá trị trình bày chưa tương xứng với phạm vi dự án.
+
+1. **Upload file đính kèm local-only**: đính kèm giấy tờ cho đơn nghỉ khi demo local. Metadata lưu trong
+   PostgreSQL, file lưu ở Docker named volume; endpoint upload/download kiểm tra quyền theo đơn nghỉ.
+   Không dùng R2/S3 và không deploy tính năng này lên Vercel/Railway/Neon.
+2. **Báo cáo nâng cao**: bổ sung bộ lọc và số liệu tổng hợp hữu ích hơn, ví dụ theo phòng ban, loại nghỉ,
+   tháng/quý và xu hướng sử dụng quỹ phép. Ưu tiên CSV/bảng tổng hợp trước, không cần Excel phức tạp.
+3. **Cải thiện notification**: làm rõ trạng thái đã đọc/chưa đọc, nội dung thông báo, điều hướng từ thông báo
+   tới đối tượng liên quan và trải nghiệm polling/refresh trong giao diện.
+4. **Chế độ xem lịch theo phòng ban**: cải thiện calendar để người dùng quan sát lịch nghỉ theo phòng ban
+   rõ hơn, phục vụ Manager/HR khi theo dõi nhân sự vắng mặt.
+5. **Cải thiện UI/UX**: tiếp tục tinh chỉnh trạng thái tải/rỗng/lỗi, responsive, form validation, thông tin
+   hướng dẫn thao tác và độ nhất quán theo `docs/UI-GUIDELINES.md`.
 
 ## Nguyên tắc docs cho mọi bản nâng cấp (bắt buộc)
 
@@ -168,6 +177,8 @@ phạm vi** theo quyết định 06/2026 — UI tiếng Việt duy nhất, xem R
 - ❌ Tích hợp Google Calendar / Outlook (2-way sync).
 - ❌ Multi-tenant / multi-company.
 - ❌ SSO (Google Workspace / Microsoft 365).
+- ❌ Workflow duyệt nhiều cấp — không cần thiết cho phạm vi nghiệp vụ hiện tại.
+- ❌ Phân quyền chi tiết/permission matrix — giữ RBAC theo role và kiểm tra phạm vi dữ liệu ở service.
 
 ## Nguyên tắc xuyên suốt
 
