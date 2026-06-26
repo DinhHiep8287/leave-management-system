@@ -163,6 +163,15 @@ leave-management-system/
 - **Preview**: màn hình báo cáo gọi JSON `/reports/leave-summary` để xem nhanh tổng ngày, số đơn và
   số loại nghỉ có phát sinh trước khi tải CSV.
 
+## 5e. Calendar by Department
+
+- **Scope**: Employee/Manager xem lịch phòng ban của mình; HR/Admin có thể xem toàn tổ chức hoặc lọc
+  một phòng ban/nhân viên cụ thể.
+- **Response**: mỗi entry trả thêm `departmentId` và `departmentName` để frontend hiển thị và tổng hợp
+  theo phòng ban mà không cần gọi thêm API theo từng user.
+- **UI**: calendar hiển thị nhãn phạm vi đang xem, thẻ tổng hợp số đơn theo phòng ban và nhãn phòng ban
+  trong từng entry khi HR/Admin xem toàn tổ chức.
+
 ## 6. Error handling
 
 - Global `@RestControllerAdvice` → response chuẩn `ErrorResponse`.

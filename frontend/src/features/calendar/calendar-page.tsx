@@ -70,6 +70,38 @@ export function CalendarPage() {
   });
   const { data: holidays } = useHolidays(refDate.getFullYear());
 
+  const selectedDepartment = useMemo(
+    () => depts?.find((d) => d.id === departmentId),
+    [depts, departmentId],
+  );
+
+  const userOptions = useMemo(() => {
+    if (!isHrAdmin || departmentId == null) return users ?? [];
+    return (users ?? []).filter((u) => u.departmentId === departmentId);
+  }, [departmentId, isHrAdmin, users]);
+
+  const departmentSummary = useMemo(() => {
+    const map = new Map<string, { name: string; count: number; approved: number; pending: number }>();
+    for (const e of entries ?? []) {
+      const key = e.departmentId == null ? "unknown" : String(e.departmentId);
+      const current = map.get(key) ?? {
+        name: e.departmentName ?? "Chưa rõ phòng ban",
+        count: 0,
+        approved: 0,
+        pending: 0,
+      };
+      current.count += 1;
+      if (e.status === "APPROVED") current.approved += 1;
+      if (e.status === "PENDING") current.pending += 1;
+      map.set(key, current);
+    }
+    return [...map.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "vi"));
+  }, [entries]);
+
+  const viewingLabel = isHrAdmin
+    ? selectedDepartment?.name ?? "Tất cả phòng ban"
+    : (departmentSummary[0]?.name ?? "Phòng ban của bạn");
+
   const holidayByDay = useMemo(() => {
     const map = new Map<string, string>();
     for (const h of holidays ?? []) map.set(h.holidayDate, h.name);
@@ -92,6 +124,11 @@ export function CalendarPage() {
     return map;
   }, [entries, grid]);
 
+  const onDepartmentChange = (value: string) => {
+    setDepartmentId(value ? Number(value) : undefined);
+    setUserId(undefined);
+  };
+
   const navPrev = () => setRefDate((d) => (monthMode ? subMonths(d, 1) : subWeeks(d, 1)));
   const navNext = () => setRefDate((d) => (monthMode ? addMonths(d, 1) : addWeeks(d, 1)));
 
@@ -104,7 +141,9 @@ export function CalendarPage() {
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Lịch nghỉ phép</h1>
-          <p className="text-sm text-muted-foreground">Nghỉ phép trong phạm vi của bạn.</p>
+          <p className="text-sm text-muted-foreground">
+            Đang xem: <span className="font-medium text-foreground">{viewingLabel}</span>
+          </p>
         </div>
         <div className="inline-flex overflow-hidden rounded-md border border-border text-sm">
           <button
@@ -156,7 +195,7 @@ export function CalendarPage() {
               aria-label="Phòng ban"
               className="w-44"
               value={departmentId ?? ""}
-              onChange={(e) => setDepartmentId(e.target.value ? Number(e.target.value) : undefined)}
+              onChange={(e) => onDepartmentChange(e.target.value)}
             >
               <option value="">Mọi phòng ban</option>
               {depts?.map((d) => (
@@ -172,7 +211,7 @@ export function CalendarPage() {
               onChange={(e) => setUserId(e.target.value ? Number(e.target.value) : undefined)}
             >
               <option value="">Mọi nhân viên</option>
-              {users?.map((u) => (
+              {userOptions.map((u) => (
                 <option key={u.id} value={u.id}>
                   {u.fullName}
                 </option>
@@ -192,6 +231,31 @@ export function CalendarPage() {
         </label>
         {isFetching && <span className="text-xs text-muted-foreground">Đang tải…</span>}
       </div>
+
+      <div className="grid gap-3 md:grid-cols-3">
+        <SummaryCard label="Phạm vi" value={viewingLabel} />
+        <SummaryCard label="Số đơn trong kỳ" value={String(entries?.length ?? 0)} />
+        <SummaryCard label="Phòng ban có lịch nghỉ" value={String(departmentSummary.length)} />
+      </div>
+
+      {departmentSummary.length > 0 && (
+        <div className="rounded-lg border border-border bg-card p-3">
+          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Tổng hợp theo phòng ban
+          </p>
+          <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+            {departmentSummary.map((d) => (
+              <div key={d.name} className="rounded-md border border-border px-3 py-2 text-sm">
+                <p className="font-medium">{d.name}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {d.count} đơn · {d.approved} đã duyệt
+                  {d.pending > 0 ? ` · ${d.pending} chờ duyệt` : ""}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {isError && <ErrorState onRetry={() => void refetch()} />}
 
@@ -242,7 +306,7 @@ export function CalendarPage() {
                       key={e.leaveRequestId}
                       type="button"
                       onClick={() => setDetailId(e.leaveRequestId)}
-                      title={`${e.userFullName} · ${e.leaveTypeCode} — bấm để xem chi tiết`}
+                      title={`${e.userFullName} · ${e.departmentName ?? "Chưa rõ phòng ban"} · ${e.leaveTypeCode} — bấm để xem chi tiết`}
                       className={cn(
                         "block w-full cursor-pointer truncate rounded px-1.5 py-0.5 text-left text-[11px]",
                         "transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -252,6 +316,7 @@ export function CalendarPage() {
                       )}
                     >
                       {e.userFullName}
+                      {isHrAdmin && departmentId == null && e.departmentName ? ` · ${e.departmentName}` : ""}
                     </button>
                   ))}
                 </div>
@@ -274,6 +339,17 @@ export function CalendarPage() {
       </div>
 
       <RequestDetailDialog requestId={detailId} onClose={() => setDetailId(null)} />
+    </div>
+  );
+}
+
+function SummaryCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-border bg-secondary/40 p-3">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="mt-1 truncate text-base font-semibold" title={value}>
+        {value}
+      </p>
     </div>
   );
 }

@@ -155,8 +155,8 @@ Các công việc tiếp theo chỉ phục vụ hoàn thiện miniproject và de
    CSV tổng hợp có số đơn, CSV quỹ phép có filter phòng ban. Không làm Excel phức tạp.
 3. ✅ **Cải thiện notification**: làm rõ trạng thái đã đọc/chưa đọc, bổ sung filter "Tất cả/Chưa đọc",
    hiển thị loại sự kiện, thời điểm đọc và giữ điều hướng từ thông báo tới chi tiết đơn nghỉ.
-4. **Chế độ xem lịch theo phòng ban**: cải thiện calendar để người dùng quan sát lịch nghỉ theo phòng ban
-   rõ hơn, phục vụ Manager/HR khi theo dõi nhân sự vắng mặt.
+4. ✅ **Chế độ xem lịch theo phòng ban**: calendar hiển thị rõ phạm vi đang xem, tổng hợp theo phòng ban,
+   filter phòng ban/nhân viên cho HR/Admin và nhãn phòng ban khi xem toàn tổ chức.
 5. **Cải thiện UI/UX**: tiếp tục tinh chỉnh trạng thái tải/rỗng/lỗi, responsive, form validation, thông tin
    hướng dẫn thao tác và độ nhất quán theo `docs/UI-GUIDELINES.md`.
 

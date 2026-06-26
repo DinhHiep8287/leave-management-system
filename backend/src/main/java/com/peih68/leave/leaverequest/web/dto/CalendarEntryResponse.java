@@ -9,6 +9,8 @@ public record CalendarEntryResponse(
         Long leaveRequestId,
         Long userId,
         String userFullName,
+        Long departmentId,
+        String departmentName,
         String leaveTypeCode,
         LocalDate startDate,
         LocalDate endDate,

@@ -4,6 +4,8 @@ export type CalendarEntry = {
   leaveRequestId: number;
   userId: number;
   userFullName: string | null;
+  departmentId: number | null;
+  departmentName: string | null;
   leaveTypeCode: string | null;
   startDate: string;
   endDate: string;

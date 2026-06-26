@@ -175,7 +175,7 @@ PENDING ──approve──> APPROVED ──cancel(by employee/HR)──> CANCEL
   này lên hạ tầng production hiện tại. Tối đa 5 file/đơn, 5MB/file, chỉ PDF/JPG/PNG; chỉ sửa khi đơn `PENDING`.
 - ✅ Báo cáo nâng cao — có preview tổng hợp theo tháng/quý, loại nghỉ và phòng ban; CSV tổng hợp có số đơn, CSV quỹ phép có filter phòng ban.
 - ✅ Cải thiện notification — có filter tất cả/chưa đọc, nhãn trạng thái đọc, loại sự kiện, thời điểm đọc và điều hướng từ thông báo tới chi tiết đơn.
-- ⏳ Chế độ xem lịch theo phòng ban — làm rõ phạm vi quan sát lịch cho Manager/HR.
+- ✅ Chế độ xem lịch theo phòng ban — calendar có nhãn phạm vi, tổng hợp theo phòng ban, filter phòng ban/nhân viên cho HR/Admin và thông tin phòng ban trong từng entry.
 - ⏳ Cải thiện UI/UX — tiếp tục hoàn thiện responsive, validation, empty/loading/error state.
 - ❌ Mobile app native
 - ❌ Self-register

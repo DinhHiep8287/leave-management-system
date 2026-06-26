@@ -44,7 +44,7 @@ export async function adjustBalance(
   return res.data.data;
 }
 
-export type UserOption = { id: number; fullName: string; employeeCode: string };
+export type UserOption = { id: number; fullName: string; employeeCode: string; departmentId: number | null };
 
 export async function listUserOptions(): Promise<UserOption[]> {
   const res = await api.get<Envelope<PageData<UserOption>>>("/users", {
@@ -54,5 +54,6 @@ export async function listUserOptions(): Promise<UserOption[]> {
     id: u.id,
     fullName: u.fullName,
     employeeCode: u.employeeCode,
+    departmentId: u.departmentId,
   }));
 }

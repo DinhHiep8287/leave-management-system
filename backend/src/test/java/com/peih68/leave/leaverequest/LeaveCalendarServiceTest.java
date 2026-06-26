@@ -105,8 +105,16 @@ class LeaveCalendarServiceTest {
 
     @Test
     void departmentFilterNarrowsToOneDepartment() {
-        Set<Long> ids = userIds(service.calendar(UserPrincipal.from(admin), FROM, TO, salesId, null, null, true));
+        List<CalendarEntryResponse> entries =
+                service.calendar(UserPrincipal.from(admin), FROM, TO, salesId, null, null, true);
+        Set<Long> ids = userIds(entries);
         assertThat(ids).containsExactly(s1.getId());
+        assertThat(entries)
+                .singleElement()
+                .satisfies(e -> {
+                    assertThat(e.departmentId()).isEqualTo(salesId);
+                    assertThat(e.departmentName()).isEqualTo("Sales");
+                });
     }
 
     @Test

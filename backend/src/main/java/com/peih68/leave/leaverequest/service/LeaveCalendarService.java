@@ -3,6 +3,8 @@ package com.peih68.leave.leaverequest.service;
 import com.peih68.leave.auth.domain.UserPrincipal;
 import com.peih68.leave.common.exception.ApiException;
 import com.peih68.leave.common.exception.ErrorCode;
+import com.peih68.leave.department.domain.DepartmentEntity;
+import com.peih68.leave.department.repository.DepartmentRepository;
 import com.peih68.leave.leaverequest.domain.LeaveRequestEntity;
 import com.peih68.leave.leaverequest.domain.LeaveStatus;
 import com.peih68.leave.leaverequest.repository.LeaveRequestRepository;
@@ -46,6 +48,7 @@ public class LeaveCalendarService {
     private final LeaveRequestRepository requestRepository;
     private final UserRepository userRepository;
     private final LeaveTypeRepository leaveTypeRepository;
+    private final DepartmentRepository departmentRepository;
 
     @Transactional(readOnly = true)
     public List<CalendarEntryResponse> calendar(
@@ -119,17 +122,28 @@ public class LeaveCalendarService {
         if (rows.isEmpty()) {
             return List.of();
         }
-        Map<Long, String> userNames = userRepository
+        Map<Long, UserEntity> users = userRepository
                 .findAllById(rows.stream().map(LeaveRequestEntity::getUserId).distinct().toList()).stream()
-                .collect(Collectors.toMap(UserEntity::getId, UserEntity::getFullName));
+                .collect(Collectors.toMap(UserEntity::getId, u -> u));
         Map<Long, String> typeCodes = leaveTypeRepository
                 .findAllById(rows.stream().map(LeaveRequestEntity::getLeaveTypeId).distinct().toList()).stream()
                 .collect(Collectors.toMap(LeaveTypeEntity::getId, LeaveTypeEntity::getCode));
+        Map<Long, String> departmentNames = departmentRepository
+                .findAllById(users.values().stream()
+                        .map(UserEntity::getDepartmentId)
+                        .filter(java.util.Objects::nonNull)
+                        .distinct()
+                        .toList())
+                .stream()
+                .collect(Collectors.toMap(DepartmentEntity::getId, DepartmentEntity::getName));
 
         List<CalendarEntryResponse> out = new ArrayList<>(rows.size());
         for (LeaveRequestEntity r : rows) {
+            UserEntity user = users.get(r.getUserId());
+            Long departmentId = user == null ? null : user.getDepartmentId();
             out.add(new CalendarEntryResponse(
-                    r.getId(), r.getUserId(), userNames.get(r.getUserId()),
+                    r.getId(), r.getUserId(), user == null ? null : user.getFullName(),
+                    departmentId, departmentId == null ? null : departmentNames.get(departmentId),
                     typeCodes.get(r.getLeaveTypeId()),
                     r.getStartDate(), r.getEndDate(), r.getStartHalf(), r.getEndHalf(), r.getStatus()));
         }
