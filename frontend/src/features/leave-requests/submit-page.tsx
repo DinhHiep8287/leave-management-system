@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 
@@ -15,7 +15,8 @@ import { getUserBalances } from "@/features/balances/api";
 import { getHolidays } from "@/features/calendar/api";
 import { previewWorkingDays } from "@/lib/working-days";
 
-import { useLeaveTypes, useSubmitLeaveRequest } from "./hooks";
+import { formatFileSize, validateAttachmentFiles } from "./attachment-rules";
+import { useLeaveTypes, useSubmitLeaveRequest, useUploadAttachments } from "./hooks";
 import { HALVES, leaveRequestSchema, type LeaveRequestFormValues } from "./schema";
 import { HALF_LABELS } from "./types";
 
@@ -27,6 +28,9 @@ export function SubmitLeaveRequestPage() {
   const { user } = useAuth();
   const { data: types, isLoading: typesLoading } = useLeaveTypes(true);
   const submit = useSubmitLeaveRequest();
+  const upload = useUploadAttachments();
+  const [attachmentFiles, setAttachmentFiles] = useState<File[]>([]);
+  const [attachmentError, setAttachmentError] = useState<string | null>(null);
 
   const {
     register,
@@ -39,8 +43,26 @@ export function SubmitLeaveRequestPage() {
   });
 
   const onSubmit = handleSubmit((values) => {
-    submit.mutate(values, { onSuccess: () => navigate("/leave-requests") });
+    submit.mutate(values, {
+      onSuccess: async (created) => {
+        if (attachmentFiles.length > 0) {
+          try {
+            await upload.mutateAsync({ id: created.id, files: attachmentFiles });
+          } catch {
+            // Request already exists; user can retry upload from request detail.
+          }
+        }
+        navigate("/leave-requests");
+      },
+    });
   });
+
+  const onAttachmentChange = (files: FileList | null) => {
+    const selected = Array.from(files ?? []);
+    const validation = validateAttachmentFiles(selected);
+    setAttachmentError(validation);
+    setAttachmentFiles(validation ? [] : selected);
+  };
 
   // --- Live preview: working days + remaining balance (backend stays authoritative) ---
   const startDate = watch("startDate");
@@ -191,12 +213,38 @@ export function SubmitLeaveRequestPage() {
               {errors.reason && <p className="text-xs text-destructive">{errors.reason.message}</p>}
             </div>
 
+            {import.meta.env.VITE_ATTACHMENTS_ENABLED === "true" && (
+              <div className="space-y-2 rounded-lg border border-dashed border-border p-4">
+                <Label htmlFor="attachments">File đính kèm</Label>
+                <Input
+                  id="attachments"
+                  type="file"
+                  multiple
+                  accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                  onChange={(e) => onAttachmentChange(e.target.files)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Chỉ PDF, JPG, PNG. Tối đa 5 file, mỗi file 5MB.
+                </p>
+                {attachmentError && <p className="text-xs text-destructive">{attachmentError}</p>}
+                {attachmentFiles.length > 0 && (
+                  <ul className="space-y-1 text-xs text-muted-foreground">
+                    {attachmentFiles.map((file) => (
+                      <li key={`${file.name}-${file.size}`}>
+                        {file.name} · {formatFileSize(file.size)}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+
             <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => navigate("/leave-requests")}>
                 Hủy
               </Button>
-              <Button type="submit" disabled={submit.isPending}>
-                {submit.isPending ? "Đang gửi…" : "Nộp đơn"}
+              <Button type="submit" disabled={submit.isPending || upload.isPending}>
+                {submit.isPending || upload.isPending ? "Đang gửi…" : "Nộp đơn"}
               </Button>
             </div>
           </form>

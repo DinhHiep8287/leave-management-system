@@ -14,7 +14,8 @@ departments ─┐
              │
              ├──< leave_requests >── leave_types
              │           │
-             │           └──< approval_actions >── users (approver)
+             │           ├──< approval_actions >── users (approver)
+             │           └──< attachments >── users (uploader)
              │
              └──< audit_log
                   
@@ -193,6 +194,23 @@ Migration cuối cùng sẽ seed dữ liệu demo:
 
 INDEX `(user_id, is_read)`. Ghi trong **cùng transaction** với transition của đơn.
 
+### 2.x. `attachments` (V6, local-only)
+
+Metadata file đính kèm cho đơn nghỉ. File vật lý lưu trong Docker named volume, không lưu trong PostgreSQL.
+
+| Cột | Kiểu | Ràng buộc | Ghi chú |
+|---|---|---|---|
+| id | BIGSERIAL | PK | |
+| leave_request_id | BIGINT | FK leave_requests(id), ON DELETE CASCADE | Đơn nghỉ |
+| uploaded_by | BIGINT | FK users(id) | Người upload |
+| original_filename | TEXT | NOT NULL | Tên gốc để hiển thị/tải xuống |
+| stored_key | TEXT | UNIQUE, NOT NULL | Key nội bộ trong volume |
+| content_type | VARCHAR(100) | CHECK PDF/JPG/PNG | |
+| size_bytes | BIGINT | CHECK 1..5242880 | Tối đa 5MB/file |
+| created_at, updated_at, created_by, updated_by | | | Audit |
+
+Index: `(leave_request_id)`, `(uploaded_by)`. Mỗi đơn tối đa 5 file, kiểm soát ở service.
+
 ## 5. Migration plan (Flyway)
 
 ```
@@ -201,6 +219,7 @@ V2__seed_reference_data.sql      # 3 phòng ban, 4 loại nghỉ, 10 ngày lễ 
 V3__fix_sick_quota.sql           # SICK quota 3 -> 30 (REQUIREMENTS §3)
 V4__notifications.sql            # Bảng notifications (v2.0.0)
 V5__carry_over.sql               # Cột leave_balances.carried_over_days (v2.0.0)
+V6__attachments.sql              # Metadata file đính kèm local-only
 ```
 
 > User demo KHÔNG seed qua migration — `DemoDataInitializer`/`DemoLeaveSeeder`

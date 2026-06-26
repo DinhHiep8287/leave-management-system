@@ -1,6 +1,7 @@
 import { api } from "@/lib/api";
 
 import type {
+  AttachmentResponse,
   ApprovalActionResponse,
   LeaveRequestCreateRequest,
   LeaveRequestResponse,
@@ -56,4 +57,38 @@ export async function cancelRequest(id: number, comment?: string): Promise<Leave
 export async function getHistory(id: number): Promise<ApprovalActionResponse[]> {
   const res = await api.get<Envelope<ApprovalActionResponse[]>>(`/leave-requests/${id}/history`);
   return res.data.data;
+}
+
+export async function getAttachments(requestId: number): Promise<AttachmentResponse[]> {
+  const res = await api.get<Envelope<AttachmentResponse[]>>(
+    `/leave-requests/${requestId}/attachments`,
+  );
+  return res.data.data;
+}
+
+export async function uploadAttachments(
+  requestId: number,
+  files: File[],
+): Promise<AttachmentResponse[]> {
+  const form = new FormData();
+  files.forEach((file) => form.append("files", file));
+  const res = await api.post<Envelope<AttachmentResponse[]>>(
+    `/leave-requests/${requestId}/attachments`,
+    form,
+  );
+  return res.data.data;
+}
+
+export async function deleteAttachment(requestId: number, attachmentId: number): Promise<void> {
+  await api.delete(`/leave-requests/${requestId}/attachments/${attachmentId}`);
+}
+
+export async function downloadAttachment(
+  requestId: number,
+  attachmentId: number,
+): Promise<Blob> {
+  const res = await api.get(`/leave-requests/${requestId}/attachments/${attachmentId}/download`, {
+    responseType: "blob",
+  });
+  return res.data as Blob;
 }

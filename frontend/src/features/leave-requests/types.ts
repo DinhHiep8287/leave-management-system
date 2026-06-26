@@ -28,6 +28,17 @@ export type LeaveRequestCreateRequest = {
   reason: string;
 };
 
+export type AttachmentResponse = {
+  id: number;
+  leaveRequestId: number;
+  originalFilename: string;
+  contentType: string;
+  sizeBytes: number;
+  uploadedById: number;
+  uploadedByName: string | null;
+  createdAt: string;
+};
+
 export type ApprovalActionResponse = {
   id: number;
   action: string;

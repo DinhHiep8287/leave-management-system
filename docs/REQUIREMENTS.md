@@ -170,9 +170,9 @@ PENDING ──approve──> APPROVED ──cancel(by employee/HR)──> CANCEL
 - ✅ ~~In-app notification (chuông)~~ — đã làm ở v2.0.0.
 - ✅ ~~Email notification~~ — đã làm ở v2.0.0 (Mailpit bật ở dev; production giữ tắt; SMS không làm).
 - ✅ ~~Carry over phép sang năm sau~~ — đã làm ở v2.0.0 (xem §4).
-- ⏳ Upload file (giấy bác sĩ…) — **chỉ phục vụ demo/test local**. Metadata lưu
+- ✅ Upload file (giấy bác sĩ…) — **chỉ phục vụ demo/test local**. Metadata lưu
   PostgreSQL, file lưu Docker named volume; không dùng object storage và không deploy tính năng
-  này lên hạ tầng production hiện tại.
+  này lên hạ tầng production hiện tại. Tối đa 5 file/đơn, 5MB/file, chỉ PDF/JPG/PNG; chỉ sửa khi đơn `PENDING`.
 - ⏳ Báo cáo nâng cao — ưu tiên bộ lọc/phân tích theo phòng ban, loại nghỉ và tháng/quý; không cần Excel phức tạp.
 - ⏳ Cải thiện notification — tối ưu nội dung, trạng thái đọc/chưa đọc và điều hướng từ thông báo.
 - ⏳ Chế độ xem lịch theo phòng ban — làm rõ phạm vi quan sát lịch cho Manager/HR.
@@ -180,8 +180,6 @@ PENDING ──approve──> APPROVED ──cancel(by employee/HR)──> CANCEL
 - ❌ Mobile app native
 - ❌ Self-register
 - ❌ Quên mật khẩu tự reset qua email
-- ❌ Workflow duyệt nhiều cấp
-- ❌ Phân quyền chi tiết/permission matrix
 - ❌ Báo cáo Excel phức tạp với biểu đồ (CSV hiện tại mở được bằng Excel)
 
 ## 14. Loại trừ vĩnh viễn (không nằm trong v2)

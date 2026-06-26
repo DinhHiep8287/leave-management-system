@@ -145,6 +145,14 @@ leave-management-system/
   SMTP — lỗi mail không bao giờ ảnh hưởng transaction nghiệp vụ. Cờ `app.mail.enabled`
   (mặc định false); dev bật sẵn với **Mailpit** (UI :8025).
 
+## 5c. Attachment local-only
+
+- **Metadata**: bảng `attachments` trong PostgreSQL, FK tới `leave_requests` và `users`.
+- **File vật lý**: Docker named volume `backend-attachments`, mount vào `/app/uploads/attachments`.
+- **Phạm vi**: chỉ bật ở dev/local qua `app.attachments.enabled=true`; production giữ tắt và frontend không hiển thị UI.
+- **Giới hạn**: tối đa 5 file/đơn, 5MB/file, chỉ PDF/JPG/PNG.
+- **Quyền**: requester upload/xóa khi đơn còn `PENDING`; requester, manager, HR/Admin được xem/tải.
+
 ## 6. Error handling
 
 - Global `@RestControllerAdvice` → response chuẩn `ErrorResponse`.
@@ -186,7 +194,6 @@ rộng hạ tầng Vercel/Railway/Neon.
 
 **Sau v2.0 (chỉ demo/test local):**
 - Upload file đính kèm → module `attachment/`, metadata trong PostgreSQL, file trong Docker named volume.
-- Multi-level approval → thêm bảng `approval_step` nếu cần thử nghiệm state machine.
 - Các thử nghiệm khác không được kéo thêm dịch vụ production hoặc object storage ngoài.
 
 **v3 (nice to have, chỉ local):**

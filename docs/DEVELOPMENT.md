@@ -94,7 +94,7 @@ Tạo file mới trong `backend/src/main/resources/db/migration/`:
 ```
 V<N>__<mô_tả_ngắn>.sql
 ```
-Ví dụ: `V5__add_request_attachment_url.sql`.
+Ví dụ: `V7__add_report_filter.sql`.
 
 **KHÔNG sửa migration đã apply** (Flyway sẽ fail checksum).
 

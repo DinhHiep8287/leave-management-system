@@ -7,7 +7,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { formatDate, formatDateTime } from "@/lib/format";
+import { useAuth } from "@/features/auth/auth-context";
 
+import { AttachmentList } from "./attachment-list";
 import { useHistory, useRequest } from "./hooks";
 import { HALF_LABELS } from "./types";
 
@@ -28,6 +30,7 @@ export function RequestDetailDialog({
   onClose: () => void;
 }) {
   const open = requestId != null;
+  const { user } = useAuth();
   const { data: req, isLoading } = useRequest(requestId ?? undefined);
   const { data: history } = useHistory(requestId ?? undefined, open);
 
@@ -58,6 +61,11 @@ export function RequestDetailDialog({
               <Row label="Quản lý">{req.managerName ?? "(chưa gán)"}</Row>
               <Row label="Lý do">{req.reason}</Row>
             </dl>
+
+            <AttachmentList
+              requestId={req.id}
+              canModify={req.status === "PENDING" && user?.id === req.userId}
+            />
 
             <div>
               <h4 className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">

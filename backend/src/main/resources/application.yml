@@ -27,6 +27,10 @@ spring:
   docker:
     compose:
       enabled: false
+  servlet:
+    multipart:
+      max-file-size: ${APP_ATTACHMENTS_MAX_FILE_SIZE:5MB}
+      max-request-size: ${APP_ATTACHMENTS_MAX_REQUEST_SIZE:25MB}
 
 server:
   # PaaS platforms (Railway, Fly.io...) inject PORT; default stays 8080 for compose.
@@ -51,6 +55,15 @@ app:
     secret: ${JWT_SECRET}
     access-expiration-ms: ${JWT_ACCESS_EXPIRATION_MS:900000}
     refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000}
+  attachments:
+    enabled: ${APP_ATTACHMENTS_ENABLED:false}
+    storage-dir: ${APP_ATTACHMENTS_STORAGE_DIR:/app/uploads/attachments}
+    max-files-per-request: ${APP_ATTACHMENTS_MAX_FILES_PER_REQUEST:5}
+    max-file-size-bytes: ${APP_ATTACHMENTS_MAX_FILE_SIZE_BYTES:5242880}
+    allowed-content-types:
+      - application/pdf
+      - image/jpeg
+      - image/png
 
 logging:
   level:

@@ -147,10 +147,8 @@ phạm vi** theo quyết định 06/2026 — UI tiếng Việt duy nhất, xem R
 ## Định hướng hiện tại — Demo/test local
 
 Các công việc tiếp theo chỉ phục vụ hoàn thiện miniproject và demo local, không mở rộng thêm hạ tầng production.
-Phê duyệt nhiều cấp và phân quyền chi tiết không nằm trong kế hoạch hiện tại vì làm tăng độ phức tạp nghiệp vụ
-trong khi giá trị trình bày chưa tương xứng với phạm vi dự án.
 
-1. **Upload file đính kèm local-only**: đính kèm giấy tờ cho đơn nghỉ khi demo local. Metadata lưu trong
+1. ✅ **Upload file đính kèm local-only**: đính kèm giấy tờ cho đơn nghỉ khi demo local. Metadata lưu trong
    PostgreSQL, file lưu ở Docker named volume; endpoint upload/download kiểm tra quyền theo đơn nghỉ.
    Không dùng R2/S3 và không deploy tính năng này lên Vercel/Railway/Neon.
 2. **Báo cáo nâng cao**: bổ sung bộ lọc và số liệu tổng hợp hữu ích hơn, ví dụ theo phòng ban, loại nghỉ,
@@ -177,8 +175,6 @@ trong khi giá trị trình bày chưa tương xứng với phạm vi dự án.
 - ❌ Tích hợp Google Calendar / Outlook (2-way sync).
 - ❌ Multi-tenant / multi-company.
 - ❌ SSO (Google Workspace / Microsoft 365).
-- ❌ Workflow duyệt nhiều cấp — không cần thiết cho phạm vi nghiệp vụ hiện tại.
-- ❌ Phân quyền chi tiết/permission matrix — giữ RBAC theo role và kiểm tra phạm vi dữ liệu ở service.
 
 ## Nguyên tắc xuyên suốt
 

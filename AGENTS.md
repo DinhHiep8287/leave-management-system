@@ -9,8 +9,9 @@ Tài liệu hướng dẫn cho Codex khi làm việc trong repo này.
 - **Mục tiêu**: Xây dựng hệ thống quản lý nghỉ phép chỉn chu, học sâu Spring Boot + React, hoàn thành MVP trong ~4 tuần.
 - **Phong cách user mong đợi**: Cẩn thận, chi tiết, đúng best practice — không cắt góc.
 - **Phạm vi attachment**: Upload file đính kèm chỉ để demo/test local. Lưu metadata trong PostgreSQL, file trong Docker named volume; không thêm R2/S3 và không deploy tính năng này lên production hiện tại.
+- **Attachment rule**: tối đa 5 file/đơn, 5MB/file, chỉ PDF/JPG/PNG. Requester upload/xóa khi đơn còn `PENDING`; requester/manager/HR/Admin được xem/tải.
 - **Mốc deploy cuối**: v2.0.0 là lần deploy production cuối dự kiến. Mọi tính năng sau đó chỉ dành cho demo/test local, không mở rộng Vercel/Railway/Neon hay thêm dịch vụ production.
-- **Định hướng hiện tại**: Không đưa phê duyệt nhiều cấp hoặc phân quyền chi tiết vào kế hoạch. Tập trung vào upload đính kèm local-only, báo cáo nâng cao, cải thiện notification, lịch theo phòng ban và UI/UX.
+- **Định hướng hiện tại**: Upload đính kèm local-only đã tích hợp; tiếp tục tập trung báo cáo nâng cao, cải thiện notification, lịch theo phòng ban và UI/UX.
 
 ## Tech stack đã chốt
 

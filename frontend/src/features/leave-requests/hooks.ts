@@ -5,12 +5,16 @@ import { apiErrorMessage } from "@/lib/api-error";
 
 import {
   cancelRequest,
+  deleteAttachment,
+  downloadAttachment,
+  getAttachments,
   getHistory,
   getRequest,
   getMyRequests,
   listLeaveTypes,
   submitLeaveRequest,
   updateRequest,
+  uploadAttachments,
 } from "./api";
 import type { LeaveRequestCreateRequest, LeaveStatus } from "./types";
 
@@ -43,6 +47,14 @@ export function useHistory(id: number | undefined, enabled = true) {
     queryKey: ["leave-request-history", id],
     queryFn: () => getHistory(id as number),
     enabled: id != null && enabled,
+  });
+}
+
+export function useAttachments(id: number | undefined, enabled = true) {
+  return useQuery({
+    queryKey: ["leave-request-attachments", id],
+    queryFn: () => getAttachments(id as number),
+    enabled: id != null && enabled && import.meta.env.VITE_ATTACHMENTS_ENABLED === "true",
   });
 }
 
@@ -85,5 +97,38 @@ export function useCancelRequest() {
       toast.success("Đã hủy đơn");
     },
     onError: (e) => toast.error(apiErrorMessage(e, "Hủy đơn thất bại")),
+  });
+}
+
+export function useUploadAttachments() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, files }: { id: number; files: File[] }) => uploadAttachments(id, files),
+    onSuccess: (_attachments, vars) => {
+      void qc.invalidateQueries({ queryKey: ["leave-request-attachments", vars.id] });
+      toast.success("ÄÃ£ táº£i lÃªn file Ä‘Ã­nh kÃ¨m");
+    },
+    onError: (e) => toast.error(apiErrorMessage(e, "Táº£i file tháº¥t báº¡i")),
+  });
+}
+
+export function useDeleteAttachment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ requestId, attachmentId }: { requestId: number; attachmentId: number }) =>
+      deleteAttachment(requestId, attachmentId),
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: ["leave-request-attachments", vars.requestId] });
+      toast.success("ÄÃ£ xÃ³a file Ä‘Ã­nh kÃ¨m");
+    },
+    onError: (e) => toast.error(apiErrorMessage(e, "XÃ³a file tháº¥t báº¡i")),
+  });
+}
+
+export function useDownloadAttachment() {
+  return useMutation({
+    mutationFn: ({ requestId, attachmentId }: { requestId: number; attachmentId: number }) =>
+      downloadAttachment(requestId, attachmentId),
+    onError: (e) => toast.error(apiErrorMessage(e, "Táº£i file tháº¥t báº¡i")),
   });
 }
