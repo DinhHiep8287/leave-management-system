@@ -15,8 +15,14 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     watch: {
-      usePolling: true,
-      interval: 300,
+      ignored: [
+        "**/node_modules/**",
+        "**/dist/**",
+        "**/.git/**",
+        "**/vite.config.js",
+        "**/vite.config.d.ts",
+        "**/*.tsbuildinfo",
+      ],
     },
   },
   test: {
