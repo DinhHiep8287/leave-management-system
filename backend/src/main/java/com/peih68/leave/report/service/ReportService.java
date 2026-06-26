@@ -7,10 +7,13 @@ import com.peih68.leave.leaverequest.domain.LeaveStatus;
 import com.peih68.leave.leaverequest.repository.LeaveRequestRepository;
 import com.peih68.leave.leavetype.domain.LeaveTypeEntity;
 import com.peih68.leave.leavetype.repository.LeaveTypeRepository;
+import com.peih68.leave.report.web.dto.LeaveSummaryRow;
 import com.peih68.leave.user.domain.UserEntity;
 import com.peih68.leave.user.repository.UserRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -75,7 +78,17 @@ public class ReportService {
     /** All leave balances for a year. */
     @Transactional(readOnly = true)
     public String leaveBalancesCsv(int year) {
+        return leaveBalancesCsv(year, null);
+    }
+
+    /** All leave balances for a year, optionally scoped to one department. */
+    @Transactional(readOnly = true)
+    public String leaveBalancesCsv(int year, Long departmentId) {
         List<LeaveBalanceEntity> rows = balanceRepository.findByYearOrderByUserIdAscLeaveTypeIdAsc(year);
+        Set<Long> deptUserIds = userIdsForDepartment(departmentId);
+        if (deptUserIds != null) {
+            rows = rows.stream().filter(b -> deptUserIds.contains(b.getUserId())).toList();
+        }
 
         Map<Long, UserEntity> users = usersById(
                 rows.stream().map(LeaveBalanceEntity::getUserId).distinct().toList());
@@ -102,28 +115,55 @@ public class ReportService {
      */
     @Transactional(readOnly = true)
     public String leaveSummaryCsv(int year, String groupBy) {
+        return leaveSummaryCsv(year, groupBy, null);
+    }
+
+    @Transactional(readOnly = true)
+    public String leaveSummaryCsv(int year, String groupBy, Long departmentId) {
+        List<LeaveSummaryRow> rows = leaveSummary(year, groupBy, departmentId);
+        boolean quarter = "quarter".equalsIgnoreCase(groupBy);
+
+        CsvWriter csv = new CsvWriter(
+                quarter ? "quarter" : "month",
+                "leaveTypeCode",
+                "totalDays",
+                "requestCount");
+        for (LeaveSummaryRow row : rows) {
+            csv.row(row.period(), row.leaveTypeCode(), row.totalDays(), row.requestCount());
+        }
+        return csv.build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<LeaveSummaryRow> leaveSummary(int year, String groupBy, Long departmentId) {
         boolean quarter = "quarter".equalsIgnoreCase(groupBy);
         List<LeaveRequestEntity> rows = requestRepository.findByStatusAndStartDateBetween(
                 LeaveStatus.APPROVED, LocalDate.of(year, 1, 1), LocalDate.of(year, 12, 31));
+        Set<Long> deptUserIds = userIdsForDepartment(departmentId);
+        if (deptUserIds != null) {
+            rows = rows.stream().filter(r -> deptUserIds.contains(r.getUserId())).toList();
+        }
 
         Map<Long, String> typeCodes = typeCodesById(
                 rows.stream().map(LeaveRequestEntity::getLeaveTypeId).distinct().toList());
 
         // Keyed "period|typeCode" so the TreeMap sorts by period then type.
         Map<String, BigDecimal> sums = new TreeMap<>();
+        Map<String, Long> counts = new LinkedHashMap<>();
         for (LeaveRequestEntity r : rows) {
             int month = r.getStartDate().getMonthValue();
             String period = quarter ? "Q" + ((month - 1) / 3 + 1) : String.format("%02d", month);
             String code = typeCodes.getOrDefault(r.getLeaveTypeId(), String.valueOf(r.getLeaveTypeId()));
             sums.merge(period + "|" + code, r.getTotalDays(), BigDecimal::add);
+            counts.merge(period + "|" + code, 1L, Long::sum);
         }
 
-        CsvWriter csv = new CsvWriter(quarter ? "quarter" : "month", "leaveTypeCode", "totalDays");
+        List<LeaveSummaryRow> result = new ArrayList<>();
         for (Map.Entry<String, BigDecimal> e : sums.entrySet()) {
             String[] parts = e.getKey().split("\\|", 2);
-            csv.row(parts[0], parts[1], e.getValue());
+            result.add(new LeaveSummaryRow(parts[0], parts[1], e.getValue(), counts.getOrDefault(e.getKey(), 0L)));
         }
-        return csv.build();
+        return result;
     }
 
     private Map<Long, UserEntity> usersById(List<Long> ids) {
@@ -134,5 +174,14 @@ public class ReportService {
     private Map<Long, String> typeCodesById(List<Long> ids) {
         return leaveTypeRepository.findAllById(ids).stream()
                 .collect(Collectors.toMap(LeaveTypeEntity::getId, LeaveTypeEntity::getCode));
+    }
+
+    private Set<Long> userIdsForDepartment(Long departmentId) {
+        if (departmentId == null) {
+            return null;
+        }
+        return userRepository.findByDepartmentIdAndIsActiveTrue(departmentId).stream()
+                .map(UserEntity::getId)
+                .collect(Collectors.toSet());
     }
 }

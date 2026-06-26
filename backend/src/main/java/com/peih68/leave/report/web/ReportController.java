@@ -1,10 +1,13 @@
 package com.peih68.leave.report.web;
 
+import com.peih68.leave.common.web.ApiResponse;
 import com.peih68.leave.leaverequest.domain.LeaveStatus;
 import com.peih68.leave.report.service.ReportService;
+import com.peih68.leave.report.web.dto.LeaveSummaryRow;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.Year;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
@@ -43,18 +46,31 @@ public class ReportController {
     @PreAuthorize("hasAnyRole('ADMIN','HR')")
     public ResponseEntity<String> leaveSummary(
             @RequestParam(required = false) Integer year,
-            @RequestParam(name = "groupBy", defaultValue = "month") String groupBy) {
+            @RequestParam(name = "groupBy", defaultValue = "month") String groupBy,
+            @RequestParam(required = false) Long departmentId) {
         int target = year != null ? year : Year.now().getValue();
-        String csv = reportService.leaveSummaryCsv(target, groupBy);
+        String csv = reportService.leaveSummaryCsv(target, groupBy, departmentId);
         return csvResponse(csv, "leave-summary_%d_%s.csv".formatted(target, groupBy));
+    }
+
+    /** JSON preview for the advanced report page. */
+    @GetMapping("/leave-summary")
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
+    public ApiResponse<List<LeaveSummaryRow>> leaveSummaryPreview(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(name = "groupBy", defaultValue = "month") String groupBy,
+            @RequestParam(required = false) Long departmentId) {
+        int target = year != null ? year : Year.now().getValue();
+        return ApiResponse.ok(reportService.leaveSummary(target, groupBy, departmentId));
     }
 
     @GetMapping(value = "/leave-balances.csv", produces = "text/csv")
     @PreAuthorize("hasAnyRole('ADMIN','HR')")
     public ResponseEntity<String> leaveBalances(
-            @RequestParam(required = false) Integer year) {
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Long departmentId) {
         int target = year != null ? year : Year.now().getValue();
-        String csv = reportService.leaveBalancesCsv(target);
+        String csv = reportService.leaveBalancesCsv(target, departmentId);
         return csvResponse(csv, "leave-balances_%d.csv".formatted(target));
     }
 

@@ -39,12 +39,15 @@ class ReportServiceTest {
     @Autowired JdbcTemplate jdbc;
 
     private Long typeId;
+    private Long engId;
+    private Long hrId;
     private UserEntity manager;
     private UserEntity employee;
 
     @BeforeEach
     void setup() {
-        Long engId = jdbc.queryForObject("SELECT id FROM departments WHERE code = 'ENG'", Long.class);
+        engId = jdbc.queryForObject("SELECT id FROM departments WHERE code = 'ENG'", Long.class);
+        hrId = jdbc.queryForObject("SELECT id FROM departments WHERE code = 'HR'", Long.class);
         typeId = jdbc.queryForObject("SELECT id FROM leave_types WHERE code = 'UNPAID'", Long.class);
 
         manager = userRepository.save(UserEntity.builder()
@@ -112,6 +115,39 @@ class ReportServiceTest {
     }
 
     @Test
+    void leaveSummaryCanBeFilteredByDepartment() {
+        Long sumType = leaveTypeRepository.save(LeaveTypeEntity.builder()
+                .code("RPT-DEPT").name("Dept Sum").defaultQuotaDays(new BigDecimal("0.0"))
+                .requiresBalance(false).isActive(true).build()).getId();
+        UserEntity otherDeptUser = userRepository.save(UserEntity.builder()
+                .employeeCode("RPT-HR").email("rpt.hr@ex.com").passwordHash("x").fullName("Rpt HR")
+                .role(Role.EMPLOYEE).departmentId(hrId).joinDate(LocalDate.of(2024, 1, 1)).isActive(true).build());
+        requestRepository.save(LeaveRequestEntity.builder()
+                .userId(employee.getId()).leaveTypeId(sumType)
+                .startDate(LocalDate.of(2026, 9, 7)).endDate(LocalDate.of(2026, 9, 8))
+                .startHalf(LeaveHalf.FULL_DAY).endHalf(LeaveHalf.FULL_DAY)
+                .totalDays(new BigDecimal("2.0")).reason("eng").status(LeaveStatus.APPROVED)
+                .managerId(manager.getId()).build());
+        requestRepository.save(LeaveRequestEntity.builder()
+                .userId(otherDeptUser.getId()).leaveTypeId(sumType)
+                .startDate(LocalDate.of(2026, 9, 9)).endDate(LocalDate.of(2026, 9, 11))
+                .startHalf(LeaveHalf.FULL_DAY).endHalf(LeaveHalf.FULL_DAY)
+                .totalDays(new BigDecimal("3.0")).reason("hr").status(LeaveStatus.APPROVED)
+                .managerId(manager.getId()).build());
+
+        var rows = service.leaveSummary(2026, "month", engId);
+
+        assertThat(rows)
+                .anySatisfy(row -> {
+                    assertThat(row.period()).isEqualTo("09");
+                    assertThat(row.leaveTypeCode()).isEqualTo("RPT-DEPT");
+                    assertThat(row.totalDays()).isEqualByComparingTo("2.0");
+                    assertThat(row.requestCount()).isEqualTo(1);
+                });
+        assertThat(service.leaveSummaryCsv(2026, "month", engId)).contains("09,RPT-DEPT,2.0,1");
+    }
+
+    @Test
     void leaveBalancesCsvHasHeaderAndComputedRemaining() {
         balanceRepository.save(LeaveBalanceEntity.builder()
                 .userId(employee.getId()).leaveTypeId(typeId).year(2026)
@@ -123,5 +159,25 @@ class ReportServiceTest {
         assertThat(lines[0]).contains("userFullName", "remainingDays");
         assertThat(csv).contains("Rpt Emp", "RPT-E", "UNPAID");
         assertThat(csv).contains("11.0"); // 12 + 1 - 2
+    }
+
+    @Test
+    void leaveBalancesCsvCanBeFilteredByDepartment() {
+        UserEntity otherDeptUser = userRepository.save(UserEntity.builder()
+                .employeeCode("RPT-HR2").email("rpt.hr2@ex.com").passwordHash("x").fullName("Rpt HR2")
+                .role(Role.EMPLOYEE).departmentId(hrId).joinDate(LocalDate.of(2024, 1, 1)).isActive(true).build());
+        balanceRepository.save(LeaveBalanceEntity.builder()
+                .userId(employee.getId()).leaveTypeId(typeId).year(2026)
+                .totalDays(new BigDecimal("12.0")).usedDays(new BigDecimal("2.0"))
+                .adjustedDays(new BigDecimal("0.0")).build());
+        balanceRepository.save(LeaveBalanceEntity.builder()
+                .userId(otherDeptUser.getId()).leaveTypeId(typeId).year(2026)
+                .totalDays(new BigDecimal("12.0")).usedDays(new BigDecimal("5.0"))
+                .adjustedDays(new BigDecimal("0.0")).build());
+
+        String csv = service.leaveBalancesCsv(2026, engId);
+
+        assertThat(csv).contains("Rpt Emp");
+        assertThat(csv).doesNotContain("Rpt HR2");
     }
 }

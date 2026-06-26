@@ -26,7 +26,7 @@ Tài liệu này vạch lộ trình **sau khi hoàn thành MVP 4 tuần**, dựa
 | §6 | Calendar chỉ hiện `APPROVED` | Hiện cả `APPROVED` + `PENDING` | **Lệch** (cân nhắc giữ pending là tuỳ chọn) |
 | §7 | Admin/HR **nhập/sửa/xóa** ngày lễ | Chỉ `GET /holidays` | **Thiếu** CRUD (BE + FE) |
 | §10.3 | Dashboard HR/Admin: headcount, đơn theo trạng thái, top phòng ban | Dashboard chung cho mọi vai trò | **Thiếu** widget HR/Admin |
-| §11 | CSV đơn **theo phòng ban**; báo cáo **tổng ngày nghỉ theo loại theo tháng/quý** | CSV theo from/to/status, balance theo năm | **Thiếu** lọc phòng ban + báo cáo tổng hợp |
+| §11 | CSV đơn **theo phòng ban**; báo cáo **tổng ngày nghỉ theo loại theo tháng/quý** | Đã có filter phòng ban, preview tổng hợp và CSV tổng hợp có số đơn | **Đã bổ sung** |
 | §3 | `SICK` quota mặc định **30** | Seed V2 đang để **3** | **Lệch** dữ liệu seed |
 | §9 | Đổi mật khẩu / quản lý user | Backend đủ | **Thiếu** UI |
 | §12 | ~~i18n (chừa chỗ tiếng Anh)~~ | UI tiếng Việt duy nhất | **Đã loại vĩnh viễn khỏi phạm vi** (REQUIREMENTS §14) |
@@ -66,8 +66,8 @@ Giao diện quản trị cho backend đã có sẵn — biến sản phẩm thà
     sửa scope **employee = cả phòng ban**; tùy chọn ẩn/hiện đơn PENDING.
 12. **Dashboard theo vai trò** (§10.3): widget HR/Admin (tổng nhân viên, đơn theo trạng thái,
     top phòng ban nghỉ nhiều/ít trong tháng) + quick links quản trị.
-13. **Báo cáo nâng cao** (§11): thêm lọc **phòng ban** cho CSV đơn nghỉ; báo cáo **tổng ngày
-    nghỉ theo loại theo tháng/quý** (endpoint + FE + CSV).
+13. **Báo cáo nâng cao** (§11): thêm lọc **phòng ban** cho CSV đơn nghỉ/quỹ phép; báo cáo **tổng ngày
+    nghỉ theo loại theo tháng/quý** (endpoint JSON preview + FE + CSV).
 
 ## Milestone v1.3 — Chất lượng sản phẩm (no deploy) ✅ **Done**
 
@@ -151,8 +151,8 @@ Các công việc tiếp theo chỉ phục vụ hoàn thiện miniproject và de
 1. ✅ **Upload file đính kèm local-only**: đính kèm giấy tờ cho đơn nghỉ khi demo local. Metadata lưu trong
    PostgreSQL, file lưu ở Docker named volume; endpoint upload/download kiểm tra quyền theo đơn nghỉ.
    Không dùng R2/S3 và không deploy tính năng này lên Vercel/Railway/Neon.
-2. **Báo cáo nâng cao**: bổ sung bộ lọc và số liệu tổng hợp hữu ích hơn, ví dụ theo phòng ban, loại nghỉ,
-   tháng/quý và xu hướng sử dụng quỹ phép. Ưu tiên CSV/bảng tổng hợp trước, không cần Excel phức tạp.
+2. ✅ **Báo cáo nâng cao**: bổ sung preview bảng tổng hợp theo tháng/quý, loại nghỉ và phòng ban;
+   CSV tổng hợp có số đơn, CSV quỹ phép có filter phòng ban. Không làm Excel phức tạp.
 3. ✅ **Cải thiện notification**: làm rõ trạng thái đã đọc/chưa đọc, bổ sung filter "Tất cả/Chưa đọc",
    hiển thị loại sự kiện, thời điểm đọc và giữ điều hướng từ thông báo tới chi tiết đơn nghỉ.
 4. **Chế độ xem lịch theo phòng ban**: cải thiện calendar để người dùng quan sát lịch nghỉ theo phòng ban

@@ -14,17 +14,41 @@ export async function downloadLeaveRequestsCsv(
   return res.data as Blob;
 }
 
-export async function downloadLeaveSummaryCsv(year: number, groupBy: "month" | "quarter"): Promise<Blob> {
+export type LeaveSummaryRow = {
+  period: string;
+  leaveTypeCode: string;
+  totalDays: number;
+  requestCount: number;
+};
+
+type Envelope<T> = { data: T };
+
+export async function getLeaveSummary(
+  year: number,
+  groupBy: "month" | "quarter",
+  departmentId?: number,
+): Promise<LeaveSummaryRow[]> {
+  const res = await api.get<Envelope<LeaveSummaryRow[]>>("/reports/leave-summary", {
+    params: { year, groupBy, departmentId },
+  });
+  return res.data.data;
+}
+
+export async function downloadLeaveSummaryCsv(
+  year: number,
+  groupBy: "month" | "quarter",
+  departmentId?: number,
+): Promise<Blob> {
   const res = await api.get("/reports/leave-summary.csv", {
-    params: { year, groupBy },
+    params: { year, groupBy, departmentId },
     responseType: "blob",
   });
   return res.data as Blob;
 }
 
-export async function downloadLeaveBalancesCsv(year: number): Promise<Blob> {
+export async function downloadLeaveBalancesCsv(year: number, departmentId?: number): Promise<Blob> {
   const res = await api.get("/reports/leave-balances.csv", {
-    params: { year },
+    params: { year, departmentId },
     responseType: "blob",
   });
   return res.data as Blob;

@@ -156,6 +156,13 @@ leave-management-system/
 - **Giới hạn**: tối đa 5 file/đơn, 5MB/file, chỉ PDF/JPG/PNG.
 - **Quyền**: requester upload/xóa khi đơn còn `PENDING`; requester, manager, HR/Admin được xem/tải.
 
+## 5d. Report
+
+- **CSV**: HR/Admin tải CSV đơn nghỉ, quỹ phép và tổng hợp ngày nghỉ đã duyệt.
+- **Bộ lọc**: hỗ trợ khoảng ngày, trạng thái, năm, nhóm tháng/quý và phòng ban tùy loại báo cáo.
+- **Preview**: màn hình báo cáo gọi JSON `/reports/leave-summary` để xem nhanh tổng ngày, số đơn và
+  số loại nghỉ có phát sinh trước khi tải CSV.
+
 ## 6. Error handling
 
 - Global `@RestControllerAdvice` → response chuẩn `ErrorResponse`.
