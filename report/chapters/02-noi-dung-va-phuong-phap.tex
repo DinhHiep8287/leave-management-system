@@ -1,0 +1,494 @@
+\chapter{Nội dung và phương pháp}
+
+\section{Phân tích yêu cầu}
+Phân tích yêu cầu là bước xác định hệ thống cần hỗ trợ những nhóm nghiệp vụ nào, phục vụ các nhóm người dùng nào và phải đáp ứng những ràng buộc kỹ thuật nào để có thể vận hành ổn định. Đối với Leave Management System, yêu cầu được xây dựng xoay quanh quy trình nghỉ phép trong doanh nghiệp: nhân viên tạo đơn, người quản lý xử lý đơn, bộ phận nhân sự theo dõi dữ liệu toàn tổ chức và quản trị viên cấu hình các dữ liệu nền của hệ thống.
+
+Trong phạm vi báo cáo, các yêu cầu được trình bày ở mức nhóm năng lực chính của hệ thống thay vì liệt kê toàn bộ chi tiết giao diện hoặc endpoint. Cách tiếp cận này giúp phần phân tích giữ được tính ổn định khi hệ thống tiếp tục mở rộng, đồng thời vẫn đủ cơ sở cho các phần thiết kế use case, kiến trúc, cơ sở dữ liệu và luồng nghiệp vụ ở các mục tiếp theo.
+
+\subsection{Yêu cầu chức năng}
+Yêu cầu chức năng mô tả các hành vi chính mà hệ thống cần cung cấp cho người dùng. Các chức năng này được nhóm theo năng lực nghiệp vụ để tránh phụ thuộc vào cách tổ chức màn hình hoặc API cụ thể.
+
+\begin{longtable}{p{0.24\textwidth}p{0.66\textwidth}}
+\toprule
+\textbf{Nhóm chức năng} & \textbf{Mô tả yêu cầu} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Nhóm chức năng} & \textbf{Mô tả yêu cầu} \\
+\midrule
+\endhead
+Xác thực và phân quyền & Hệ thống cần cho phép người dùng đăng nhập, duy trì phiên làm việc an toàn và giới hạn thao tác theo vai trò. Các quyền truy cập phải phân biệt giữa nhân viên, quản lý, nhân sự và quản trị viên. \\
+Quản lý dữ liệu tổ chức & Hệ thống cần hỗ trợ quản lý người dùng, phòng ban, vai trò, quan hệ quản lý trực tiếp và trạng thái hoạt động của tài khoản. Đây là nền tảng để xác định phạm vi xem dữ liệu và người có thẩm quyền phê duyệt. \\
+Quản lý chính sách nghỉ phép & Hệ thống cần quản lý loại nghỉ, ngày lễ và quỹ phép của từng nhân viên theo từng loại nghỉ. Các thông tin này được dùng khi tính số ngày nghỉ hợp lệ và kiểm tra số ngày phép còn lại. \\
+Quản lý đơn nghỉ & Người dùng cần tạo, xem, sửa hoặc hủy đơn nghỉ trong các điều kiện hợp lệ. Hệ thống cần kiểm tra ngày bắt đầu, ngày kết thúc, phần ngày nghỉ, lý do, sự chồng lấn với đơn khác và số ngày nghỉ được tính tự động. \\
+Phê duyệt đơn nghỉ & Người quản lý hoặc người có thẩm quyền cần xem danh sách đơn chờ xử lý, phê duyệt hoặc từ chối đơn kèm ghi chú khi cần. Mỗi thao tác xử lý cần làm thay đổi trạng thái đơn theo đúng quy tắc nghiệp vụ. \\
+Lịch nghỉ phép & Hệ thống cần hiển thị lịch nghỉ tổng hợp theo khoảng thời gian, hỗ trợ quan sát tình hình nghỉ của cá nhân, nhóm hoặc tổ chức tùy theo quyền truy cập. \\
+Dashboard và báo cáo & Hệ thống cần cung cấp thông tin tổng hợp như số đơn đang chờ xử lý, tình hình nghỉ trong khoảng thời gian, quỹ phép và dữ liệu báo cáo để hỗ trợ theo dõi vận hành. \\
+Thông báo & Hệ thống cần thông báo cho người dùng khi có sự kiện quan trọng liên quan đến đơn nghỉ, chẳng hạn đơn mới được tạo, được phê duyệt, bị từ chối hoặc bị hủy. \\
+Quản trị hệ thống & Quản trị viên cần có khả năng cấu hình và duy trì các dữ liệu nền để hệ thống thích ứng với thay đổi của tổ chức hoặc chính sách nghỉ phép. \\
+\bottomrule
+\end{longtable}
+
+Các nhóm chức năng trên tạo thành phạm vi nghiệp vụ cốt lõi của hệ thống. Những chức năng mở rộng như tệp đính kèm cho đơn nghỉ, phê duyệt nhiều cấp hoặc các kênh tích hợp khác có thể được bổ sung sau dựa trên cùng mô hình actor, dữ liệu và luồng xử lý.
+
+\subsection{Yêu cầu phi chức năng}
+Yêu cầu phi chức năng mô tả các tiêu chí chất lượng của hệ thống. Đây là phần quan trọng đối với một dự án phát triển phần mềm web, vì hệ thống không chỉ cần đúng nghiệp vụ mà còn phải có khả năng bảo trì, kiểm thử và triển khai nhất quán.
+
+\begin{longtable}{p{0.24\textwidth}p{0.66\textwidth}}
+\toprule
+\textbf{Tiêu chí} & \textbf{Yêu cầu} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Tiêu chí} & \textbf{Yêu cầu} \\
+\midrule
+\endhead
+Bảo mật & Mật khẩu cần được lưu dưới dạng hash an toàn; API cần yêu cầu xác thực với các thao tác nghiệp vụ; quyền truy cập phải được kiểm tra ở cả cấp route và cấp nghiệp vụ quan trọng. \\
+Phân quyền & Hệ thống cần áp dụng RBAC theo vai trò, đồng thời xét thêm phạm vi dữ liệu như đơn của chính mình, đơn của cấp dưới hoặc dữ liệu toàn tổ chức. \\
+Audit và truy vết & Các thao tác quan trọng như phê duyệt, từ chối, hủy đơn hoặc điều chỉnh quỹ phép cần được ghi nhận để phục vụ kiểm tra lại sau này. \\
+Tính đúng đắn nghiệp vụ & Quy tắc tính ngày nghỉ cần nhất quán giữa backend và giao diện, có xét cuối tuần, ngày lễ, nửa ngày và số ngày phép còn lại. \\
+Khả năng bảo trì & Mã nguồn cần được tổ chức theo module chức năng, tách DTO khỏi entity, tách logic nghiệp vụ khỏi controller và quản lý schema bằng migration. \\
+Khả năng kiểm thử & Các thành phần quan trọng cần có khả năng kiểm thử tự động ở nhiều mức: unit test cho logic nghiệp vụ, test tích hợp cho API/backend và smoke test cho luồng người dùng chính. \\
+Khả năng triển khai & Hệ thống cần chạy được bằng môi trường container hóa, giảm phụ thuộc vào cấu hình máy cá nhân và hỗ trợ tách biệt cấu hình phát triển với cấu hình triển khai. \\
+Khả năng sử dụng & Giao diện cần rõ ràng, phù hợp với vai trò người dùng, hỗ trợ trạng thái tải/rỗng/lỗi và hiển thị thông tin nghiệp vụ bằng tiếng Việt. \\
+Múi giờ và dữ liệu ngày & Các tính toán ngày nghỉ, ngày lễ và dashboard cần thống nhất theo múi giờ Việt Nam để tránh sai lệch khi xử lý dữ liệu ngày. \\
+\bottomrule
+\end{longtable}
+
+Các yêu cầu phi chức năng này định hướng các quyết định kỹ thuật như sử dụng JWT cho xác thực, BCrypt cho mật khẩu, Flyway cho migration, Docker cho môi trường chạy, và các tầng kiểm thử để giảm rủi ro khi thay đổi hệ thống.
+
+\subsection{Phạm vi và giới hạn}
+Phạm vi của mini-project tập trung vào việc mô phỏng một hệ thống quản lý nghỉ phép có đủ các thành phần chính của một ứng dụng web thực tế: giao diện người dùng, API backend, cơ sở dữ liệu quan hệ, xác thực, phân quyền, kiểm thử và môi trường triển khai. Hệ thống được thiết kế để phù hợp với bài toán doanh nghiệp quy mô vừa và nhỏ, nơi quy trình nghỉ phép vẫn có thể mô hình hóa bằng các vai trò và luồng phê duyệt tương đối rõ ràng.
+
+Báo cáo tập trung vào các chức năng đã hình thành rõ trong hệ thống và các nguyên tắc thiết kế giúp hệ thống có thể tiếp tục mở rộng. Vì vậy, những nội dung như danh sách API đầy đủ, chi tiết mọi cột trong cơ sở dữ liệu hoặc ảnh chụp toàn bộ giao diện sẽ được ưu tiên đưa vào phụ lục hoặc các phần kết quả sau, thay vì làm nặng phần phân tích yêu cầu.
+
+Một số hướng mở rộng có thể xuất hiện trong quá trình phát triển tiếp theo, chẳng hạn hỗ trợ tệp đính kèm cho đơn nghỉ, phê duyệt nhiều cấp, bổ sung báo cáo nâng cao hoặc tích hợp với các hệ thống bên ngoài. Các hướng này không bị loại trừ khỏi định hướng thiết kế, nhưng không phải trọng tâm của phần phân tích yêu cầu hiện tại. Khi được triển khai, chúng có thể được mô tả như phần mở rộng của các nhóm chức năng đã nêu: quản lý đơn nghỉ, quản lý dữ liệu liên quan, phân quyền truy cập và lưu vết thao tác.
+
+Ngược lại, một số bài toán có phạm vi lớn hơn như multi-tenant, SSO doanh nghiệp hoặc đồng bộ hai chiều với lịch bên ngoài đòi hỏi thay đổi kiến trúc và giả định vận hành đáng kể. Các nội dung này không được xem là trọng tâm của mini-project, nhưng có thể được nhắc đến ở phần đánh giá hạn chế nếu cần làm rõ ranh giới giữa hệ thống minh họa và một sản phẩm doanh nghiệp quy mô lớn.
+
+\section{Mô hình use case}
+Mô hình use case mô tả cách các nhóm người dùng tương tác với hệ thống ở mức nghiệp vụ. Trong hệ thống quản lý nghỉ phép, bốn actor chính được xác định gồm Employee, Manager, HR và Admin. Employee là người sử dụng hệ thống để quản lý đơn nghỉ của bản thân. Manager xử lý đơn của cấp dưới và theo dõi lịch nghỉ của nhóm. HR theo dõi dữ liệu nghỉ phép toàn tổ chức, quản lý các chính sách liên quan đến nghỉ phép và khai thác báo cáo. Admin chịu trách nhiệm cấu hình dữ liệu nền và tài khoản hệ thống.
+
+\subsection{Use case diagram}
+Sơ đồ use case được giữ ở mức tổng quan để thể hiện phạm vi chính của hệ thống. Các use case nhỏ như lọc danh sách, xem chi tiết hoặc đánh dấu thông báo đã đọc không được tách riêng trên sơ đồ nhằm tránh làm rối mô hình.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  font=\small,
+  card/.style={draw, rounded corners, fill=reportgray, text width=3.15cm, minimum height=4.1cm, align=left, inner sep=7pt},
+  title/.style={font=\small\bfseries, align=center}
+]
+  \node[title] at (5.9,4.9) {Hệ thống quản lý nghỉ phép};
+
+  \node[card] (employee) at (0,2.25) {
+    \centering\textbf{Employee}\par
+    \raggedright
+    \vspace{0.15cm}
+    Đăng nhập\\
+    Quản lý hồ sơ\\
+    Nộp/sửa/hủy đơn\\
+    Xem lịch nghỉ cá nhân\\
+    Nhận thông báo
+  };
+
+  \node[card] (manager) at (3.95,2.25) {
+    \centering\textbf{Manager}\par
+    \raggedright
+    \vspace{0.15cm}
+    Duyệt/từ chối đơn\\
+    Theo dõi lịch nhóm\\
+    Xem dashboard nhóm\\
+    Nhận thông báo xử lý
+  };
+
+  \node[card] (hr) at (7.9,2.25) {
+    \centering\textbf{HR}\par
+    \raggedright
+    \vspace{0.15cm}
+    Theo dõi toàn tổ chức\\
+    Quản lý chính sách nghỉ\\
+    Quản lý quỹ phép\\
+    Xuất báo cáo
+  };
+
+  \node[card] (admin) at (11.85,2.25) {
+    \centering\textbf{Admin}\par
+    \raggedright
+    \vspace{0.15cm}
+    Quản lý người dùng\\
+    Quản lý phòng ban\\
+    Quản lý danh mục nền\\
+    Cấu hình hệ thống
+  };
+
+  \node[draw, dashed, rounded corners, fit=(employee)(manager)(hr)(admin), inner sep=0.35cm] {};
+\end{tikzpicture}%
+}
+\caption{Use case diagram tổng quan}
+\end{figure}
+
+\subsection{Danh sách use case chính}
+Bảng dưới đây tóm tắt các use case chính của hệ thống. Mỗi use case được mô tả ở mức mục tiêu nghiệp vụ, actor chính và kết quả mong đợi.
+
+\begin{longtable}{p{0.20\textwidth}p{0.19\textwidth}p{0.47\textwidth}}
+\toprule
+\textbf{Use case} & \textbf{Actor chính} & \textbf{Mục tiêu và kết quả} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Use case} & \textbf{Actor chính} & \textbf{Mục tiêu và kết quả} \\
+\midrule
+\endhead
+Đăng nhập & Tất cả actor & Người dùng xác thực bằng email và mật khẩu. Hệ thống trả về phiên làm việc hợp lệ, thông tin vai trò và quyền truy cập tương ứng. \\
+Quản lý hồ sơ cá nhân & Employee, Manager, HR, Admin & Người dùng xem thông tin cá nhân, phòng ban, vai trò, quản lý trực tiếp và các dữ liệu liên quan đến tài khoản của mình. \\
+Nộp đơn nghỉ & Employee & Nhân viên nhập loại nghỉ, khoảng thời gian, phần ngày và lý do. Hệ thống kiểm tra dữ liệu, tính số ngày nghỉ, kiểm tra chồng lấn và tạo đơn ở trạng thái chờ duyệt. \\
+Sửa hoặc hủy đơn & Employee & Nhân viên chỉnh sửa đơn còn chờ duyệt hoặc hủy đơn trong điều kiện hợp lệ. Hệ thống cập nhật trạng thái, ghi lịch sử thao tác và gửi thông báo cho bên liên quan. \\
+Duyệt hoặc từ chối đơn & Manager, HR, Admin & Người có thẩm quyền xử lý đơn chờ duyệt. Khi duyệt, hệ thống cập nhật trạng thái và quỹ phép nếu loại nghỉ yêu cầu trừ phép; khi từ chối, hệ thống yêu cầu ghi chú lý do. \\
+Xem lịch nghỉ & Employee, Manager, HR, Admin & Người dùng xem lịch nghỉ theo phạm vi quyền: cá nhân, nhóm hoặc toàn tổ chức. Hệ thống hiển thị các đơn đã duyệt và có thể kèm đơn đang chờ xử lý. \\
+Quản lý danh mục & HR, Admin & Người dùng có quyền quản lý phòng ban, ngày lễ, loại nghỉ và các dữ liệu nền cần thiết cho nghiệp vụ nghỉ phép. \\
+Quản lý quỹ phép & HR, Admin & Người dùng có quyền xem và điều chỉnh quỹ phép của nhân viên theo năm và loại nghỉ, phục vụ chính sách nghỉ phép của tổ chức. \\
+Xem dashboard và báo cáo & Manager, HR, Admin & Người dùng theo dõi số liệu tổng hợp như đơn chờ duyệt, tình hình nghỉ theo thời gian, dữ liệu quỹ phép và xuất báo cáo khi cần. \\
+Nhận thông báo & Employee, Manager, HR & Người dùng nhận thông báo khi có sự kiện liên quan đến đơn nghỉ, ví dụ đơn mới, đơn được cập nhật, được duyệt, bị từ chối hoặc bị hủy. \\
+\bottomrule
+\end{longtable}
+
+\section{Thiết kế kiến trúc hệ thống}
+Leave Management System được thiết kế theo mô hình web application ba phần chính: client chạy trên trình duyệt, backend cung cấp REST API và cơ sở dữ liệu PostgreSQL. Cách tổ chức này phù hợp với mục tiêu của dự án vì tách rõ trách nhiệm giữa giao diện, nghiệp vụ và lưu trữ dữ liệu, đồng thời vẫn giữ kiến trúc đủ đơn giản để phát triển và kiểm thử trong phạm vi mini-project.
+
+\subsection{Architecture diagram}
+Sơ đồ kiến trúc tổng quan thể hiện luồng giao tiếp chính và các concern cắt ngang của hệ thống.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.88\textwidth}{!}{%
+\begin{tikzpicture}[
+  font=\scriptsize,
+  >=Latex,
+  tier/.style={draw, rounded corners, fill=reportgray, text width=11.0cm, minimum height=1.0cm, align=center, inner sep=7pt},
+  strip/.style={draw, rounded corners, fill=white, text width=9.8cm, minimum height=0.48cm, align=center, inner sep=3pt},
+  arrow/.style={-Latex, line width=0.5pt}
+]
+  \node[tier] (frontend) at (0,7.0) {
+    \textbf{Frontend}\\
+    React SPA, TypeScript, Vite, Tailwind, TanStack Query, React Hook Form, Zod
+  };
+
+  \node[draw, rounded corners, fill=reportgray, minimum width=11.6cm, minimum height=3.2cm] (backend) at (0,4.0) {};
+  \node[font=\small\bfseries] at (0,5.28) {Backend Spring Boot};
+  \node[strip] at (0,4.75) {Controller layer -- REST API};
+  \node[strip] at (0,4.25) {Service layer -- business rules and transactions};
+  \node[strip] at (0,3.75) {Repository layer -- Spring Data JPA};
+  \node[strip] at (0,3.25) {Domain layer -- Entity, DTO, Mapper};
+  \node[strip] at (0,2.75) {Cross-cutting -- Security, Validation, Audit, Notification};
+
+  \node[tier] (database) at (0,1.0) {
+    \textbf{Database}\\
+    PostgreSQL, Flyway migration, constraints, indexes, transactional data
+  };
+
+  \draw[arrow] (frontend.south) -- (backend.north);
+  \draw[arrow] (backend.south) -- (database.north);
+\end{tikzpicture}%
+}
+\caption{Architecture diagram tổng quan}
+\end{figure}
+
+\subsection{Backend architecture}
+Backend được triển khai bằng Spring Boot theo hướng monolith có tổ chức module theo feature. Các package như \texttt{auth}, \texttt{user}, \texttt{department}, \texttt{leavetype}, \texttt{leavebalance}, \texttt{leaverequest}, \texttt{holiday}, \texttt{notification} và \texttt{report} phản ánh trực tiếp các vùng nghiệp vụ của hệ thống. Cách tổ chức này giúp mã nguồn dễ tìm, dễ kiểm thử và tránh việc một module nghiệp vụ bị phân tán quá nhiều theo lớp kỹ thuật.
+
+Bên trong mỗi feature, hệ thống vẫn duy trì phân lớp quen thuộc gồm controller, service, repository, domain và DTO. Controller chịu trách nhiệm nhận request, validate dữ liệu đầu vào và trả response chuẩn. Service chứa logic nghiệp vụ như tính ngày nghỉ, kiểm tra chồng lấn, cập nhật trạng thái đơn và điều chỉnh quỹ phép. Repository dùng Spring Data JPA để truy vấn dữ liệu. Entity chỉ đại diện cho mô hình lưu trữ, không được trả trực tiếp qua API; dữ liệu ra vào hệ thống đi qua DTO để giảm rò rỉ chi tiết nội bộ.
+
+Các concern dùng chung như response wrapper, exception handler, audit log, cấu hình bảo mật và auditing được đặt trong các package chung hoặc cấu hình riêng. Nhờ vậy, luồng xử lý nghiệp vụ chính vẫn tập trung trong service, còn các quy tắc kỹ thuật lặp lại được xử lý nhất quán ở một nơi.
+
+\subsection{Frontend architecture}
+Frontend được triển khai bằng React, TypeScript và Vite. Cấu trúc mã nguồn đi theo feature, tương ứng với các vùng chức năng như đăng nhập, người dùng, phòng ban, loại nghỉ, quỹ phép, đơn nghỉ, phê duyệt, lịch, dashboard, báo cáo và thông báo. Mỗi feature chứa các thành phần giao diện, hook, API client và kiểu dữ liệu liên quan.
+
+Server state được quản lý bằng TanStack Query để chuẩn hóa việc gọi API, cache, refetch và xử lý trạng thái tải/lỗi. Form được xây dựng với React Hook Form và Zod để kiểm soát validation ở phía client trước khi gửi request. Cách này không thay thế validation ở backend, nhưng giúp giao diện phản hồi nhanh hơn và giảm request sai định dạng.
+
+Routing phía frontend được bảo vệ theo trạng thái đăng nhập và vai trò người dùng. Các màn hình quản trị, nhân sự hoặc phê duyệt chỉ được hiển thị cho actor phù hợp. Việc phân quyền cuối cùng vẫn được backend kiểm tra, nhưng frontend giúp điều hướng người dùng đúng phạm vi chức năng và giảm thao tác không hợp lệ.
+
+\subsection{Security architecture}
+Hệ thống sử dụng JWT cho xác thực API theo mô hình stateless. Sau khi đăng nhập thành công, client gửi access token trong header Authorization cho các request cần bảo vệ. Refresh token được lưu phía backend dưới dạng hash để có thể thu hồi khi người dùng đăng xuất hoặc token hết hạn.
+
+Mật khẩu được mã hóa bằng BCrypt trước khi lưu trữ. Spring Security kiểm soát filter chain, CORS, xác thực request và phân quyền ở cấp endpoint. Bên cạnh RBAC theo vai trò, một số thao tác còn kiểm tra phạm vi dữ liệu ở tầng service, ví dụ nhân viên chỉ được sửa đơn của chính mình, manager chỉ xử lý đơn thuộc phạm vi quản lý, còn HR/Admin có phạm vi rộng hơn.
+
+Các thao tác quan trọng như duyệt, từ chối, hủy đơn và điều chỉnh dữ liệu nghiệp vụ được ghi lại thông qua approval action hoặc audit log. Điều này giúp hệ thống có khả năng truy vết nguyên nhân thay đổi trạng thái, không chỉ lưu trạng thái cuối cùng.
+
+\section{Thiết kế dữ liệu}
+Mô hình dữ liệu được thiết kế trên PostgreSQL và được quản lý bằng Flyway migration. Cơ sở dữ liệu tập trung vào ba nhóm thông tin chính: dữ liệu tổ chức, dữ liệu chính sách nghỉ phép và dữ liệu phát sinh từ quy trình đơn nghỉ. Ngoài ra, hệ thống có các bảng hỗ trợ cho xác thực, thông báo và audit.
+
+\subsection{Database diagram}
+Sơ đồ ERD dưới đây chỉ thể hiện các bảng chính và quan hệ khóa ngoại quan trọng. Các cột audit dùng chung như \texttt{created\_at}, \texttt{updated\_at}, \texttt{created\_by}, \texttt{updated\_by} không được lặp lại trong sơ đồ để giữ mô hình dễ đọc.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  font=\scriptsize,
+  >=Latex,
+  entity/.style={draw, rounded corners, fill=reportgray, text width=3.35cm, minimum height=1.65cm, align=left, inner sep=5pt},
+  rel/.style={-Latex, line width=0.42pt},
+  softrel/.style={-Latex, dashed, line width=0.38pt},
+  note/.style={font=\scriptsize, align=center}
+]
+  \node[entity] (departments) at (-5.0,3.0) {
+    \centering\textbf{\texttt{departments}}\par
+    \raggedright
+    \texttt{id}\\
+    \texttt{head\_user\_id -> users}
+  };
+
+  \node[entity] (users) at (0,3.0) {
+    \centering\textbf{\texttt{users}}\par
+    \raggedright
+    \texttt{id}\\
+    \texttt{department\_id -> departments}\\
+    \texttt{manager\_id -> users}
+  };
+
+  \node[entity] (tokens) at (5.0,3.0) {
+    \centering\textbf{\texttt{refresh\_tokens}}\par
+    \raggedright
+    \texttt{id}\\
+    \texttt{user\_id -> users}
+  };
+
+  \node[entity] (types) at (-5.0,0.55) {
+    \centering\textbf{\texttt{leave\_types}}\par
+    \raggedright
+    \texttt{id}\\
+    \texttt{default\_quota}\\
+    \texttt{requires\_balance}
+  };
+
+  \node[entity] (requests) at (0,0.55) {
+    \centering\textbf{\texttt{leave\_requests}}\par
+    \raggedright
+    \texttt{user\_id -> users}\\
+    \texttt{leave\_type\_id -> leave\_types}\\
+    \texttt{manager\_id -> users}
+  };
+
+  \node[entity] (actions) at (5.0,0.55) {
+    \centering\textbf{\texttt{approval\_actions}}\par
+    \raggedright
+    \texttt{leave\_request\_id -> leave\_requests}\\
+    \texttt{actor\_id -> users}
+  };
+
+  \node[entity] (balances) at (-5.0,-1.9) {
+    \centering\textbf{\texttt{leave\_balances}}\par
+    \raggedright
+    \texttt{user\_id -> users}\\
+    \texttt{leave\_type\_id -> leave\_types}\\
+    \texttt{year}
+  };
+
+  \node[entity] (notifications) at (0,-1.9) {
+    \centering\textbf{\texttt{notifications}}\par
+    \raggedright
+    \texttt{user\_id -> users}\\
+    \texttt{leave\_request\_id -> leave\_requests}
+  };
+
+  \node[entity] (audit) at (5.0,-1.9) {
+    \centering\textbf{\texttt{audit\_log}}\par
+    \raggedright
+    \texttt{actor\_id -> users}\\
+    \texttt{target\_type, target\_id}
+  };
+
+  \node[entity, fill=white] (holidays) at (-5.0,-4.05) {
+    \centering\textbf{\texttt{holidays}}\par
+    \raggedright
+    Bảng tham chiếu ngày lễ, dùng khi tính số ngày nghỉ.
+  };
+
+  \draw[rel] (users.west) -- (departments.east);
+  \draw[rel] (tokens.west) -- (users.east);
+  \draw[rel] (requests.north) -- (users.south);
+  \draw[rel] (requests.west) -- (types.east);
+  \draw[rel] (actions.west) -- (requests.east);
+  \draw[rel] (balances.north) -- (types.south);
+  \draw[rel] (notifications.north) -- (requests.south);
+  \draw[rel] (audit.north west) to[out=135,in=-35] (users.south east);
+  \draw[softrel] (holidays.east) -- (requests.south west);
+\end{tikzpicture}%
+}
+\caption{Database diagram rút gọn với khóa ngoại chính}
+\end{figure}
+
+\subsection{Các bảng dữ liệu chính}
+Bảng sau mô tả vai trò của các bảng chính trong cơ sở dữ liệu. Báo cáo chỉ trình bày ở mức ý nghĩa nghiệp vụ; chi tiết từng cột có thể được đưa vào phụ lục nếu cần đối chiếu với migration.
+
+\begin{longtable}{p{0.25\textwidth}p{0.62\textwidth}}
+\toprule
+\textbf{Bảng} & \textbf{Vai trò trong hệ thống} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Bảng} & \textbf{Vai trò trong hệ thống} \\
+\midrule
+\endhead
+\texttt{departments} & Lưu phòng ban, mã phòng ban, tên phòng ban và người phụ trách nếu có. Bảng này là cơ sở để nhóm người dùng và phân tích dữ liệu theo đơn vị tổ chức. \\
+\texttt{users} & Lưu tài khoản người dùng, thông tin nhân viên, vai trò, phòng ban, quản lý trực tiếp và trạng thái hoạt động. Đây là bảng trung tâm cho xác thực và phân quyền. \\
+\texttt{leave\_types} & Lưu các loại nghỉ, quota mặc định và cờ xác định loại nghỉ có cần kiểm tra quỹ phép hay không. \\
+\texttt{leave\_balances} & Lưu quỹ phép của từng người dùng theo loại nghỉ và năm, bao gồm tổng ngày, số ngày đã dùng, số ngày điều chỉnh và số ngày chuyển tiếp nếu có. \\
+\texttt{holidays} & Lưu ngày lễ để loại khỏi số ngày làm việc khi tính thời lượng nghỉ phép. \\
+\texttt{leave\_requests} & Lưu đơn nghỉ, người tạo, loại nghỉ, khoảng thời gian, nửa ngày, tổng ngày nghỉ, lý do, trạng thái và người quản lý xử lý. \\
+\texttt{approval\_actions} & Lưu lịch sử hành động trên đơn nghỉ như tạo, cập nhật, duyệt, từ chối hoặc hủy. Bảng này giúp truy vết diễn tiến của từng đơn. \\
+\texttt{notifications} & Lưu thông báo trong ứng dụng cho các sự kiện vòng đời đơn nghỉ, gắn với người nhận và đơn liên quan nếu có. \\
+\texttt{audit\_log} & Lưu vết thao tác quan trọng ở mức hệ thống, gồm actor, loại đối tượng, định danh đối tượng và dữ liệu trước/sau khi thay đổi. \\
+\texttt{refresh\_tokens} & Lưu refresh token đã hash, thời điểm hết hạn và thời điểm thu hồi để hỗ trợ cơ chế đăng nhập stateless nhưng vẫn có khả năng revoke token. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Quản lý migration}
+Schema cơ sở dữ liệu được quản lý bằng Flyway thay vì để JPA tự sinh bảng. Mỗi thay đổi schema được viết thành một migration SQL có thứ tự, giúp môi trường phát triển, kiểm thử và triển khai cùng đi qua một lịch sử thay đổi giống nhau. Cách tiếp cận này giảm rủi ro sai lệch schema giữa các môi trường và giúp dễ truy vết thời điểm một bảng, cột hoặc constraint được bổ sung.
+
+Trong hệ thống, migration nền tạo các bảng cốt lõi như phòng ban, người dùng, loại nghỉ, quỹ phép, ngày lễ, đơn nghỉ, lịch sử phê duyệt, audit log và refresh token. Các migration sau bổ sung dữ liệu tham chiếu hoặc mở rộng schema cho những năng lực mới như thông báo và chuyển tiếp quỹ phép. Khi cần thay đổi cấu trúc dữ liệu, hệ thống tạo migration mới thay vì sửa migration đã áp dụng để tránh lỗi checksum và bảo đảm tính lặp lại của quá trình khởi tạo database.
+
+\section{Thiết kế luồng nghiệp vụ}
+Luồng nghiệp vụ trung tâm của hệ thống là vòng đời đơn nghỉ phép. Một đơn nghỉ được tạo ở trạng thái chờ duyệt, sau đó có thể được phê duyệt, từ chối hoặc hủy tùy theo actor và điều kiện nghiệp vụ. Việc thiết kế rõ trạng thái và luồng xử lý giúp backend kiểm soát tính hợp lệ của thao tác, đồng thời giúp frontend hiển thị đúng hành động người dùng có thể thực hiện.
+
+\subsection{State machine của đơn nghỉ}
+State machine của đơn nghỉ gồm bốn trạng thái chính: \texttt{PENDING}, \texttt{APPROVED}, \texttt{REJECTED} và \texttt{CANCELLED}. Trạng thái \texttt{PENDING} là điểm bắt đầu sau khi nhân viên nộp đơn. Từ trạng thái này, đơn có thể được chỉnh sửa, được duyệt, bị từ chối hoặc bị hủy. Khi đơn đã được duyệt, hệ thống cho phép hủy trong các điều kiện được kiểm soát và khôi phục quỹ phép nếu loại nghỉ có trừ quỹ.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  font=\scriptsize,
+  >=Latex,
+  state/.style={draw, rounded corners, fill=reportgray, minimum width=2.9cm, minimum height=0.95cm, align=center},
+  label/.style={font=\scriptsize, fill=white, inner sep=1.5pt, align=center},
+  arrow/.style={-Latex, line width=0.5pt}
+]
+  \node[state] (pending) at (0,0) {\texttt{PENDING}\\Chờ duyệt};
+  \node[state] (approved) at (5.2,2.0) {\texttt{APPROVED}\\Đã duyệt};
+  \node[state] (rejected) at (5.2,-2.0) {\texttt{REJECTED}\\Bị từ chối};
+  \node[state] (cancelled) at (10.4,0) {\texttt{CANCELLED}\\Đã hủy};
+
+  \draw[arrow] (-3.2,0) -- node[label, above]{Tạo đơn hợp lệ} (pending.west);
+  \draw[arrow] (pending.north west) to[out=135,in=45,looseness=1.9]
+    node[label, above]{Sửa khi còn chờ} (pending.north east);
+  \draw[arrow] (pending.east) -- node[label, above, pos=0.46]{Duyệt} (approved.west);
+  \draw[arrow] (pending.east) -- node[label, below, pos=0.46]{Từ chối} (rejected.west);
+  \draw[arrow] (pending.south) .. controls (2.0,-3.25) and (8.2,-3.25) ..
+    node[label, below, pos=0.5]{Hủy khi còn chờ} (cancelled.south);
+  \draw[arrow] (approved.east) .. controls (7.1,2.75) and (9.3,2.2) ..
+    node[label, above, pos=0.52]{Hủy có điều kiện\\và hoàn quỹ} (cancelled.north west);
+\end{tikzpicture}%
+}
+\caption{State machine của đơn nghỉ}
+\end{figure}
+
+Các trạng thái \texttt{REJECTED} và \texttt{CANCELLED} là trạng thái kết thúc của một đơn nghỉ trong phạm vi hiện tại. Hệ thống không chuyển một đơn đã từ chối hoặc đã hủy quay lại trạng thái chờ duyệt; nếu người dùng vẫn có nhu cầu nghỉ, họ cần tạo đơn mới để hệ thống tính lại dữ liệu và kiểm tra điều kiện tại thời điểm mới.
+
+\subsection{Sequence diagram: nộp đơn nghỉ}
+Luồng nộp đơn nghỉ bắt đầu từ giao diện nhân viên. Backend không tin cậy hoàn toàn dữ liệu từ frontend mà thực hiện lại toàn bộ kiểm tra quan trọng, bao gồm khoảng ngày, nửa ngày, ngày lễ, chồng lấn đơn và quỹ phép.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  font=\scriptsize,
+  >=Latex,
+  msg/.style={-Latex, line width=0.45pt},
+  life/.style={dashed, line width=0.35pt},
+  actor/.style={draw, rounded corners, fill=reportgray, minimum width=2.2cm, minimum height=0.65cm, align=center}
+]
+  \node[actor] (fe) at (0,0) {Employee\\Frontend};
+  \node[actor] (api) at (3.4,0) {LeaveRequest\\Controller};
+  \node[actor] (svc) at (6.8,0) {LeaveRequest\\Service};
+  \node[actor] (domain) at (10.2,0) {Calculator\\Repository};
+  \node[actor] (notify) at (13.6,0) {Notification};
+
+  \draw[life] (0,-0.4) -- (0,-6.6);
+  \draw[life] (3.4,-0.4) -- (3.4,-6.6);
+  \draw[life] (6.8,-0.4) -- (6.8,-6.6);
+  \draw[life] (10.2,-0.4) -- (10.2,-6.6);
+  \draw[life] (13.6,-0.4) -- (13.6,-6.6);
+
+  \draw[msg] (0,-1.0) -- node[above]{Gửi đơn nghỉ} (3.4,-1.0);
+  \draw[msg] (3.4,-1.7) -- node[above]{Validate DTO, lấy principal} (6.8,-1.7);
+  \draw[msg] (6.8,-2.4) -- node[above]{Lấy user, loại nghỉ, ngày lễ} (10.2,-2.4);
+  \draw[msg] (10.2,-3.1) -- node[above]{Tính số ngày nghỉ} (6.8,-3.1);
+  \draw[msg] (6.8,-3.8) -- node[above]{Kiểm tra overlap và balance} (10.2,-3.8);
+  \draw[msg] (6.8,-4.5) -- node[above]{Lưu \texttt{leave\_requests}} (10.2,-4.5);
+  \draw[msg] (6.8,-5.2) -- node[above]{Ghi \texttt{approval\_actions}} (10.2,-5.2);
+  \draw[msg] (6.8,-5.9) -- node[above]{Tạo thông báo cho manager} (13.6,-5.9);
+  \draw[msg] (6.8,-6.5) -- node[above]{Trả đơn ở trạng thái \texttt{PENDING}} (0,-6.5);
+\end{tikzpicture}%
+}
+\caption{Sequence diagram cho luồng nộp đơn nghỉ}
+\end{figure}
+
+Kết quả của luồng này là một bản ghi đơn nghỉ ở trạng thái \texttt{PENDING}, một bản ghi lịch sử hành động \texttt{CREATED} và thông báo gửi đến người quản lý trực tiếp. Nếu bất kỳ điều kiện nào không hợp lệ, service trả lỗi nghiệp vụ và không tạo đơn.
+
+\subsection{Sequence diagram: duyệt hoặc từ chối đơn}
+Luồng duyệt hoặc từ chối đơn được thực hiện bởi Manager, HR hoặc Admin tùy phạm vi quyền. Backend kiểm tra trạng thái hiện tại của đơn trước khi chuyển trạng thái để tránh xử lý lại đơn đã kết thúc.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  font=\scriptsize,
+  >=Latex,
+  msg/.style={-Latex, line width=0.45pt},
+  life/.style={dashed, line width=0.35pt},
+  actor/.style={draw, rounded corners, fill=reportgray, minimum width=2.25cm, minimum height=0.65cm, align=center}
+]
+  \node[actor] (mgr) at (0,0) {Manager/HR\\Frontend};
+  \node[actor] (api) at (3.4,0) {Approval\\Endpoint};
+  \node[actor] (svc) at (6.8,0) {LeaveRequest\\Service};
+  \node[actor] (bal) at (10.2,0) {Balance\\Repository};
+  \node[actor] (audit) at (13.6,0) {Audit\\Notification};
+
+  \draw[life] (0,-0.4) -- (0,-6.8);
+  \draw[life] (3.4,-0.4) -- (3.4,-6.8);
+  \draw[life] (6.8,-0.4) -- (6.8,-6.8);
+  \draw[life] (10.2,-0.4) -- (10.2,-6.8);
+  \draw[life] (13.6,-0.4) -- (13.6,-6.8);
+
+  \draw[msg] (0,-1.0) -- node[above]{Chọn duyệt hoặc từ chối} (3.4,-1.0);
+  \draw[msg] (3.4,-1.7) -- node[above]{Kiểm tra quyền và principal} (6.8,-1.7);
+  \draw[msg] (6.8,-2.4) to[loop right, looseness=5] node[right, align=left]{Tải đơn\\yêu cầu \texttt{PENDING}} (6.8,-2.4);
+  \draw[msg] (6.8,-3.1) -- node[above]{Nếu duyệt: trừ quỹ phép} (10.2,-3.1);
+  \draw[msg] (6.8,-3.8) -- node[above]{Cập nhật trạng thái} (10.2,-3.8);
+  \draw[msg] (6.8,-4.5) -- node[above]{Ghi approval action} (10.2,-4.5);
+  \draw[msg] (6.8,-5.2) -- node[above]{Ghi audit log} (13.6,-5.2);
+  \draw[msg] (6.8,-5.9) -- node[above]{Thông báo kết quả cho requester} (13.6,-5.9);
+  \draw[msg] (6.8,-6.6) -- node[above]{Trả trạng thái mới} (0,-6.6);
+\end{tikzpicture}%
+}
+\caption{Sequence diagram cho luồng duyệt hoặc từ chối đơn}
+\end{figure}
+
+Trong trường hợp phê duyệt, hệ thống thực hiện kiểm tra quỹ phép ở thời điểm duyệt để bảo đảm dữ liệu vẫn hợp lệ sau khi có thể đã phát sinh các đơn khác. Trong trường hợp từ chối, hệ thống yêu cầu ghi chú lý do và không thay đổi quỹ phép. Cả hai nhánh đều ghi lịch sử hành động và tạo thông báo cho người nộp đơn.
+
+\section{Phương pháp triển khai}
+Phương pháp triển khai của dự án đi theo từng lát cắt chức năng, bắt đầu từ nền tảng hạ tầng và dữ liệu, sau đó phát triển dần các nhóm nghiệp vụ cốt lõi. Cách tiếp cận này giúp mỗi phần được kiểm chứng sớm bằng API, giao diện và test tương ứng, thay vì dồn toàn bộ kiểm thử về cuối.
+
+\subsection{Công nghệ sử dụng}
+Backend sử dụng Java 21 và Spring Boot 3.3. Spring Security đảm nhiệm xác thực và phân quyền, Spring Data JPA hỗ trợ truy cập dữ liệu, Flyway quản lý migration cơ sở dữ liệu và PostgreSQL là hệ quản trị cơ sở dữ liệu quan hệ chính. Các thành phần nghiệp vụ được tổ chức theo feature để giữ mã nguồn gần với domain của hệ thống.
+
+Frontend sử dụng React 18, TypeScript, Vite, Tailwind CSS và các component theo hướng tái sử dụng. TanStack Query được dùng cho server state, React Hook Form và Zod được dùng cho form validation. Các request từ frontend đi qua lớp API client thay vì gọi trực tiếp trong component, giúp giao diện dễ kiểm thử và dễ thay đổi khi backend API điều chỉnh.
+
+Môi trường phát triển và chạy thử được container hóa bằng Docker Compose. Cách này giúp backend, frontend và database chạy trong cùng một cấu hình có thể lặp lại. CI được dùng để kiểm tra các bước chất lượng như build, test và lint trước khi hợp nhất thay đổi.
+
+\subsection{Quy trình phát triển}
+Quy trình phát triển được chia theo các nhóm năng lực tăng dần. Giai đoạn đầu tập trung dựng nền tảng gồm Docker Compose, cấu trúc backend/frontend, schema cơ sở dữ liệu và migration ban đầu. Sau đó hệ thống bổ sung xác thực, phân quyền, quản lý người dùng, phòng ban, loại nghỉ, quỹ phép và ngày lễ.
+
+Khi nền tảng dữ liệu đã ổn định, trọng tâm chuyển sang nghiệp vụ đơn nghỉ: nộp đơn, tính ngày nghỉ, kiểm tra ngày lễ/cuối tuần, kiểm tra chồng lấn, phê duyệt, từ chối, hủy đơn, ghi lịch sử hành động và audit. Các chức năng quan sát như lịch tổng hợp, dashboard, báo cáo và thông báo được triển khai sau để hoàn thiện trải nghiệm quản lý.
+
+Trong từng nhóm chức năng, backend được ưu tiên định nghĩa domain rule và API trước, sau đó frontend tích hợp theo luồng người dùng. Những thay đổi schema được thực hiện qua migration mới. Những logic có rủi ro cao, như tính ngày nghỉ hoặc chuyển trạng thái đơn, được kiểm thử ở tầng service và API trước khi mở rộng giao diện.
+
+\subsection{Chiến lược kiểm thử}
+Chiến lược kiểm thử của hệ thống kết hợp nhiều mức để bao phủ cả logic nghiệp vụ và luồng sử dụng chính. Unit test tập trung vào các hàm và service có logic rõ ràng như tính ngày nghỉ, kiểm tra balance, validate trạng thái và xử lý quyền. Controller hoặc integration test kiểm tra API, validation, security và tương tác với cơ sở dữ liệu.
+
+Frontend được kiểm tra bằng typecheck, lint, unit test cho schema/hook hoặc logic giao diện quan trọng, và build để phát hiện lỗi đóng gói. Với các luồng người dùng chính, smoke test bằng trình duyệt giúp xác nhận rằng người dùng có thể đăng nhập, nộp đơn, xử lý đơn và xem dữ liệu trên giao diện thật.
+
+Bên cạnh test tự động, quá trình build LaTeX của báo cáo cũng được kiểm tra sau mỗi lần bổ sung nội dung lớn để phát hiện lỗi cú pháp, cảnh báo căn chỉnh hoặc sơ đồ tràn trang. Việc giữ source báo cáo ở dạng văn bản giúp các thay đổi nội dung, sơ đồ và bảng biểu có thể được theo dõi bằng Git như các phần khác của dự án.

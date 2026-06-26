@@ -1,0 +1,46 @@
+\chapter{Giới thiệu}
+
+\section{Đặt vấn đề}
+Trong môi trường doanh nghiệp, nghỉ phép là một nghiệp vụ xuất hiện thường xuyên và liên quan trực tiếp đến nhiều bên: nhân viên cần chủ động đăng ký thời gian nghỉ, quản lý cần nắm được tình hình nhân sự để phê duyệt phù hợp, bộ phận nhân sự cần theo dõi quỹ phép và lưu lại lịch sử xử lý, còn ban quản trị cần có dữ liệu tổng hợp để đánh giá tình hình vận hành. Nếu quy trình này được xử lý bằng trao đổi miệng, tin nhắn rời rạc, bảng tính thủ công hoặc nhiều biểu mẫu không liên thông, thông tin dễ bị phân tán và khó kiểm soát.
+
+Một quy trình nghỉ phép thủ công thường gặp một số vấn đề điển hình. Thứ nhất, người quản lý khó quan sát đầy đủ các đơn đang chờ xử lý, các khoảng thời gian nhân sự vắng mặt và khả năng chồng lấn giữa các đơn. Thứ hai, nhân viên không có một nơi thống nhất để tra cứu trạng thái đơn, lịch sử phê duyệt và số ngày phép còn lại. Thứ ba, bộ phận nhân sự phải tổng hợp dữ liệu từ nhiều nguồn, dễ sai lệch khi cập nhật quỹ phép, ngày lễ hoặc báo cáo theo tháng/quý. Thứ tư, khi thiếu lịch sử thao tác rõ ràng, việc truy vết ai đã phê duyệt, từ chối, hủy đơn hoặc điều chỉnh quỹ phép trở nên khó khăn.
+
+Từ các vấn đề trên, một hệ thống quản lý nghỉ phép tập trung là cần thiết để số hóa toàn bộ vòng đời của đơn nghỉ: từ lúc nhân viên tạo đơn, hệ thống tự tính số ngày nghỉ hợp lệ, chuyển đơn đến người có thẩm quyền, ghi nhận quyết định phê duyệt hoặc từ chối, cập nhật quỹ phép và hiển thị thông tin trên lịch tổng hợp. Hệ thống cũng cần cung cấp dashboard, báo cáo và cơ chế thông báo để người dùng nắm được các sự kiện quan trọng mà không phải theo dõi thủ công.
+
+Leave Management System được xây dựng như một mini-project phát triển phần mềm web nhằm mô phỏng bài toán trên trong phạm vi có kiểm soát. Dự án không chỉ tập trung vào việc tạo ra các màn hình thao tác, mà còn nhấn mạnh các khía cạnh cốt lõi của một ứng dụng web hoàn chỉnh: phân tích yêu cầu, thiết kế dữ liệu, thiết kế kiến trúc backend/frontend, quản lý phân quyền, kiểm thử, đóng gói bằng Docker và triển khai demo.
+
+\section{Mục tiêu mini-project}
+Mục tiêu tổng quát của mini-project là xây dựng một hệ thống web hỗ trợ quản lý quy trình nghỉ phép trong doanh nghiệp, có khả năng thể hiện đầy đủ các bước chính của một dự án phát triển phần mềm từ phân tích, thiết kế đến triển khai và đánh giá. Hệ thống cần có giao diện sử dụng được, API backend rõ ràng, cơ sở dữ liệu có ràng buộc nghiệp vụ, quy trình kiểm thử tự động và môi trường chạy nhất quán.
+
+Về mặt nghiệp vụ, hệ thống hướng đến việc hỗ trợ nhân viên tạo, theo dõi, sửa hoặc hủy đơn nghỉ; hỗ trợ quản lý trực tiếp phê duyệt hoặc từ chối đơn; hỗ trợ bộ phận nhân sự theo dõi dữ liệu nghỉ phép toàn tổ chức; và hỗ trợ quản trị viên cấu hình các danh mục cần thiết như người dùng, phòng ban, loại nghỉ và quỹ phép. Ngoài ra, hệ thống cần cung cấp lịch tổng hợp, dashboard, báo cáo và thông báo để giúp thông tin được cập nhật kịp thời giữa các nhóm người dùng.
+
+Về mặt kỹ thuật, dự án đặt mục tiêu xây dựng một ứng dụng web theo kiến trúc rõ ràng, tách biệt frontend, backend và database. Backend đảm nhiệm xử lý nghiệp vụ, bảo mật, phân quyền, kiểm tra dữ liệu và lưu trữ. Frontend cung cấp giao diện tương tác cho từng vai trò người dùng. Cơ sở dữ liệu lưu trữ các thực thể chính của bài toán và được quản lý thay đổi bằng migration. Toàn bộ hệ thống được container hóa để giảm khác biệt giữa môi trường phát triển và môi trường chạy thử.
+
+Về mặt học thuật và báo cáo, mini-project được sử dụng để minh họa quy trình phát triển một phần mềm web có cấu trúc. Vì vậy, báo cáo không chỉ trình bày kết quả giao diện hoặc danh sách chức năng, mà còn phân tích cách xác định yêu cầu, mô hình hóa use case, thiết kế dữ liệu, mô tả luồng nghiệp vụ, lựa chọn kiến trúc, tổ chức mã nguồn và kiểm thử hệ thống.
+
+\section{Phạm vi hệ thống}
+Trong phạm vi hiện tại, Leave Management System tập trung vào các nhóm chức năng chính của quy trình quản lý nghỉ phép. Nhóm chức năng xác thực và phân quyền cho phép người dùng đăng nhập, sử dụng hệ thống theo vai trò và bảo vệ các thao tác nhạy cảm. Nhóm chức năng quản trị dữ liệu nền bao gồm quản lý người dùng, phòng ban, loại nghỉ phép, ngày lễ và quỹ phép. Đây là các dữ liệu làm cơ sở cho việc tạo đơn, tính số ngày nghỉ và xác định người có quyền xử lý.
+
+Nhóm chức năng nghiệp vụ trung tâm là quản lý đơn nghỉ phép. Người dùng có thể tạo đơn với loại nghỉ, thời gian, phần ngày nghỉ và lý do; hệ thống tự tính số ngày nghỉ dựa trên ngày làm việc, cuối tuần, ngày lễ và lựa chọn nửa ngày. Đơn nghỉ sau đó đi qua quy trình xử lý gồm chờ duyệt, phê duyệt, từ chối hoặc hủy. Khi một đơn được xử lý, hệ thống ghi nhận lịch sử thao tác, cập nhật dữ liệu liên quan và bảo đảm các ràng buộc như không chồng lấn đơn hoặc không vượt quá quỹ phép còn lại.
+
+Bên cạnh quy trình đơn nghỉ, hệ thống còn có các chức năng hỗ trợ quan sát và tổng hợp dữ liệu. Lịch nghỉ phép giúp người dùng nhìn được tình hình nghỉ theo tháng hoặc tuần. Dashboard cung cấp các chỉ số phù hợp với từng vai trò, chẳng hạn đơn đang chờ xử lý, số người đang nghỉ hoặc tình hình quỹ phép. Chức năng báo cáo hỗ trợ xuất dữ liệu phục vụ tổng hợp và phân tích. Cơ chế thông báo giúp người dùng nhận biết các thay đổi quan trọng trong quy trình xử lý đơn.
+
+Một số hướng mở rộng có thể được xem xét trong tương lai, ví dụ bổ sung tệp đính kèm cho đơn nghỉ, hỗ trợ phê duyệt nhiều cấp, mở rộng phân quyền chi tiết hơn hoặc bổ sung thêm kênh tích hợp. Những hướng này không làm thay đổi mục tiêu cốt lõi của báo cáo: trình bày một hệ thống web quản lý nghỉ phép có quy trình nghiệp vụ rõ ràng, kiến trúc triển khai được và có khả năng mở rộng theo các nguyên tắc thiết kế đã chọn.
+
+\section{Đối tượng sử dụng}
+Hệ thống được thiết kế cho bốn nhóm người dùng chính. Nhân viên là nhóm sử dụng hệ thống ở góc nhìn self-service. Họ cần tạo đơn nghỉ, theo dõi trạng thái xử lý, xem lịch sử đơn của mình, tra cứu số ngày phép còn lại và quan sát lịch nghỉ liên quan đến nhóm hoặc phòng ban.
+
+Quản lý trực tiếp là nhóm chịu trách nhiệm xử lý các đơn nghỉ của nhân viên thuộc phạm vi quản lý. Ngoài các chức năng của nhân viên, quản lý cần có danh sách đơn đang chờ duyệt, thông tin đủ rõ để đánh giá thời gian nghỉ, lý do nghỉ và khả năng ảnh hưởng đến nhân sự trong nhóm. Các quyết định phê duyệt hoặc từ chối của quản lý cần được ghi nhận lại để phục vụ truy vết.
+
+Bộ phận nhân sự có góc nhìn tổng thể hơn đối với dữ liệu nghỉ phép. Nhóm này cần theo dõi lịch nghỉ của toàn tổ chức, quản lý một số dữ liệu nền như ngày lễ, điều chỉnh quỹ phép khi cần và khai thác báo cáo. Trong một số trường hợp, HR có thể cần can thiệp vào quy trình xử lý để đảm bảo dữ liệu hệ thống phản ánh đúng thực tế vận hành.
+
+Quản trị viên chịu trách nhiệm cấu hình hệ thống và quản lý các dữ liệu có ảnh hưởng rộng, chẳng hạn tài khoản người dùng, vai trò, phòng ban, loại nghỉ và các thiết lập liên quan. Vai trò này giúp hệ thống có thể được khởi tạo, duy trì và điều chỉnh khi cơ cấu tổ chức hoặc chính sách nghỉ phép thay đổi. Chi tiết quyền hạn và các use case chính của từng nhóm người dùng sẽ được trình bày ở Chương II.
+
+\section{Cấu trúc báo cáo}
+Báo cáo được tổ chức theo mạch phát triển phần mềm từ bài toán đến giải pháp. Chương I giới thiệu bối cảnh, mục tiêu, phạm vi và các nhóm người dùng của hệ thống. Đây là phần đặt nền cho việc hiểu vì sao hệ thống cần được xây dựng và hệ thống hướng đến giải quyết những vấn đề nào.
+
+Chương II trình bày nội dung phân tích và phương pháp xây dựng hệ thống. Phần này bao gồm phân tích yêu cầu, mô hình use case, kiến trúc tổng thể, thiết kế dữ liệu, các luồng nghiệp vụ quan trọng và phương pháp triển khai. Các sơ đồ như use case diagram, database diagram, state machine và sequence diagram được đặt trong chương này để thể hiện rõ cách hệ thống được mô hình hóa trước khi hiện thực.
+
+Chương III trình bày kết quả thực hiện và đánh giá. Nội dung chương tập trung vào các chức năng đã hoàn thành, giao diện người dùng, kết quả triển khai, chiến lược kiểm thử và đánh giá mức độ đáp ứng mục tiêu ban đầu. Đây là phần liên kết giữa thiết kế ở Chương II và sản phẩm đã được xây dựng.
+
+Chương IV tổng kết kết quả đạt được, nêu các bài học kỹ thuật, chỉ ra hạn chế của hệ thống và đề xuất hướng phát triển tiếp theo. Các nội dung chi tiết có tính chất tra cứu như danh sách API, schema cơ sở dữ liệu chi tiết hoặc hình ảnh giao diện có thể được đưa vào phụ lục để giữ phần thân báo cáo tập trung và mạch lạc.

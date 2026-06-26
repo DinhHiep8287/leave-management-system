@@ -124,3 +124,16 @@ playwright-report/
 # pnpm package store created by in-container installs (bind-mounted)
 frontend/.pnpm-store/
 .env.neon
+
+# ===== LaTeX report build artifacts =====
+report/*.aux
+report/*.fdb_latexmk
+report/*.fls
+report/*.lof
+report/*.log
+report/*.lot
+report/*.out
+report/*.pdf
+report/*.synctex.gz
+report/*.toc
+report/*.xdv
