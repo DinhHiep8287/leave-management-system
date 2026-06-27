@@ -157,8 +157,8 @@ Các công việc tiếp theo chỉ phục vụ hoàn thiện miniproject và de
    hiển thị loại sự kiện, thời điểm đọc và giữ điều hướng từ thông báo tới chi tiết đơn nghỉ.
 4. ✅ **Chế độ xem lịch theo phòng ban**: calendar hiển thị rõ phạm vi đang xem, tổng hợp theo phòng ban,
    filter phòng ban/nhân viên cho HR/Admin và nhãn phòng ban khi xem toàn tổ chức.
-5. **Cải thiện UI/UX**: tiếp tục tinh chỉnh trạng thái tải/rỗng/lỗi, responsive, form validation, thông tin
-   hướng dẫn thao tác và độ nhất quán theo `docs/UI-GUIDELINES.md`.
+5. ✅ **Cải thiện UI/UX**: nâng cấp page Tổng quan với hero theo vai trò, quick actions, card việc cần chú ý,
+   quỹ phép có progress chi tiết, danh sách người nghỉ hôm nay rõ hơn và khối HR/Admin có số liệu tổ chức.
 
 ## Nguyên tắc docs cho mọi bản nâng cấp (bắt buộc)
 
