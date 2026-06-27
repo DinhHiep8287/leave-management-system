@@ -1,16 +1,151 @@
 \chapter{Kết quả thực hiện và đánh giá}
 
 \section{Kết quả chức năng}
-Tổng hợp các chức năng đã hoàn thành: xác thực JWT, quản lý danh mục, quy trình nghỉ phép, lịch tổng hợp, dashboard, báo cáo CSV, thông báo in-app, email local và carry-over phép.
+Sau quá trình triển khai, Leave Management System đã hình thành đầy đủ các nhóm chức năng chính của một hệ thống quản lý nghỉ phép trên nền web. Kết quả không chỉ dừng ở giao diện nhập liệu, mà bao gồm cả xử lý nghiệp vụ ở backend, lưu trữ dữ liệu bằng PostgreSQL, phân quyền theo vai trò, kiểm thử tự động và môi trường chạy bằng Docker. Các chức năng được xây dựng theo lát cắt hoàn chỉnh từ API đến giao diện để có thể demo theo luồng sử dụng thực tế.
+
+\subsection{Xác thực, người dùng và dữ liệu nền}
+Hệ thống đã hỗ trợ đăng nhập bằng email và mật khẩu, phát hành access token và refresh token, kiểm soát phiên làm việc và thu hồi refresh token khi cần. Mật khẩu được lưu dưới dạng hash, các API nghiệp vụ yêu cầu xác thực và quyền truy cập được kiểm tra theo vai trò. Cách tiếp cận này giúp frontend có thể hoạt động như một single page application trong khi backend vẫn giữ vai trò quyết định cuối cùng đối với quyền truy cập.
+
+Nhóm chức năng quản trị dữ liệu nền bao gồm người dùng, phòng ban, loại nghỉ phép, ngày lễ và quỹ phép. Admin hoặc HR có thể quản lý các dữ liệu này để thiết lập tổ chức, xác định quản lý trực tiếp, cấu hình chính sách nghỉ phép và điều chỉnh quỹ phép theo nhu cầu nghiệp vụ. Đây là nền tảng để các luồng tạo đơn, duyệt đơn, tính ngày nghỉ và báo cáo hoạt động nhất quán.
+
+\subsection{Quy trình đơn nghỉ phép}
+Quy trình đơn nghỉ là phần nghiệp vụ trung tâm của hệ thống. Nhân viên có thể tạo đơn nghỉ với loại nghỉ, khoảng thời gian, lựa chọn nửa ngày và lý do. Backend tự tính số ngày nghỉ hợp lệ dựa trên ngày làm việc, cuối tuần và ngày lễ; đồng thời kiểm tra các điều kiện như ngày bắt đầu, ngày kết thúc, đơn chồng lấn và số ngày phép còn lại. Khi đơn hợp lệ, hệ thống lưu đơn ở trạng thái chờ duyệt và tạo thông tin cần thiết cho người có thẩm quyền xử lý.
+
+Người quản lý, HR hoặc Admin có thể duyệt hoặc từ chối đơn theo phạm vi quyền hạn. Khi đơn được duyệt, hệ thống cập nhật trạng thái và trừ quỹ phép nếu loại nghỉ yêu cầu quản lý quota. Khi đơn bị từ chối hoặc bị hủy, hệ thống ghi nhận lý do hoặc hành động tương ứng, đồng thời đảm bảo quỹ phép được khôi phục trong các trường hợp cần thiết. Các thao tác quan trọng đều có lịch sử xử lý để phục vụ truy vết.
+
+\subsection{Thông báo và tệp đính kèm}
+Cơ chế thông báo trong ứng dụng đã được tích hợp vào vòng đời đơn nghỉ. Khi có sự kiện như nộp đơn, cập nhật đơn, phê duyệt, từ chối hoặc hủy đơn, hệ thống tạo thông báo cho người liên quan trong cùng transaction nghiệp vụ. Giao diện thông báo hỗ trợ phân biệt trạng thái đã đọc/chưa đọc, lọc thông báo, hiển thị loại sự kiện, thời điểm đọc và mở trực tiếp chi tiết đơn nghỉ liên quan.
+
+Hệ thống cũng hỗ trợ tệp đính kèm cho đơn nghỉ trong phạm vi demo/test local. Metadata của file được lưu trong PostgreSQL, còn file vật lý được lưu trong Docker named volume. Quyền thao tác được giới hạn theo trạng thái và chủ thể của đơn: người tạo đơn có thể upload hoặc xóa file khi đơn còn chờ duyệt; người tạo, quản lý, HR và Admin có thể xem hoặc tải file nếu có quyền xem đơn. Chức năng này được chủ động giới hạn ở môi trường local để không kéo thêm dịch vụ lưu trữ ngoài vào phạm vi triển khai.
+
+\subsection{Lịch, dashboard và báo cáo}
+Lịch nghỉ phép đã hỗ trợ quan sát dữ liệu theo phạm vi người dùng. Employee và Manager có thể theo dõi lịch liên quan đến phòng ban hoặc nhóm của mình, trong khi HR/Admin có thêm khả năng xem toàn tổ chức hoặc lọc theo phòng ban và nhân viên. Mỗi mục lịch mang theo thông tin phòng ban để giao diện có thể tổng hợp và hiển thị rõ phạm vi đang xem.
+
+Dashboard được cải thiện theo hướng cung cấp thông tin hành động thay vì chỉ liệt kê số liệu. Trang tổng quan có phần chào theo vai trò, các chỉ số cần chú ý, lối tắt đến thao tác thường dùng, biểu đồ quỹ phép và danh sách người đang nghỉ. Với HR/Admin, dashboard bổ sung góc nhìn tổ chức như số lượng nhân viên, phân bố trạng thái đơn và các phòng ban có nhiều đơn nghỉ trong kỳ.
+
+Báo cáo đã được mở rộng từ xuất CSV cơ bản sang nhóm báo cáo có bộ lọc và preview. HR/Admin có thể xem nhanh tổng hợp số ngày nghỉ và số đơn theo tháng hoặc quý, loại nghỉ và phòng ban trước khi tải file. Các CSV chính gồm đơn nghỉ, quỹ phép và tổng hợp ngày nghỉ, giúp dữ liệu có thể được mở bằng công cụ bảng tính để phục vụ phân tích hoặc lưu trữ.
+
+\begin{longtable}{p{0.24\textwidth}p{0.56\textwidth}p{0.12\textwidth}}
+\toprule
+\textbf{Nhóm kết quả} & \textbf{Nội dung đã hoàn thành} & \textbf{Trạng thái} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Nhóm kết quả} & \textbf{Nội dung đã hoàn thành} & \textbf{Trạng thái} \\
+\midrule
+\endhead
+Xác thực và phân quyền & Đăng nhập JWT, refresh token, RBAC, kiểm tra phạm vi dữ liệu theo vai trò và chủ thể nghiệp vụ. & Hoàn thành \\
+Dữ liệu nền & Quản lý người dùng, phòng ban, loại nghỉ, ngày lễ, quỹ phép, quan hệ quản lý và dữ liệu seed demo. & Hoàn thành \\
+Đơn nghỉ phép & Tạo, sửa, hủy, duyệt, từ chối, tính ngày nghỉ, kiểm tra chồng lấn, cập nhật quỹ phép và ghi lịch sử. & Hoàn thành \\
+Thông báo & Notification in-app, badge chưa đọc, filter, mark-read và điều hướng tới chi tiết đơn. & Hoàn thành \\
+Tệp đính kèm local-only & Upload, download, xóa file theo quyền; lưu metadata trong database và file trong Docker volume. & Hoàn thành \\
+Lịch nghỉ & Lịch tháng/tuần, filter theo loại nghỉ, nhân viên, phòng ban và hiển thị phạm vi đang xem. & Hoàn thành \\
+Dashboard & Tổng quan theo vai trò, quick actions, chỉ số cần chú ý, biểu đồ quỹ phép và số liệu tổ chức. & Hoàn thành \\
+Báo cáo & CSV đơn nghỉ, CSV quỹ phép, CSV tổng hợp; preview theo tháng/quý, loại nghỉ và phòng ban. & Hoàn thành \\
+\bottomrule
+\end{longtable}
 
 \section{Kết quả giao diện}
-Mô tả các màn hình chính của frontend và các cải tiến trải nghiệm người dùng như mobile navigation, skeleton loading, empty state, xác nhận thao tác và dark mode.
+Frontend đã được xây dựng theo hướng ứng dụng nội bộ, ưu tiên tính rõ ràng, thao tác nhanh và thông tin nghiệp vụ dễ đọc. Các màn hình chính được tổ chức theo vai trò người dùng, giúp mỗi actor chỉ nhìn thấy các chức năng phù hợp với phạm vi công việc của mình. Giao diện sử dụng tiếng Việt, layout nhất quán, màu nhấn tiết chế và các trạng thái tải/rỗng/lỗi được xử lý để tránh cảm giác hệ thống bị treo khi dữ liệu chưa sẵn sàng.
+
+\subsection{Luồng người dùng chính}
+Ở phía nhân viên, các màn hình quan trọng gồm đăng nhập, hồ sơ cá nhân, nộp đơn nghỉ, danh sách đơn của tôi, chi tiết đơn, lịch nghỉ, dashboard và thông báo. Khi nộp đơn, giao diện hỗ trợ preview số ngày nghỉ, hiển thị gợi ý quỹ phép và cho phép đính kèm file trong môi trường local nếu chức năng được bật. Sau khi gửi đơn, người dùng có thể theo dõi trạng thái xử lý, xem lịch sử và nhận thông báo khi đơn thay đổi trạng thái.
+
+Ở phía quản lý, giao diện tập trung vào danh sách đơn cần duyệt và thông tin đủ để ra quyết định: người nộp, loại nghỉ, thời gian nghỉ, số ngày tính toán, lý do và lịch sử xử lý. Các thao tác duyệt, từ chối hoặc hủy đơn được đặt trong ngữ cảnh chi tiết của đơn để giảm nhầm lẫn. Khi cần, quản lý có thể xem lịch nhóm hoặc dashboard để cân nhắc tình hình nhân sự trước khi xử lý.
+
+Với HR/Admin, hệ thống cung cấp các màn hình quản trị dữ liệu nền, báo cáo, dashboard tổ chức và lịch toàn tổ chức. Các bộ lọc theo phòng ban, nhân viên, trạng thái, khoảng thời gian hoặc nhóm thời gian giúp người dùng khai thác dữ liệu mà không phải xuất toàn bộ rồi lọc thủ công bên ngoài.
+
+\subsection{Cải thiện trải nghiệm sử dụng}
+Một số cải thiện UI/UX đã được bổ sung để giao diện phù hợp hơn với demo và sử dụng thực tế. Dashboard mới có phần hero theo vai trò, quick actions, các card thể hiện việc cần chú ý, biểu đồ quỹ phép kèm thanh tiến độ và danh sách người đang nghỉ hôm nay rõ ràng hơn. Với HR/Admin, khối số liệu tổ chức giúp người dùng thấy nhanh tình trạng vận hành thay vì phải đi qua nhiều màn hình.
+
+Các màn hình dùng dữ liệu từ API được bổ sung trạng thái tải, empty state và error state có nút thử lại. Điều này giúp người dùng phân biệt được trường hợp chưa có dữ liệu, đang tải dữ liệu hoặc request gặp lỗi. Một số thao tác nhạy cảm như khóa người dùng, hủy đơn hoặc xóa dữ liệu có bước xác nhận để hạn chế thao tác nhầm. Navigation trên thiết bị nhỏ cũng được cải thiện để demo trên nhiều kích thước màn hình thuận tiện hơn.
+
+\begin{longtable}{p{0.24\textwidth}p{0.62\textwidth}}
+\toprule
+\textbf{Khu vực giao diện} & \textbf{Kết quả đạt được} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Khu vực giao diện} & \textbf{Kết quả đạt được} \\
+\midrule
+\endhead
+Dashboard & Hiển thị tổng quan theo vai trò, việc cần xử lý, quick actions, quỹ phép, người đang nghỉ và số liệu tổ chức cho HR/Admin. \\
+Đơn nghỉ & Cho phép tạo, sửa, hủy, xem chi tiết, xem lịch sử xử lý và upload file đính kèm local-only khi điều kiện hợp lệ. \\
+Phê duyệt & Cung cấp inbox đơn chờ xử lý, chi tiết đơn, thao tác duyệt/từ chối/hủy và phản hồi trạng thái rõ ràng. \\
+Lịch & Hỗ trợ quan sát theo tháng/tuần, filter theo phòng ban hoặc nhân viên và tổng hợp số đơn theo phạm vi đang xem. \\
+Báo cáo & Có form lọc, preview dữ liệu tổng hợp, thẻ chỉ số nhanh và nút tải CSV theo từng loại báo cáo. \\
+Thông báo & Có chuông thông báo, badge chưa đọc, filter, trạng thái đọc/chưa đọc và điều hướng tới đơn liên quan. \\
+Quản trị & Cung cấp màn hình quản lý người dùng, phòng ban, loại nghỉ, ngày lễ và quỹ phép với form validation. \\
+\bottomrule
+\end{longtable}
 
 \section{Kết quả triển khai}
-TODO: Trình bày kết quả đóng gói Docker, cấu hình production và demo trực tuyến trên Vercel, Railway và Neon.
+Hệ thống được đóng gói để có thể chạy toàn bộ stack bằng Docker Compose trong môi trường phát triển. Backend, frontend và PostgreSQL được khai báo trong cùng cấu hình compose, giúp quá trình khởi động, reset dữ liệu và kiểm thử thủ công nhất quán hơn giữa các máy. Frontend trong môi trường local được build và chạy bằng Vite preview để ổn định trên Docker Desktop Windows; backend chạy Spring Boot với cấu hình dev; database sử dụng PostgreSQL và migration được áp dụng bằng Flyway khi ứng dụng khởi động.
+
+Bên cạnh môi trường local, dự án cũng có cấu hình phục vụ triển khai demo trực tuyến. Frontend được build thành static assets, backend được đóng gói thành container production, database sử dụng dịch vụ PostgreSQL quản lý, còn secrets được truyền qua biến môi trường. Các cấu hình như CORS, JWT secret, database URL, logging và security headers được tách khỏi mã nguồn để phù hợp với từng môi trường.
+
+Một điểm cần tách bạch trong kết quả triển khai là chức năng tệp đính kèm. Do mục tiêu của chức năng này chỉ phục vụ demo/test local, hệ thống lưu file trong Docker named volume và giữ khả năng bật/tắt bằng cấu hình. Cách làm này đủ để minh họa nghiệp vụ đính kèm giấy tờ cho đơn nghỉ, nhưng không kéo thêm object storage hoặc dịch vụ hạ tầng bên ngoài vào phạm vi triển khai demo trực tuyến.
+
+\begin{longtable}{p{0.25\textwidth}p{0.61\textwidth}}
+\toprule
+\textbf{Hạng mục} & \textbf{Kết quả triển khai} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Hạng mục} & \textbf{Kết quả triển khai} \\
+\midrule
+\endhead
+Container hóa & Backend, frontend và PostgreSQL chạy được bằng Docker Compose; cấu hình dev và production được tách riêng. \\
+Database migration & Flyway quản lý lịch sử schema, giúp khởi tạo database lặp lại được và tránh sửa trực tiếp schema đã áp dụng. \\
+Cấu hình môi trường & Các giá trị nhạy cảm như database URL, JWT secret, CORS origin và SMTP được đưa ra biến môi trường. \\
+Demo data & Dữ liệu seed phục vụ demo gồm người dùng, phòng ban, quỹ phép và đơn nghỉ ở nhiều trạng thái. \\
+Local-only attachment & Metadata lưu trong PostgreSQL, file lưu trong Docker volume; có cờ cấu hình để giới hạn phạm vi sử dụng. \\
+\bottomrule
+\end{longtable}
 
 \section{Kết quả kiểm thử}
-Ghi nhận kết quả kiểm thử backend, frontend và Playwright smoke test. Phần này sẽ bổ sung số liệu chi tiết từ log release khi viết nội dung đầy đủ.
+Kiểm thử được thực hiện ở nhiều mức để bao phủ cả logic nghiệp vụ và giao diện. Với backend, các test tập trung vào service, controller và luồng tích hợp quan trọng như đăng nhập, quản lý danh mục, tính ngày nghỉ, tạo đơn, cập nhật đơn, phê duyệt, từ chối, hủy đơn, cập nhật quỹ phép, thông báo, báo cáo và quyền truy cập. Các tình huống có rủi ro cao như đơn chồng lấn, ngày nghỉ quá khứ, thiếu quỹ phép hoặc thao tác sai vai trò được kiểm tra ở tầng backend để đảm bảo dữ liệu không bị phụ thuộc vào validation phía frontend.
+
+Với frontend, dự án sử dụng typecheck, lint, unit test và build để phát hiện lỗi kiểu dữ liệu, lỗi quy ước code và lỗi bundle trước khi chạy demo. Các test giao diện tập trung vào utility, schema form, component quan trọng và các trạng thái tải/lỗi/rỗng. Ngoài ra, smoke test bằng trình duyệt được dùng để kiểm tra các luồng chính theo vai trò như đăng nhập, nộp đơn, xử lý đơn, xem lịch, mở thông báo và truy cập dashboard.
+
+Trong lần kiểm tra gần nhất của báo cáo, các quality gate chính đã được chạy lại: frontend typecheck, lint, unit test, build; backend/API được kiểm tra qua container đang chạy; LaTeX report được build thành công; và các request health/frontend local trả về trạng thái hợp lệ. Các cảnh báo lint còn lại thuộc nhóm cảnh báo kỹ thuật đã biết của một số component dùng chung, không phải lỗi build hoặc lỗi chức năng.
+
+\begin{longtable}{p{0.22\textwidth}p{0.48\textwidth}p{0.18\textwidth}}
+\toprule
+\textbf{Loại kiểm tra} & \textbf{Phạm vi} & \textbf{Kết quả} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Loại kiểm tra} & \textbf{Phạm vi} & \textbf{Kết quả} \\
+\midrule
+\endhead
+Backend test & Logic nghiệp vụ, API, bảo mật, dữ liệu và các luồng xử lý đơn nghỉ. & Đạt \\
+Frontend typecheck & Kiểm tra TypeScript cho component, hook, API client và schema. & Đạt \\
+Frontend lint & Kiểm tra quy ước code frontend; còn một số cảnh báo đã biết ở component dùng chung. & Đạt \\
+Frontend unit test & Utility, schema form, component và trạng thái giao diện quan trọng. & Đạt \\
+Frontend build & Kiểm tra khả năng build production bundle bằng Vite. & Đạt \\
+Smoke test & Kiểm tra luồng người dùng chính trên trình duyệt/local stack. & Đạt \\
+LaTeX build & Kiểm tra cú pháp, bảng biểu và khả năng xuất PDF của báo cáo. & Đạt \\
+\bottomrule
+\end{longtable}
 
 \section{Đánh giá}
-Đánh giá mức độ đáp ứng yêu cầu, ưu điểm của kiến trúc hiện tại và các giới hạn của mini-project so với hệ thống production thực tế.
+Nhìn chung, hệ thống đã đáp ứng được mục tiêu chính của mini-project: mô phỏng một quy trình quản lý nghỉ phép hoàn chỉnh bằng ứng dụng web có frontend, backend, database, phân quyền, kiểm thử và cấu hình triển khai. Các chức năng cốt lõi đã đi qua đủ vòng đời từ phân tích yêu cầu đến hiện thực và kiểm tra, trong đó các phần quan trọng như tính ngày nghỉ, cập nhật quỹ phép, chuyển trạng thái đơn và phân quyền được đặt ở backend thay vì chỉ xử lý ở giao diện.
+
+\subsection{Mức độ đáp ứng yêu cầu}
+Các yêu cầu nghiệp vụ chính đã được hiện thực ở mức đủ để demo theo luồng thực tế. Nhân viên có thể tự phục vụ các thao tác liên quan đến đơn nghỉ; quản lý có công cụ xử lý đơn và theo dõi nhóm; HR/Admin có khả năng quản lý dữ liệu nền, xem lịch toàn tổ chức và khai thác báo cáo. Hệ thống cũng có các cơ chế hỗ trợ vận hành như audit, notification, dashboard, seed dữ liệu demo và các bộ lọc dữ liệu.
+
+So với mục tiêu ban đầu là xây dựng một sản phẩm học tập nhưng có cấu trúc kỹ thuật nghiêm túc, dự án đã thể hiện được các phần quan trọng của phát triển phần mềm web: thiết kế API, tổ chức module theo feature, quản lý schema bằng migration, kiểm soát security, quản lý server state ở frontend và kiểm thử tự động. Các cải thiện gần đây như báo cáo nâng cao, lịch theo phòng ban, notification tốt hơn và dashboard rõ ràng hơn giúp sản phẩm thuyết phục hơn khi trình bày trong bối cảnh thực tập hoặc portfolio.
+
+\subsection{Ưu điểm}
+Ưu điểm lớn nhất của hệ thống là ranh giới trách nhiệm rõ ràng. Backend chịu trách nhiệm tính toán và bảo vệ nghiệp vụ; frontend tập trung vào trải nghiệm thao tác; PostgreSQL lưu trữ dữ liệu có ràng buộc; Flyway quản lý thay đổi schema; Docker Compose giúp môi trường chạy nhất quán. Cấu trúc package theo feature cũng giúp việc thêm chức năng mới như notification, report, calendar hoặc attachment không làm rối toàn bộ codebase.
+
+Một ưu điểm khác là hệ thống có tính demo tốt. Dữ liệu seed tương đối tự nhiên, giao diện đã có các luồng theo vai trò, dashboard và báo cáo giúp người xem hiểu nhanh giá trị nghiệp vụ. Các tính năng local-only như attachment được giới hạn rõ phạm vi, đủ để minh họa ý tưởng mà không làm tăng chi phí hoặc độ phức tạp hạ tầng.
+
+\subsection{Hạn chế}
+Do đây là mini-project, hệ thống chưa hướng tới đầy đủ các yêu cầu vận hành của một sản phẩm doanh nghiệp quy mô lớn. Chức năng tệp đính kèm mới dừng ở local storage, chưa dùng object storage, antivirus scanning hoặc CDN. Notification hiện là in-app và email local/dev, chưa có kênh thời gian thực như WebSocket hoặc push notification. Báo cáo sử dụng CSV và preview tổng hợp, chưa có dashboard phân tích sâu hoặc xuất Excel nhiều sheet.
+
+Một số khía cạnh vận hành như quan sát hệ thống, phân tích log dài hạn, backup tự động, phân quyền rất chi tiết theo từng permission hoặc tích hợp SSO chưa được đưa vào phạm vi hiện tại. Đây là lựa chọn có chủ đích để giữ dự án tập trung vào bài toán quản lý nghỉ phép và tránh mở rộng quá mức so với mục tiêu mini-project.
+
+\subsection{Nhận xét tổng quan}
+Kết quả hiện tại cho thấy dự án đã đạt trạng thái đủ hoàn chỉnh để trình bày như một bài toán software development/web programming: có bối cảnh nghiệp vụ, yêu cầu, mô hình dữ liệu, luồng xử lý, kiến trúc triển khai, giao diện theo vai trò, kiểm thử và đánh giá giới hạn. Phần còn lại của báo cáo nên tiếp tục tập trung vào việc diễn giải nhất quán các quyết định kỹ thuật, minh họa kết quả bằng hình ảnh giao diện chọn lọc và tổng kết bài học thay vì bổ sung thêm nhiều chức năng mới.
