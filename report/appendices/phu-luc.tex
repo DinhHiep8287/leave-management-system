@@ -1,22 +1,78 @@
 \chapter{Phụ lục}
 
 \section{Nguồn tài liệu nội bộ}
-Liệt kê các tài liệu trong kho mã nguồn sẽ được dùng làm nguồn chính khi hoàn thiện báo cáo:
+Các tài liệu trong kho mã nguồn được dùng làm nguồn chính khi hoàn thiện báo cáo:
 
 \begin{itemize}
-  \item README.md
-  \item docs/REQUIREMENTS.md
-  \item docs/ARCHITECTURE.md
-  \item docs/DATABASE.md
-  \item docs/DEPLOYMENT.md
-  \item docs/ROADMAP.md
+  \item \texttt{README.md}: mô tả tổng quan dự án, cách chạy, tài khoản demo và ảnh minh họa.
+  \item \texttt{docs/REQUIREMENTS.md}: mô tả yêu cầu nghiệp vụ, phạm vi và các quyết định sản phẩm.
+  \item \texttt{docs/ARCHITECTURE.md}: mô tả kiến trúc backend/frontend/database, bảo mật, notification, attachment và báo cáo.
+  \item \texttt{docs/DATABASE.md}: mô tả schema logic, quan hệ bảng và migration.
+  \item \texttt{docs/DEPLOYMENT.md}: mô tả cấu hình triển khai demo và các lưu ý vận hành.
+  \item \texttt{docs/ROADMAP.md}: mô tả tiến độ các nhóm chức năng và định hướng demo/test local.
+  \item \texttt{docs/UI-GUIDELINES.md}: mô tả định hướng giao diện tiếng Việt, màu sắc và quy tắc trình bày.
 \end{itemize}
 
-\section{Đặc tả API chi tiết}
-TODO: Bổ sung danh sách endpoint chính nếu phần thân báo cáo chỉ trình bày API ở mức tổng quan.
+\section{Tóm tắt API chính}
+Bảng dưới đây liệt kê các nhóm endpoint chính ở mức tra cứu. Chi tiết request/response được giữ trong mã nguồn backend và các DTO tương ứng.
 
-\section{Thiết kế cơ sở dữ liệu chi tiết}
-TODO: Bổ sung schema chi tiết theo bảng nếu phần thân báo cáo chỉ trình bày ERD và mô tả bảng rút gọn.
+\begingroup
+\small
+\begin{longtable}{p{0.20\textwidth}p{0.30\textwidth}p{0.36\textwidth}}
+\toprule
+\textbf{Nhóm API} & \textbf{Endpoint tiêu biểu} & \textbf{Mục đích} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Nhóm API} & \textbf{Endpoint tiêu biểu} & \textbf{Mục đích} \\
+\midrule
+\endhead
+Auth & \path{/auth/*} & Đăng nhập, refresh token, đăng xuất và lấy thông tin người dùng hiện tại. \\
+User & \path{/users/*} & Quản lý tài khoản, hồ sơ cá nhân, trạng thái hoạt động và đổi/đặt lại mật khẩu. \\
+Department & \path{/departments/*} & Quản lý phòng ban và danh bạ phòng ban của người dùng. \\
+Leave type, holiday & \path{/leave-types/*}; \path{/holidays/*} & Quản lý loại nghỉ phép và ngày lễ phục vụ tính ngày nghỉ. \\
+Leave balance & \path{/leave-balances/*} & Xem, khởi tạo, điều chỉnh và carry-over quỹ phép. \\
+Leave request & \path{/leave-requests/*} & Tạo, sửa, xem danh sách, xem chi tiết và lịch sử đơn nghỉ. \\
+Approval & \path{/leave-requests/*/approve}; \path{/*/reject}; \path{/*/cancel} & Duyệt, từ chối hoặc hủy đơn nghỉ theo quyền và trạng thái hợp lệ. \\
+Calendar, dashboard & \path{/calendar}; \path{/dashboard/*} & Cung cấp dữ liệu lịch nghỉ và số liệu tổng quan theo vai trò. \\
+Report & \path{/reports/*} & Preview và tải CSV cho báo cáo đơn nghỉ, tổng hợp ngày nghỉ và quỹ phép. \\
+Notification & \path{/notifications/*} & Xem, đếm và đánh dấu thông báo đã đọc. \\
+Attachment local-only & \path{/leave-requests/*/attachments/*} & Upload, liệt kê, tải và xóa tệp đính kèm trong môi trường local. \\
+\bottomrule
+\end{longtable}
+\endgroup
 
-\section{Hình ảnh giao diện}
-TODO: Bổ sung ảnh chụp các màn hình chính nếu cần minh họa kết quả giao diện.
+\section{Schema cơ sở dữ liệu rút gọn}
+Bảng dưới đây tóm tắt các bảng dữ liệu chính, khóa ngoại quan trọng và vai trò lưu trữ. Các cột audit dùng chung không được lặp lại ở mọi dòng.
+
+\begin{longtable}{p{0.22\textwidth}p{0.30\textwidth}p{0.34\textwidth}}
+\toprule
+\textbf{Bảng} & \textbf{Khóa/quan hệ chính} & \textbf{Dữ liệu quan trọng} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Bảng} & \textbf{Khóa/quan hệ chính} & \textbf{Dữ liệu quan trọng} \\
+\midrule
+\endhead
+\texttt{departments} & PK \texttt{id}; \texttt{head\_user\_id -> users} & Mã phòng ban, tên phòng ban, trạng thái hoạt động. \\
+\texttt{users} & PK \texttt{id}; \texttt{department\_id -> departments}; \texttt{manager\_id -> users} & Email, mã nhân viên, hash mật khẩu, họ tên, vai trò, ngày vào làm. \\
+\texttt{leave\_types} & PK \texttt{id}; unique \texttt{code} & Mã loại nghỉ, quota mặc định, cờ yêu cầu quỹ phép, trạng thái hoạt động. \\
+\texttt{leave\_balances} & FK tới \texttt{users}, \texttt{leave\_types}; unique theo user/type/year & Năm, tổng ngày, đã dùng, điều chỉnh, chuyển tiếp, số ngày còn lại tính ở app. \\
+\texttt{holidays} & Unique \texttt{holiday\_date} & Ngày lễ và mô tả, dùng khi tính số ngày làm việc. \\
+\texttt{leave\_requests} & FK tới \texttt{users}, \texttt{leave\_types}, \texttt{manager\_id -> users} & Khoảng ngày, nửa ngày, tổng ngày, lý do, trạng thái, quản lý tại thời điểm tạo. \\
+\texttt{approval\_actions} & FK tới \texttt{leave\_requests}, \texttt{actor\_id -> users} & Hành động, trạng thái trước/sau, ghi chú xử lý. \\
+\texttt{notifications} & FK tới \texttt{users}, \texttt{leave\_requests} & Loại sự kiện, nội dung thông báo, trạng thái đọc, thời điểm đọc. \\
+\texttt{attachments} & FK tới \texttt{leave\_requests}, \texttt{uploaded\_by -> users}; unique \texttt{stored\_key} & Tên file gốc, key lưu trữ, content type, dung lượng; file vật lý nằm trong Docker volume. \\
+\texttt{audit\_log} & FK tùy chọn tới \texttt{users} & Actor, hành động, loại đối tượng, id đối tượng, dữ liệu trước/sau. \\
+\texttt{refresh\_tokens} & FK tới \texttt{users}; unique \texttt{token\_hash} & Hash refresh token, thời điểm hết hạn và thời điểm thu hồi. \\
+\bottomrule
+\end{longtable}
+
+\section{Hình ảnh giao diện bổ sung}
+Phần thân báo cáo đã sử dụng các ảnh chọn lọc cho dashboard, đơn nghỉ, phê duyệt, notification, lịch và báo cáo. Hình dưới đây bổ sung minh họa cho giao diện quản trị người dùng, một phần quan trọng trong nhóm chức năng Admin/HR.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{images/users.png}
+\caption{Giao diện quản trị người dùng}
+\end{figure}
